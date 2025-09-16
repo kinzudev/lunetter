@@ -7,7 +7,7 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: "Segoe UI", Arial, sans-serif;
       background-color: #000;
       color: #e6e6e6;
       display: flex;
@@ -16,7 +16,7 @@
 
     /* Sidebar */
     .sidebar {
-      width: 200px;
+      width: 220px;
       border-right: 1px solid #333;
       padding: 20px 0;
       display: flex;
@@ -32,9 +32,14 @@
       margin: 15px 0;
       cursor: pointer;
       transition: 0.2s;
+      width: 100%;
+      text-align: left;
+      padding: 10px 20px;
+      border-radius: 30px;
     }
 
     .sidebar button:hover {
+      background-color: #111;
       color: #1DA1F2;
     }
 
@@ -51,21 +56,31 @@
     .new-post {
       width: 100%;
       max-width: 600px;
-      background: #111;
-      border: 1px solid #333;
-      border-radius: 10px;
+      background: #000;
+      border-bottom: 1px solid #333;
+      display: flex;
       padding: 15px;
-      margin-bottom: 20px;
+    }
+
+    .new-post img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .new-post-content {
+      flex: 1;
     }
 
     .new-post textarea {
       width: 100%;
-      background: #000;
+      background: transparent;
       color: #fff;
       border: none;
       resize: none;
       font-size: 16px;
-      padding: 10px;
+      padding: 10px 0;
       outline: none;
     }
 
@@ -84,16 +99,42 @@
     .post {
       width: 100%;
       max-width: 600px;
-      background: #111;
-      border: 1px solid #333;
-      border-radius: 10px;
+      background: #000;
+      border-bottom: 1px solid #333;
       padding: 15px;
-      margin-bottom: 20px;
+      display: flex;
     }
 
-    .username {
+    .post img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .post-content {
+      flex: 1;
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .post-name {
       font-weight: bold;
-      margin-bottom: 8px;
+      margin-right: 5px;
+    }
+
+    .post-username {
+      color: #777;
+      font-size: 14px;
+    }
+
+    .post-text {
+      font-size: 15px;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -106,10 +147,16 @@
   </div>
 
   <div class="feed">
+    <!-- New post form -->
     <div class="new-post">
-      <textarea id="postInput" rows="3" placeholder="What's happening?"></textarea>
-      <button onclick="addPost()">Post</button>
+      <img src="https://i.pravatar.cc/48?img=1" alt="Profile">
+      <div class="new-post-content">
+        <textarea id="postInput" rows="3" placeholder="What's happening?"></textarea>
+        <button onclick="addPost()">Post</button>
+      </div>
     </div>
+
+    <!-- Posts feed -->
     <div id="posts"></div>
   </div>
 
@@ -122,15 +169,35 @@
       const postContainer = document.createElement('div');
       postContainer.className = 'post';
 
-      const username = document.createElement('div');
-      username.className = 'username';
-      username.textContent = "User";
+      const avatar = document.createElement('img');
+      avatar.src = "https://i.pravatar.cc/48?img=" + Math.floor(Math.random() * 70);
+
+      const contentWrapper = document.createElement('div');
+      contentWrapper.className = 'post-content';
+
+      const header = document.createElement('div');
+      header.className = 'post-header';
+
+      const name = document.createElement('span');
+      name.className = 'post-name';
+      name.textContent = "User";
+
+      const username = document.createElement('span');
+      username.className = 'post-username';
+      username.textContent = " @username";
 
       const content = document.createElement('div');
+      content.className = 'post-text';
       content.textContent = text;
 
-      postContainer.appendChild(username);
-      postContainer.appendChild(content);
+      header.appendChild(name);
+      header.appendChild(username);
+
+      contentWrapper.appendChild(header);
+      contentWrapper.appendChild(content);
+
+      postContainer.appendChild(avatar);
+      postContainer.appendChild(contentWrapper);
 
       const posts = document.getElementById('posts');
       posts.insertBefore(postContainer, posts.firstChild);
