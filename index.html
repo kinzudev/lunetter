@@ -285,5 +285,99 @@
   subscribeFeed();
   </script>
   
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ADMIN_EMAIL = "kinzudev@gmail.com";
+  const VERIFIED_ICON = "https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png";
+
+  // Crear panel admin oculto
+  const panel = document.createElement("div");
+  panel.id = "admin-panel";
+  panel.style.display = "none";
+  panel.className = "fixed top-10 right-10 bg-white shadow-lg p-4 rounded-xl z-50 w-80";
+  panel.innerHTML = `
+    <h2 class="text-lg font-bold mb-3">Panel Admin</h2>
+    <input type="text" id="verify-email" placeholder="Email del usuario" class="w-full border p-2 rounded mb-3"/>
+    <button id="btn-verify" class="px-3 py-2 bg-blue-600 text-white rounded">Añadir verificado</button>
+  `;
+  document.body.appendChild(panel);
+
+  // Toggle panel con tecla Insert
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Insert" && auth.currentUser && auth.currentUser.email === ADMIN_EMAIL) {
+      panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+  });
+
+  // Guardar estado verificado en Firestore
+  document.getElementById("btn-verify").onclick = async () => {
+    const email = document.getElementById("verify-email").value.trim();
+    if (!email) return alert("Ingresa un email");
+
+    try {
+      const q = await db.collection("users").where("email", "==", email).get();
+      if (q.empty) return alert("Usuario no encontrado");
+
+      q.forEach(async (docSnap) => {
+        await db.collection("users").doc(docSnap.id).set({ verified: true }, { merge: true });
+      });
+
+      alert("Usuario verificado con éxito ✅");
+      document.getElementById("verify-email").value = "";
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  // Modificar renderizado para mostrar el icono de verificado
+  const originalRenderPost = renderPost;
+  renderPost = function (doc, userId) {
+    const el = originalRenderPost(doc, userId);
+    const data = doc.data();
+
+    db.collection("users").doc(data.uid).get().then((snap) => {
+      if (snap.exists && snap.data().verified) {
+        const nameEl = el.querySelector(".font-semibold");
+        if (nameEl && !nameEl.querySelector("img")) {
+          const icon = document.createElement("img");
+          icon.src = VERIFIED_ICON;
+          icon.className = "inline-block w-4 h-4 ml-1";
+          nameEl.appendChild(icon);
+        }
+      }
+    });
+
+    return el;
+  };
+
+  // También actualizar en el perfil
+  const originalRenderProfileCard = renderProfileCard;
+  renderProfileCard = function (userData) {
+    originalRenderProfileCard(userData);
+    if (userData && userData.verified) {
+      const nameEl = document.querySelector("#profile-card h3");
+      if (nameEl && !nameEl.querySelector("img")) {
+        const icon = document.createElement("img");
+        icon.src = VERIFIED_ICON;
+        icon.className = "inline-block w-5 h-5 ml-1";
+        nameEl.appendChild(icon);
+      }
+    } else if (userData) {
+      db.collection("users").doc(userData.uid).get().then((snap) => {
+        if (snap.exists && snap.data().verified) {
+          const nameEl = document.querySelector("#profile-card h3");
+          if (nameEl && !nameEl.querySelector("img")) {
+            const icon = document.createElement("img");
+            icon.src = VERIFIED_ICON;
+            icon.className = "inline-block w-5 h-5 ml-1";
+            nameEl.appendChild(icon);
+          }
+        }
+      });
+    }
+  };
+});
+</script>
+
 </body>
 </html>
