@@ -521,5 +521,54 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const VERIFIED_ICON = "https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png";
+
+  // Función auxiliar para añadir icono al nombre
+  function addVerifiedIcon(el) {
+    if (!el) return;
+    if (el.querySelector(".verified-icon")) return; // evitar duplicados
+    const icon = document.createElement("img");
+    icon.src = VERIFIED_ICON;
+    icon.className = "verified-icon inline-block w-4 h-4 ml-1";
+    el.appendChild(icon);
+  }
+
+  // Hook para posts
+  const originalRenderPost = renderPost;
+  renderPost = function (doc, userId) {
+    const el = originalRenderPost(doc, userId);
+    const data = doc.data();
+
+    db.collection("users").doc(data.uid).get().then((snap) => {
+      if (snap.exists && snap.data().verified) {
+        const nameEl = el.querySelector(".font-semibold");
+        addVerifiedIcon(nameEl);
+      }
+    });
+
+    return el;
+  };
+
+  // Hook para perfil
+  const originalRenderProfileCard = renderProfileCard;
+  renderProfileCard = async function (userData) {
+    originalRenderProfileCard(userData);
+    if (!userData || !userData.uid) return;
+
+    try {
+      const snap = await db.collection("users").doc(userData.uid).get();
+      if (snap.exists && snap.data().verified) {
+        const nameEl = document.querySelector("#profile-card h3");
+        addVerifiedIcon(nameEl);
+      }
+    } catch (err) {
+      console.error("Error añadiendo verificado:", err);
+    }
+  };
+});
+</script>
+
 </body>
 </html>
