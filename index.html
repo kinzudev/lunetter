@@ -235,5 +235,34 @@
   });
 </script>
 
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btnRegister = document.getElementById("btnRegister");
+    const inpUsername = document.getElementById("inpUsername");
+    const loginError = document.getElementById("loginError");
+
+    btnRegister.addEventListener("click", async () => {
+      const username = inpUsername.value.trim();
+      if (!username) return;
+
+      // Revisar en Firestore si el usuario ya existe
+      try {
+        const userRef = firebase.firestore().collection("users").doc(username);
+        const docSnap = await userRef.get();
+
+        if (docSnap.exists) {
+          loginError.textContent = "Usuario ya existe";
+        } else {
+          loginError.textContent = "";
+          // ⚡ Aquí puedes seguir con tu lógica de crear usuario
+          // Si ya usas setDoc en otro lado, este mensaje es solo la validación
+        }
+      } catch (e) {
+        console.error("Error al validar usuario:", e);
+      }
+    });
+  });
+</script>
+
 </body>
 </html>
