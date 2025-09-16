@@ -84,6 +84,43 @@
     .postContent b {
       color: #1DA1F2;
     }
+    .actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 15px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .comments {
+      margin-top: 10px;
+      padding-left: 20px;
+      border-left: 1px solid #222;
+    }
+    .comment {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+    .commentInput {
+      margin-top: 8px;
+      display: flex;
+      gap: 5px;
+    }
+    .commentInput input {
+      flex: 1;
+      padding: 5px;
+      border: none;
+      border-radius: 5px;
+      background: #111;
+      color: white;
+    }
+    .commentInput button {
+      background: #1DA1F2;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -112,9 +149,12 @@
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { 
+      getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, 
+      doc, updateDoc, setDoc 
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    // 🔥 Tu configuración de Firebase
+    // 🔥 Config de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBZvsL3zwUsHmTL0QZxQOkWF28_N2FR4L0",
       authDomain: "lunetter-55d46.firebaseapp.com",
@@ -125,19 +165,24 @@
       measurementId: "G-46BL2MEZ68"
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Función para publicar
+    // Simulación de usuario logueado
+    const currentUser = {
+      name: "Anon",
+      avatar: "https://i.pravatar.cc/100"
+    };
+
+    // Publicar
     async function addPost() {
       const input = document.getElementById("postInput");
       const text = input.value.trim();
       if (!text) return;
 
       await addDoc(collection(db, "posts"), {
-        user: "Anon", // 👈 luego lo conectamos con el login real
-        avatar: "https://i.pravatar.cc/100",
+        user: currentUser.name,
+        avatar: currentUser.avatar,
         text: text,
         created: serverTimestamp()
       });
@@ -145,32 +190,86 @@
       input.value = "";
     }
 
-    // Mostrar posts en tiempo real
+    // Like
+    async function toggleLike(postId) {
+      const likeRef = doc(db, "posts", postId, "likes", currentUser.name);
+      await setDoc(likeRef, { user: currentUser.name }, { merge: true });
+    }
+
+    // Comentar
+    async function addComment(postId, inputId) {
+      const input = document.getElementById(inputId);
+      const text = input.value.trim();
+      if (!text) return;
+
+      await addDoc(collection(db, "posts", postId, "comments"), {
+        user: currentUser.name,
+        text: text,
+        created: serverTimestamp()
+      });
+
+      input.value = "";
+    }
+
+    // Render posts en tiempo real
     const postsDiv = document.getElementById("posts");
     const q = query(collection(db, "posts"), orderBy("created", "desc"));
 
     onSnapshot(q, (snapshot) => {
       postsDiv.innerHTML = "";
-      snapshot.forEach(doc => {
-        const post = doc.data();
+      snapshot.forEach(docSnap => {
+        const post = docSnap.data();
+        const postId = docSnap.id;
+
         const div = document.createElement("div");
         div.className = "post";
+
+        // Subcolección: Likes
+        const likesRef = collection(db, "posts", postId, "likes");
+        onSnapshot(likesRef, (likeSnap) => {
+          const likes = likeSnap.size;
+          div.querySelector(".likesCount").innerText = likes;
+        });
+
+        // Subcolección: Comentarios
+        const commentsRef = collection(db, "posts", postId, "comments");
+        onSnapshot(commentsRef, (commentSnap) => {
+          const commentsDiv = div.querySelector(".comments");
+          commentsDiv.innerHTML = "";
+          commentSnap.forEach(c => {
+            const cm = c.data();
+            const cmDiv = document.createElement("div");
+            cmDiv.className = "comment";
+            cmDiv.innerHTML = `<b>${cm.user}:</b> ${cm.text}`;
+            commentsDiv.appendChild(cmDiv);
+          });
+        });
+
         div.innerHTML = `
           <img src="${post.avatar || "https://i.pravatar.cc/100"}" alt="avatar">
           <div class="postContent">
             <b>${post.user || "Anon"}</b><br>
             ${post.text}
+            <div class="actions">
+              <span onclick="toggleLike('${postId}')">❤️ <span class="likesCount">0</span></span>
+              <span>💬 Comentar</span>
+            </div>
+            <div class="comments"></div>
+            <div class="commentInput">
+              <input type="text" id="comment-${postId}" placeholder="Escribe un comentario...">
+              <button onclick="addComment('${postId}','comment-${postId}')">Enviar</button>
+            </div>
           </div>
         `;
+
         postsDiv.appendChild(div);
       });
     });
 
-    // Hacer global la función para el botón
     window.addPost = addPost;
-    window.logout = function() {
-      alert("Cerrar sesión (aquí iría la lógica real)");
-    }
+    window.toggleLike = toggleLike;
+    window.addComment = addComment;
+    window.logout = () => alert("Cerrar sesión aquí");
   </script>
 </body>
 </html>
