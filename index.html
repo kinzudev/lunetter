@@ -1,680 +1,244 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>lunetter</title>
+  <meta charset="UTF-8">
+  <title>Pekora Forum</title>
   <style>
-    :root{--bg:#000;--card:#0f1113;--accent:#1DA1F2;--muted:#9aa3ad}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:#e6eef3;display:flex;height:100vh;overflow:hidden}
-    /* Sidebar */
-    .sidebar{width:260px;background:#070708;border-right:1px solid #111;padding:18px;display:flex;flex-direction:column;gap:12px}
-    .brand{font-weight:800;font-size:20px;color:var(--accent);margin-bottom:8px}
-    .navBtn{background:transparent;border:none;color:inherit;padding:10px;border-radius:10px;text-align:left;cursor:pointer;font-size:16px;display:flex;align-items:center;gap:10px}
-    .navBtn:hover{background:#0c0d0e;color:var(--accent)}
-    .profileMini{margin-top:auto;display:flex;gap:10px;align-items:center}
-    .avatarMini{width:42px;height:42px;border-radius:50%}
-    .logoutBtn{background:#222;border:none;color:#fff;padding:6px 10px;border-radius:8px;cursor:pointer}
-
-    /* Main content */
-    .main{flex:1;overflow:auto;padding:22px;display:flex;justify-content:center}
-    .center{width:760px}
-    .composer{background:var(--card);border-radius:14px;padding:14px;display:flex;gap:12px;align-items:flex-start}
-    .composer img{width:52px;height:52px;border-radius:50%}
-    .composer textarea{flex:1;background:transparent;border:none;color:inherit;resize:none;outline:none;font-size:15px;min-height:60px}
-    .composer-controls{display:flex;align-items:center;gap:8px;margin-top:8px;justify-content:flex-end}
-    .btn{background:var(--accent);border:none;color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
-    .btn.ghost{background:transparent;border:1px solid #222;color:var(--muted)}
-    .filePreview{max-width:100%;border-radius:12px;margin-top:10px}
-
-    /* Post card */
-    .post{background:var(--card);padding:12px;border-radius:14px;margin-top:14px;display:flex;gap:12px}
-    .post .avatar{width:48px;height:48px;border-radius:50%}
-    .post .content{flex:1}
-    .post .meta{display:flex;align-items:center;gap:8px}
-    .post .name{font-weight:700;color:var(--accent)}
-    .post .handle{color:var(--muted);font-size:13px}
-    .post .text{margin:8px 0;white-space:pre-wrap}
-    .post img.post-image{max-width:100%;border-radius:12px;margin-top:8px}
-    .post .actions{display:flex;gap:18px;color:var(--muted);margin-top:10px;align-items:center}
-    .actionBtn{background:none;border:none;color:inherit;cursor:pointer;display:flex;gap:6px;align-items:center}
-    .actionBtn.liked{color:#ff6b6b}
-    .commentsList{margin-top:10px;padding-left:56px}
-    .commentItem{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid #0b0c0d}
-    .commentItem .left{color:#dbe7ef}
-    .smallBtn{background:none;border:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:7px}
-    .smallBtn:hover{background:#0c0d0e;color:var(--accent)}
-
-    /* Right column (Profile summary) */
-    .rightCol{width:300px;padding-left:18px;display:flex;flex-direction:column;gap:12px}
-    .card{background:var(--card);padding:12px;border-radius:12px}
-
-    /* Auth modal */
-    .authOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:80}
-    .authBox{background:#0c0d0e;padding:20px;border-radius:12px;width:360px}
-    .authBox h2{margin:0 0 10px 0}
-    .authBox input{width:100%;padding:10px;border-radius:8px;border:1px solid #222;background:#0b0c0d;color:#fff;margin-bottom:8px}
-    .error{color:#ff6b6b;margin-top:6px;font-size:13px}
-
-    /* small responsive */
-    @media (max-width:980px){.sidebar{display:none}.rightCol{display:none}.main{padding:12px}}
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #000;
+      color: #e6e6e6;
+      display: flex;
+    }
+    .sidebar {
+      width: 240px;
+      background: #111;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      height: 100vh;
+      border-right: 1px solid #333;
+    }
+    .sidebar button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .sidebar button:hover, .sidebar button.active {
+      background: #1d9bf0;
+    }
+    .content {
+      flex: 1;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .hidden {
+      display: none;
+    }
+    .post-box {
+      background: #111;
+      padding: 15px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+    }
+    .post-box textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 16px;
+      resize: none;
+      outline: none;
+    }
+    .post-box button {
+      margin-top: 10px;
+      background: #1d9bf0;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .post {
+      background: #111;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 15px;
+    }
+    .post img.avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      vertical-align: middle;
+    }
+    .post .username {
+      font-weight: bold;
+      margin-left: 10px;
+      color: #fff;
+    }
+    .post .text {
+      margin-top: 10px;
+      font-size: 15px;
+    }
+    .post img.post-image {
+      max-width: 100%;
+      border-radius: 15px;
+      margin-top: 10px;
+    }
+    .post .actions {
+      margin-top: 10px;
+      font-size: 14px;
+      display: flex;
+      gap: 15px;
+      color: #aaa;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="brand">lunetter</div>
-    <button id="navHome" class="navBtn">🏠 Home</button>
-    <button id="navProfile" class="navBtn">👤 Profile</button>
-    <button id="navNotifications" class="navBtn">🔔 Notifications</button>
-    <button id="navExplore" class="navBtn">🔎 Explore</button>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <button data-section="home" class="active">🏠 Home</button>
+    <button data-section="profile">👤 Profile</button>
+    <button data-section="notifications">🔔 Notifications</button>
+    <button data-section="explore">🔎 Explore</button>
+  </div>
 
-    <div class="profileMini">
-      <img id="sidebarAvatar" class="avatarMini" src="https://i.pravatar.cc/100"/>
-      <div>
-        <div id="sidebarName" style="font-weight:700">Invitado</div>
-        <button id="logout" class="logoutBtn">Cerrar sesión</button>
+  <!-- Contenido -->
+  <div class="content">
+    <!-- HOME -->
+    <div id="home" class="section">
+      <div class="post-box">
+        <textarea id="postInput" rows="3" placeholder="¿Qué está pasando?"></textarea>
+        <div>
+          <button id="postBtn">Post</button>
+          <button id="postImageBtn">📷 Imagen</button>
+          <input type="file" id="fileInput" accept="image/*" hidden>
+        </div>
       </div>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="main">
-    <div class="center">
-      <!-- Composer / Home -->
-      <section id="homeView">
-        <div class="composer card">
-          <img id="composerAvatar" src="https://i.pravatar.cc/100"/>
-          <div style="flex:1">
-            <textarea id="composerText" placeholder="¿Qué está pasando?"></textarea>
-            <div id="imagePreviewWrap"></div>
-            <div class="composer-controls">
-              <label class="smallBtn" id="chooseImageBtn">📷 Añadir imagen
-                <input id="composerImage" type="file" accept="image/*" style="display:none">
-              </label>
-              <button class="btn" id="publishBtn">Post</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="feed"></div>
-      </section>
-
-      <!-- Profile -->
-      <section id="profileView" class="hidden">
-        <div class="card">
-          <h3>Mi perfil</h3>
-          <div style="display:flex;gap:12px;align-items:center">
-            <img id="profileAvatar" src="https://i.pravatar.cc/100" style="width:80px;height:80px;border-radius:12px"/>
-            <div>
-              <div id="profileName" style="font-weight:700">Invitado</div>
-              <div id="profileUsername" style="color:var(--muted)">@guest</div>
-            </div>
-          </div>
-          <div style="margin-top:12px">
-            <input id="avatarFile" type="file" accept="image/*">
-            <button id="saveAvatarBtn" class="btn" style="margin-top:8px">Guardar avatar</button>
-          </div>
-        </div>
-
-        <div style="margin-top:12px">
-          <h4>Tus publicaciones</h4>
-          <div id="profilePosts"></div>
-        </div>
-      </section>
-
-      <!-- Notifications -->
-      <section id="notificationsView" class="hidden">
-        <div class="card">
-          <h3>Notificaciones</h3>
-          <div id="notificationsList"></div>
-        </div>
-      </section>
-
-      <!-- Explore -->
-      <section id="exploreView" class="hidden">
-        <div class="card">
-          <h3>Explorar usuarios</h3>
-          <input id="searchInput" placeholder="Buscar por nombre de usuario" style="width:100%;padding:8px;border-radius:8px;border:1px solid #222;background:transparent;color:inherit"/>
-          <div id="searchResults" style="margin-top:10px"></div>
-        </div>
-      </section>
+      <div id="posts"></div>
     </div>
 
-    <!-- RIGHT: quick info -->
-    <aside class="rightCol">
-      <div class="card">
-        <strong>Acerca</strong>
-        <p style="color:var(--muted);font-size:13px">Demo social con Firestore — posts, imágenes, likes, comentarios y notificaciones.</p>
-      </div>
-    </aside>
-  </main>
+    <!-- PROFILE -->
+    <div id="profile" class="section hidden">
+      <h2>Mi Perfil</h2>
+      <img id="profileAvatar" class="avatar"><br><br>
+      <input type="file" id="avatarInput" accept="image/*">
+      <button id="saveAvatar">Guardar Avatar</button>
+    </div>
 
-  <!-- AUTH OVERLAY -->
-  <div id="authOverlay" class="authOverlay" style="display:none">
-    <div class="authBox">
-      <h2 id="authTitle">Iniciar sesión / Registrarse</h2>
+    <!-- NOTIFICATIONS -->
+    <div id="notifications" class="section hidden">
+      <h2>Notificaciones</h2>
+      <div id="notificationsList"></div>
+    </div>
 
-      <input id="authUsername" placeholder="Nombre de usuario (sin espacios)" />
-      <input id="authPassword" type="password" placeholder="Contraseña" />
-      <label style="font-size:13px;color:var(--muted);">Avatar (opcional)</label>
-      <input id="authAvatarFile" type="file" accept="image/*" />
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button id="btnShowRegister" class="btn">Registrarse</button>
-        <button id="btnShowLogin" class="btn ghost">Iniciar sesión</button>
-      </div>
-      <div id="authError" class="error"></div>
+    <!-- EXPLORE -->
+    <div id="explore" class="section hidden">
+      <h2>Explorar</h2>
+      <input type="text" id="searchUser" placeholder="Buscar usuario...">
+      <div id="searchResults"></div>
     </div>
   </div>
 
-  <!-- SCRIPT -->
+  <!-- Script -->
   <script type="module">
-    // ---------- Imports ----------
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc,
-      onSnapshot, query, where, orderBy, serverTimestamp, updateDoc,
-      arrayUnion, arrayRemove, deleteDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    // Cambiar entre secciones
+    const buttons = document.querySelectorAll(".sidebar button");
+    const sections = document.querySelectorAll(".section");
 
-    // ---------- Firebase config (tu nuevo config) ----------
-    const firebaseConfig = {
-      apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
-      authDomain: "pekora-forum.firebaseapp.com",
-      projectId: "pekora-forum",
-      storageBucket: "pekora-forum.firebasestorage.app",
-      messagingSenderId: "161910967859",
-      appId: "1:161910967859:web:6a28cecaae74b9b7e9dd46",
-      measurementId: "G-BPBTW5KBRK"
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        // remover active
+        buttons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        // ocultar todas las secciones
+        sections.forEach(s => s.classList.add("hidden"));
+        document.getElementById(btn.dataset.section).classList.remove("hidden");
+      });
+    });
+
+    // Simulación de usuario
+    let user = {
+      username: "UsuarioDemo",
+      avatar: "https://i.pravatar.cc/150"
     };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
 
-    // ---------- Helpers ----------
-    function genId(){ return `${Date.now()}-${Math.random().toString(36).slice(2,9)}`; }
-    function escapeHtml(s){ if(!s) return ""; return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-    async function hashPassword(password){
-      const enc = new TextEncoder();
-      const data = enc.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    document.getElementById("profileAvatar").src = user.avatar;
+
+    // Simulación de posts en memoria
+    const postsContainer = document.getElementById("posts");
+    const postBtn = document.getElementById("postBtn");
+    const postImageBtn = document.getElementById("postImageBtn");
+    const fileInput = document.getElementById("fileInput");
+    const postInput = document.getElementById("postInput");
+
+    let posts = [];
+
+    function renderPosts() {
+      postsContainer.innerHTML = "";
+      posts.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "post";
+        div.innerHTML = `
+          <img src="${p.avatar}" class="avatar">
+          <span class="username">${p.user}</span>
+          <div class="text">${p.text}</div>
+          ${p.image ? `<img src="${p.image}" class="post-image">` : ""}
+          <div class="actions">
+            ❤️ ${p.likes} &nbsp; 💬 ${p.comments.length}
+          </div>
+        `;
+        postsContainer.appendChild(div);
+      });
     }
 
-    // ---------- Session ----------
-    function saveSession(user){ localStorage.setItem('sessionUser', JSON.stringify(user)); }
-    function getSession(){ const s=localStorage.getItem('sessionUser'); return s?JSON.parse(s):null; }
-    function clearSession(){ localStorage.removeItem('sessionUser'); }
-
-    // ---------- UI refs ----------
-    const authOverlay = document.getElementById('authOverlay');
-    const authUsername = document.getElementById('authUsername');
-    const authPassword = document.getElementById('authPassword');
-    const authAvatarFile = document.getElementById('authAvatarFile');
-    const btnShowRegister = document.getElementById('btnShowRegister');
-    const btnShowLogin = document.getElementById('btnShowLogin');
-    const authError = document.getElementById('authError');
-
-    const sidebarAvatar = document.getElementById('sidebarAvatar');
-    const sidebarName = document.getElementById('sidebarName');
-    const logoutBtn = document.getElementById('logout');
-
-    const composerAvatar = document.getElementById('composerAvatar');
-    const composerText = document.getElementById('composerText');
-    const composerImage = document.getElementById('composerImage');
-    const chooseImageBtn = document.getElementById('chooseImageBtn');
-    const imagePreviewWrap = document.getElementById('imagePreviewWrap');
-    const publishBtn = document.getElementById('publishBtn');
-
-    const feed = document.getElementById('feed');
-
-    // Views
-    const homeView = document.getElementById('homeView');
-    const profileView = document.getElementById('profileView');
-    const notificationsView = document.getElementById('notificationsView');
-    const exploreView = document.getElementById('exploreView');
-
-    document.getElementById('navHome').onclick = ()=>showView('home');
-    document.getElementById('navProfile').onclick = ()=>showView('profile');
-    document.getElementById('navNotifications').onclick = ()=>showView('notifications');
-    document.getElementById('navExplore').onclick = ()=>showView('explore');
-
-    function showView(name){
-      homeView.classList.add('hidden');
-      profileView.classList.add('hidden');
-      notificationsView.classList.add('hidden');
-      exploreView.classList.add('hidden');
-      if(name==='home') homeView.classList.remove('hidden');
-      if(name==='profile') profileView.classList.remove('hidden');
-      if(name==='notifications') notificationsView.classList.remove('hidden');
-      if(name==='explore') exploreView.classList.remove('hidden');
-    }
-
-    // ---------- Auth (register/login) ----------
-    // Show overlay on first load if no session
-    let currentUser = getSession();
-    if(!currentUser){
-      authOverlay.style.display='flex';
-      showView('home');
-    } else {
-      setupAfterLogin(currentUser);
-    }
-
-    // Register
-    btnShowRegister.addEventListener('click', async ()=>{
-      authError.textContent = '';
-      const username = authUsername.value.trim();
-      const password = authPassword.value;
-      if(!username || !password){ authError.textContent='Completa usuario y contraseña'; return; }
-      if(/\s/.test(username)){ authError.textContent='No uses espacios en el nombre'; return; }
-      try{
-        const userRef = doc(db,'users',username);
-        const snap = await getDoc(userRef);
-        if(snap.exists()){ authError.textContent='Usuario ya existe'; return; }
-
-        // avatar upload if selected
-        let avatarUrl = `https://i.pravatar.cc/150?u=${encodeURIComponent(username)}`;
-        if(authAvatarFile.files[0]){
-          const f = authAvatarFile.files[0];
-          const stRef = ref(storage, `avatars/${username}-${Date.now()}-${f.name}`);
-          await uploadBytes(stRef,f);
-          avatarUrl = await getDownloadURL(stRef);
-        }
-
-        const passHash = await hashPassword(password);
-        await setDoc(userRef, { username, passwordHash: passHash, avatar: avatarUrl, followers: [], following: [], createdAt: serverTimestamp() });
-        currentUser = { username, avatar: avatarUrl };
-        saveSession(currentUser);
-        setupAfterLogin(currentUser);
-        authOverlay.style.display='none';
-      } catch(e){
-        console.error(e);
-        authError.textContent = 'Error registrando: '+(e.message||e);
-      }
+    postBtn.addEventListener("click", () => {
+      if (!postInput.value.trim()) return;
+      posts.unshift({
+        user: user.username,
+        avatar: user.avatar,
+        text: postInput.value,
+        image: null,
+        likes: 0,
+        comments: []
+      });
+      postInput.value = "";
+      renderPosts();
     });
 
-    // Login
-    btnShowLogin.addEventListener('click', async ()=>{
-      authError.textContent = '';
-      const username = authUsername.value.trim();
-      const password = authPassword.value;
-      if(!username || !password){ authError.textContent='Completa usuario y contraseña'; return; }
-      try{
-        const userRef = doc(db,'users',username);
-        const snap = await getDoc(userRef);
-        if(!snap.exists()){ authError.textContent='Usuario no encontrado'; return; }
-        const data = snap.data();
-        const passHash = await hashPassword(password);
-        if(data.passwordHash !== passHash){ authError.textContent='Contraseña incorrecta'; return; }
-        currentUser = { username: data.username, avatar: data.avatar };
-        saveSession(currentUser);
-        setupAfterLogin(currentUser);
-        authOverlay.style.display='none';
-      } catch(e){
-        console.error(e);
-        authError.textContent = 'Error al iniciar sesión';
-      }
-    });
-
-    logoutBtn.addEventListener('click', ()=>{
-      clearSession(); currentUser=null;
-      location.reload();
-    });
-
-    function setupAfterLogin(user){
-      // update UI
-      sidebarAvatar.src = user.avatar;
-      composerAvatar.src = user.avatar;
-      sidebarName.textContent = user.username;
-      document.getElementById('profileAvatar').src = user.avatar;
-      document.getElementById('profileName').textContent = user.username;
-      document.getElementById('profileUsername').textContent = '@'+user.username;
-      showView('home');
-      // start listeners
-      startFeedListener();
-      startNotificationsListener();
-      startProfilePostsListener();
-    }
-
-    // ---------- Posting (text + image via composerImage) ----------
-    let selectedImageFile = null;
-    composerImage.addEventListener('change', (e)=>{
-      selectedImageFile = e.target.files[0] || null;
-      imagePreviewWrap.innerHTML = '';
-      if(selectedImageFile){
-        const img = document.createElement('img');
-        img.src = URL.createObjectURL(selectedImageFile);
-        img.className = 'filePreview';
-        imagePreviewWrap.appendChild(img);
-      }
-    });
-
-    publishBtn.addEventListener('click', async ()=>{
-      const user = getSession();
-      if(!user){ alert('Inicia sesión'); return; }
-      const text = composerText.value.trim();
-      if(!text && !selectedImageFile){ alert('Escribe algo o añade una imagen'); return; }
-      let imageUrl = null;
-      try{
-        if(selectedImageFile){
-          const path = `posts/${user.username}-${Date.now()}-${selectedImageFile.name}`;
-          const stRef = ref(storage, path);
-          await uploadBytes(stRef, selectedImageFile);
-          imageUrl = await getDownloadURL(stRef);
-        }
-        await addDoc(collection(db,'posts'), {
+    postImageBtn.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length === 0) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        posts.unshift({
           user: user.username,
           avatar: user.avatar,
-          text,
-          image: imageUrl,
-          likes: [],
-          comments: [],
-          created: serverTimestamp()
+          text: postInput.value,
+          image: reader.result,
+          likes: 0,
+          comments: []
         });
-        // cleanup
-        composerText.value = '';
-        composerImage.value = '';
-        selectedImageFile = null;
-        imagePreviewWrap.innerHTML = '';
-      } catch(e){
-        console.error('publicar err',e); alert('Error al publicar');
-      }
-    });
-
-    // ---------- Feed rendering & listeners ----------
-    let feedUnsub = null;
-    function startFeedListener(){
-      if(feedUnsub) feedUnsub();
-      const qPosts = query(collection(db,'posts'), orderBy('created','desc'));
-      feedUnsub = onSnapshot(qPosts, snap => {
-        feed.innerHTML = '';
-        snap.forEach(docSnap => {
-          const el = createPostElement(docSnap);
-          feed.appendChild(el);
-        });
-      });
-    }
-
-    // Helper: get fresh session each action
-    function getCurrent(){ return getSession(); }
-
-    // Create post card element (full features)
-    function createPostElement(docSnap){
-      const data = docSnap.data() || {};
-      const postId = docSnap.id;
-      const post = document.createElement('div');
-      post.className = 'post';
-
-      post.innerHTML = `
-        <img src="${data.avatar||'https://i.pravatar.cc/100'}" class="avatar"/>
-        <div class="content">
-          <div class="meta">
-            <span class="name">${escapeHtml(data.user)}</span>
-            <span class="handle">@${escapeHtml(data.user)}</span>
-            <div style="flex:1"></div>
-            <div id="postControls-${postId}"></div>
-          </div>
-          <div class="text">${escapeHtml(data.text||'')}</div>
-          ${data.image?`<img src="${data.image}" class="post-image">`:''}
-          <div class="actions">
-            <button class="actionBtn likeBtn">❤️ <span class="likeCount">${(data.likes||[]).length}</span></button>
-            <button class="actionBtn commentToggleBtn">💬 <span class="commentCount">${(data.comments||[]).length}</span></button>
-          </div>
-          <div class="commentsList" style="display:none"></div>
-        </div>
-      `;
-
-      // Controls: delete post if owner
-      const controlsWrap = post.querySelector(`#postControls-${postId}`);
-      const session = getCurrent();
-      if(session && data.user === session.username){
-        const del = document.createElement('button');
-        del.className = 'smallBtn';
-        del.textContent = '🗑️';
-        del.title = 'Eliminar publicación';
-        del.onclick = async ()=>{
-          if(!confirm('¿Eliminar publicación?')) return;
-          try{ await deleteDoc(doc(db,'posts',postId)); } catch(e){ console.error(e); alert('Error al borrar'); }
-        };
-        controlsWrap.appendChild(del);
-      }
-
-      // Like handling (read-latest then update and create notification)
-      const likeBtn = post.querySelector('.likeBtn');
-      likeBtn.onclick = async ()=>{
-        const session = getCurrent();
-        if(!session){ alert('Inicia sesión'); return; }
-        try{
-          const postRef = doc(db,'posts',postId);
-          const postSnap = await getDoc(postRef);
-          const cur = postSnap.exists() ? postSnap.data() : {};
-          const likes = Array.isArray(cur.likes)?cur.likes:[];
-          if(likes.includes(session.username)){
-            await updateDoc(postRef, { likes: arrayRemove(session.username) });
-          } else {
-            await updateDoc(postRef, { likes: arrayUnion(session.username) });
-            // notification to owner
-            if(cur.user && cur.user !== session.username){
-              await addDoc(collection(db,'notifications'), { recipient: cur.user, message:`${session.username} le dio like a tu publicación`, created: serverTimestamp() });
-            }
-          }
-        } catch(e){ console.error(e); }
+        postInput.value = "";
+        fileInput.value = "";
+        renderPosts();
       };
-
-      // Comments toggle & rendering
-      const commentToggleBtn = post.querySelector('.commentToggleBtn');
-      const commentsList = post.querySelector('.commentsList');
-      commentToggleBtn.onclick = async ()=>{
-        if(commentsList.style.display === 'none'){ // show and render latest comments
-          commentsList.style.display = 'block';
-          await renderCommentsForPost(postId, commentsList);
-        } else {
-          commentsList.style.display = 'none';
-        }
-      };
-
-      // update like count reactively by listening to this post doc (optional)
-      // Instead of setting up a listener per post (costly), rely on full feed snapshot to re-render counts.
-      // But we can just update displayed counts after actions via feed listener.
-
-      // Append comment input UI into commentsList
-      const inputWrap = document.createElement('div');
-      inputWrap.style.marginTop = '8px';
-      inputWrap.innerHTML = `
-        <div style="display:flex;gap:8px;align-items:center">
-          <input placeholder="Escribe un comentario..." style="flex:1;padding:8px;border-radius:10px;border:1px solid #222;background:transparent;color:inherit"/>
-          <button class="btn" style="padding:6px 10px">Enviar</button>
-        </div>
-      `;
-      commentsList.appendChild(inputWrap);
-      const sendBtn = inputWrap.querySelector('button');
-      const inputField = inputWrap.querySelector('input');
-
-      sendBtn.onclick = async ()=>{
-        const txt = inputField.value.trim();
-        if(!txt) return;
-        const session = getCurrent();
-        if(!session){ alert('Inicia sesión'); return; }
-        const commentObj = { id: genId(), user: session.username, text: txt, created: serverTimestamp() };
-        try{
-          await updateDoc(doc(db,'posts',postId), { comments: arrayUnion(commentObj) });
-          // notification to owner
-          if(data.user && data.user !== session.username){
-            await addDoc(collection(db,'notifications'), { recipient: data.user, message: `${session.username} comentó en tu publicación`, created: serverTimestamp() });
-          }
-          inputField.value = '';
-          // re-render comments to show the new one (pull fresh)
-          await renderCommentsForPost(postId, commentsList);
-        } catch(e){ console.error(e); }
-      };
-
-      return post;
-    }
-
-    // Render comments into a container using latest post doc
-    async function renderCommentsForPost(postId, commentsContainer){
-      commentsContainer.innerHTML = ''; // clear
-      try{
-        const snap = await getDoc(doc(db,'posts',postId));
-        if(!snap.exists()) return;
-        const data = snap.data();
-        const comments = Array.isArray(data.comments) ? data.comments : [];
-        // each comment row
-        comments.forEach(c=>{
-          const cDiv = document.createElement('div');
-          cDiv.className = 'commentItem';
-          cDiv.innerHTML = `<div class="left"><b>${escapeHtml(c.user)}</b>: ${escapeHtml(c.text)}</div>`;
-          // delete if author
-          const session = getCurrent();
-          if(session && c.user === session.username){
-            const delBtn = document.createElement('button');
-            delBtn.className = 'smallBtn';
-            delBtn.textContent = '🗑️';
-            delBtn.onclick = async ()=>{
-              if(!confirm('Eliminar comentario?')) return;
-              try{
-                const postRef = doc(db,'posts',postId);
-                const postSnap = await getDoc(postRef);
-                const curComments = Array.isArray(postSnap.data().comments)?postSnap.data().comments:[];
-                const updated = curComments.filter(cc => cc.id !== c.id);
-                await updateDoc(postRef, { comments: updated });
-                // re-render
-                await renderCommentsForPost(postId, commentsContainer);
-              } catch(e){ console.error(e); }
-            };
-            cDiv.appendChild(delBtn);
-          }
-          commentsContainer.appendChild(cDiv);
-        });
-      }catch(e){ console.error(e); }
-    }
-
-    // ---------- Profile: posts of the current user ----------
-    const profilePostsWrap = document.getElementById('profilePosts');
-    let profileUnsub = null;
-    function startProfilePostsListener(){
-      if(!getSession()) return;
-      if(profileUnsub) profileUnsub();
-      const qUserPosts = query(collection(db,'posts'), where('user','==', getSession().username), orderBy('created','desc'));
-      profileUnsub = onSnapshot(qUserPosts, snap=>{
-        profilePostsWrap.innerHTML = '';
-        snap.forEach(d=>{
-          const postEl = createPostElement(d);
-          profilePostsWrap.appendChild(postEl);
-        });
-      });
-    }
-
-    // Update avatar in users collection and update posts avatars for that user
-    document.getElementById('saveAvatarBtn').addEventListener('click', async ()=>{
-      const f = document.getElementById('avatarFile').files[0];
-      const session = getSession();
-      if(!session) return alert('Inicia sesión');
-      if(!f) return alert('Selecciona un archivo');
-      try{
-        const path = `avatars/${session.username}-${Date.now()}-${f.name}`;
-        const stRef = ref(storage, path);
-        await uploadBytes(stRef, f);
-        const url = await getDownloadURL(stRef);
-        // update user doc
-        await updateDoc(doc(db,'users',session.username), { avatar: url });
-        // update posts authored by user
-        const postsSnap = await getDocs(query(collection(db,'posts'), where('user','==', session.username)));
-        const updates = [];
-        postsSnap.forEach(ps => {
-          updates.push(updateDoc(doc(db,'posts',ps.id), { avatar: url }).catch(()=>{}));
-        });
-        await Promise.all(updates);
-        // update local session
-        session.avatar = url;
-        saveSession(session);
-        // update UI
-        sidebarAvatar.src = url;
-        composerAvatar.src = url;
-        document.getElementById('profileAvatar').src = url;
-        alert('Avatar actualizado');
-      }catch(e){ console.error(e); alert('Error al guardar avatar'); }
+      reader.readAsDataURL(fileInput.files[0]);
     });
 
-    // ---------- Notifications listener ----------
-    function startNotificationsListener(){
-      const ses = getSession();
-      if(!ses) return;
-      const qNotif = query(collection(db,'notifications'), where('recipient','==', ses.username), orderBy('created','desc'));
-      onSnapshot(qNotif, snap=>{
-        const list = document.getElementById('notificationsList');
-        list.innerHTML = '';
-        snap.forEach(d => {
-          const data = d.data();
-          const row = document.createElement('div');
-          row.style.padding = '8px';
-          row.style.borderBottom = '1px solid #0b0c0d';
-          row.textContent = data.message;
-          list.appendChild(row);
-        });
-      });
-    }
-
-    // ---------- Explore (search users & follow) ----------
-    const searchInput = document.getElementById('searchInput');
-    const searchResults = document.getElementById('searchResults');
-    searchInput.addEventListener('input', async ()=>{
-      searchResults.innerHTML = '';
-      const qVal = searchInput.value.trim();
-      if(!qVal) return;
-      // range query for prefix
-      const qUsers = query(collection(db,'users'), where('username','>=', qVal), where('username','<=', qVal + '\uf8ff'));
-      const snap = await getDocs(qUsers);
-      snap.forEach(d=>{
-        const data = d.data();
-        const row = document.createElement('div');
-        row.style.display='flex';row.style.justifyContent='space-between';row.style.alignItems='center';row.style.padding='8px 0';
-        row.innerHTML = `<div><b>${escapeHtml(data.username)}</b></div>`;
-        const btn = document.createElement('button');
-        btn.className='btn';
-        btn.style.padding='6px 10px';
-        btn.textContent = 'Seguir';
-        btn.onclick = async ()=>{
-          const session = getSession();
-          if(!session) return alert('Inicia sesión');
-          // update target followers and current following
-          await updateDoc(doc(db,'users', data.username), { followers: arrayUnion(session.username) }).catch(()=>{});
-          await updateDoc(doc(db,'users', session.username), { following: arrayUnion(data.username) }).catch(()=>{});
-          // notify target
-          await addDoc(collection(db,'notifications'), { recipient: data.username, message: `${session.username} te ha empezado a seguir`, created: serverTimestamp() });
-          alert('Has seguido a ' + data.username);
-        };
-        row.appendChild(btn);
-        searchResults.appendChild(row);
-      });
-    });
-
-    // ---------- Utilities ----------
-    // start listeners if logged in at load
-    // NOTE: some listeners already started in setupAfterLogin
-
-    // ---------- Start feed/listeners if already logged in on page load ----------
-    if(getSession()){
-      setupAfterLogin(getSession());
-    }
-
-    // ---------- Small safety: show login overlay if not logged in and trying to publish or to open profile/notifications/explore ----------
-    document.getElementById('navProfile').addEventListener('click', (e)=>{
-      if(!getSession()){ authOverlay.style.display='flex'; }
-    });
-    document.getElementById('navNotifications').addEventListener('click', (e)=>{
-      if(!getSession()){ authOverlay.style.display='flex'; }
-    });
-    document.getElementById('navExplore').addEventListener('click', (e)=>{
-      if(!getSession()){ authOverlay.style.display='flex'; }
-    });
-    publishBtn.addEventListener('click', ()=>{
-      if(!getSession()){ authOverlay.style.display='flex'; }
-    });
-
-    // End of module
+    renderPosts();
   </script>
 </body>
 </html>
