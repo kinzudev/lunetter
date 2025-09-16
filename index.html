@@ -2,110 +2,110 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Pekora Forum</title>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"></script>
+  <title>Lunetter</title>
   <style>
     body {
-      background: #000;
-      color: #fff;
+      margin: 0;
+      background: black;
+      color: white;
       font-family: Arial, sans-serif;
       display: flex;
-      justify-content: center;
+    }
+    .sidebar {
+      width: 200px;
+      background: #111;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      height: 100vh;
+    }
+    .sidebar button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .content {
+      flex: 1;
       padding: 20px;
     }
-    .container {
-      width: 600px;
+    .hidden {
+      display: none;
     }
-    .post-box {
-      display: flex;
-      gap: 10px;
-      padding: 10px;
-      border-bottom: 1px solid #222;
-    }
-    .post-box img {
+    .avatar {
       width: 40px;
       height: 40px;
       border-radius: 50%;
     }
-    .post-box textarea {
-      flex: 1;
-      background: #000;
-      border: none;
-      color: #fff;
-      resize: none;
-      font-size: 16px;
-    }
-    .post-box button {
-      background: #1d9bf0;
-      color: #fff;
-      border: none;
-      border-radius: 20px;
-      padding: 6px 14px;
-      cursor: pointer;
-    }
     .post {
-      display: flex;
-      gap: 10px;
-      padding: 12px;
-      border-bottom: 1px solid #222;
-    }
-    .post img.avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-    }
-    .post-content {
-      flex: 1;
-    }
-    .post-header {
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-    .post-text {
-      margin-bottom: 8px;
-      white-space: pre-wrap;
+      background: #222;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 10px;
     }
     .post img.post-image {
       max-width: 100%;
-      border-radius: 12px;
-      margin-top: 8px;
-    }
-    .post-actions {
-      display: flex;
-      gap: 30px;
-      margin-top: 6px;
-      font-size: 14px;
-      color: #8899a6;
-      cursor: pointer;
-    }
-    .post-actions span:hover {
-      color: #1d9bf0;
+      border-radius: 10px;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Caja para publicar -->
-    <div class="post-box">
-      <img src="https://i.pravatar.cc/50" id="userAvatar">
-      <textarea id="postInput" rows="2" placeholder="¿Qué está pasando?"></textarea>
-      <button id="postBtn">Post</button>
-      <button id="postImageBtn">Post Image</button>
-      <input type="file" id="fileInput" accept="image/*" style="display:none">
-    </div>
-
-    <!-- Lista de posts -->
-    <div id="posts"></div>
+  <!-- Menú lateral -->
+  <div class="sidebar">
+    <button id="btnHome">🏠 Home</button>
+    <button id="btnProfile">👤 Profile</button>
+    <button id="btnNotifications">🔔 Notifications</button>
+    <button id="btnExplore">🔎 Explore</button>
   </div>
 
+  <!-- Contenido principal -->
+  <div class="content">
+    <!-- Home -->
+    <div id="homeSection">
+      <h2>Home</h2>
+      <textarea id="postInput" placeholder="What's happening?" style="width:80%;"></textarea>
+      <button id="postBtn">Post</button>
+      <button id="postImageBtn">Post Image</button>
+      <input type="file" id="fileInput" accept="image/*" hidden>
+      <div id="posts"></div>
+    </div>
+
+    <!-- Profile -->
+    <div id="profileSection" class="hidden">
+      <h2>Mi Perfil</h2>
+      <img id="profileAvatar" class="avatar"><br>
+      <input type="file" id="avatarInput" accept="image/*">
+      <button id="saveAvatar">Guardar Avatar</button>
+    </div>
+
+    <!-- Notifications -->
+    <div id="notificationsSection" class="hidden">
+      <h2>Notificaciones</h2>
+      <div id="notificationsList"></div>
+    </div>
+
+    <!-- Explore -->
+    <div id="exploreSection" class="hidden">
+      <h2>Explorar</h2>
+      <input type="text" id="searchUser" placeholder="Buscar usuario...">
+      <div id="searchResults"></div>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { 
+      getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, 
+      updateDoc, doc, arrayUnion, arrayRemove, getDocs, where 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    // === Config Firebase ===
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
       authDomain: "pekora-forum.firebaseapp.com",
@@ -119,19 +119,37 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
+    // Usuario actual simulado
+    let user = {
+      username: "lunetter",
+      avatar: "https://i.pravatar.cc/150"
+    };
+
+    // ================== Navegación ==================
+    const sections = {
+      home: document.getElementById("homeSection"),
+      profile: document.getElementById("profileSection"),
+      notifications: document.getElementById("notificationsSection"),
+      explore: document.getElementById("exploreSection")
+    };
+
+    function showSection(name) {
+      Object.values(sections).forEach(s => s.classList.add("hidden"));
+      sections[name].classList.remove("hidden");
+    }
+
+    document.getElementById("btnHome").onclick = () => showSection("home");
+    document.getElementById("btnProfile").onclick = () => showSection("profile");
+    document.getElementById("btnNotifications").onclick = () => showSection("notifications");
+    document.getElementById("btnExplore").onclick = () => showSection("explore");
+
+    // ================== HOME: Postear ==================
     const postsContainer = document.getElementById("posts");
     const postBtn = document.getElementById("postBtn");
     const postImageBtn = document.getElementById("postImageBtn");
     const postInput = document.getElementById("postInput");
     const fileInput = document.getElementById("fileInput");
 
-    // Usuario simulado (reemplazar por auth)
-    const user = {
-      username: "lunetter",
-      avatar: "https://i.pravatar.cc/150"
-    };
-
-    // === Publicar texto ===
     postBtn.addEventListener("click", async () => {
       const text = postInput.value.trim();
       if (!text) return;
@@ -141,15 +159,14 @@
         avatar: user.avatar,
         text,
         image: null,
+        likes: [],
+        comments: [],
         created: serverTimestamp()
       });
-
       postInput.value = "";
     });
 
-    // === Publicar imagen ===
     postImageBtn.addEventListener("click", () => fileInput.click());
-
     fileInput.addEventListener("change", async () => {
       if (fileInput.files.length === 0) return;
       const file = fileInput.files[0];
@@ -162,176 +179,89 @@
         avatar: user.avatar,
         text: postInput.value.trim(),
         image: imageUrl,
+        likes: [],
+        comments: [],
         created: serverTimestamp()
       });
-
       postInput.value = "";
       fileInput.value = "";
     });
 
-    // === Mostrar posts en tiempo real ===
     const q = query(collection(db, "posts"), orderBy("created", "desc"));
     onSnapshot(q, (snapshot) => {
       postsContainer.innerHTML = "";
-      snapshot.forEach((doc) => {
-        const data = doc.data();
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const postId = docSnap.id;
+
         const div = document.createElement("div");
         div.className = "post";
         div.innerHTML = `
           <img src="${data.avatar}" class="avatar">
-          <div class="post-content">
-            <div class="post-header">${data.user}</div>
-            <div class="post-text">${data.text || ""}</div>
-            ${data.image ? `<img src="${data.image}" class="post-image">` : ""}
-            <div class="post-actions">
-              <span>💬 0</span>
-              <span>❤️ 0</span>
-            </div>
+          <div style="display:inline-block; margin-left:10px;">
+            <b>${data.user}</b><br>
+            ${data.text || ""}
+            ${data.image ? `<br><img src="${data.image}" class="post-image">` : ""}
+          </div>
+          <div style="margin-top:10px;">
+            ❤️ ${data.likes?.length || 0} | 💬 ${data.comments?.length || 0}
           </div>
         `;
         postsContainer.appendChild(div);
       });
     });
-  </script>
 
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { 
-    getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, 
-    updateDoc, doc, arrayUnion, arrayRemove 
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-  // === Config Firebase ===
-  const firebaseConfig = {
-    apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
-    authDomain: "pekora-forum.firebaseapp.com",
-    projectId: "pekora-forum",
-    storageBucket: "pekora-forum.firebasestorage.app",
-    messagingSenderId: "161910967859",
-    appId: "1:161910967859:web:6a28cecaae74b9b7e9dd46",
-    measurementId: "G-BPBTW5KBRK"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const storage = getStorage(app);
-
-  const postsContainer = document.getElementById("posts");
-  const postBtn = document.getElementById("postBtn");
-  const postImageBtn = document.getElementById("postImageBtn");
-  const postInput = document.getElementById("postInput");
-  const fileInput = document.getElementById("fileInput");
-
-  // Usuario simulado (reemplazar con auth real)
-  const user = {
-    username: "lunetter",
-    avatar: "https://i.pravatar.cc/150"
-  };
-
-  // === Publicar texto ===
-  postBtn.addEventListener("click", async () => {
-    const text = postInput.value.trim();
-    if (!text) return;
-
-    await addDoc(collection(db, "posts"), {
-      user: user.username,
-      avatar: user.avatar,
-      text,
-      image: null,
-      likes: [],
-      comments: [],
-      created: serverTimestamp()
+    // ================== PROFILE: Cambiar Avatar ==================
+    document.getElementById("profileAvatar").src = user.avatar;
+    document.getElementById("saveAvatar").addEventListener("click", async () => {
+      const file = document.getElementById("avatarInput").files[0];
+      if (!file) return;
+      const storageRef = ref(storage, "avatars/" + user.username + "-" + file.name);
+      await uploadBytes(storageRef, file);
+      const newUrl = await getDownloadURL(storageRef);
+      user.avatar = newUrl;
+      document.getElementById("profileAvatar").src = newUrl;
+      alert("Avatar actualizado");
     });
 
-    postInput.value = "";
-  });
-
-  // === Publicar imagen ===
-  postImageBtn.addEventListener("click", () => fileInput.click());
-
-  fileInput.addEventListener("change", async () => {
-    if (fileInput.files.length === 0) return;
-    const file = fileInput.files[0];
-    const storageRef = ref(storage, "posts/" + Date.now() + "-" + file.name);
-    await uploadBytes(storageRef, file);
-    const imageUrl = await getDownloadURL(storageRef);
-
-    await addDoc(collection(db, "posts"), {
-      user: user.username,
-      avatar: user.avatar,
-      text: postInput.value.trim(),
-      image: imageUrl,
-      likes: [],
-      comments: [],
-      created: serverTimestamp()
+    // ================== NOTIFICATIONS ==================
+    const notificationsList = document.getElementById("notificationsList");
+    onSnapshot(collection(db, "notifications"), (snapshot) => {
+      notificationsList.innerHTML = "";
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.innerText = data.message;
+        notificationsList.appendChild(div);
+      });
     });
 
-    postInput.value = "";
-    fileInput.value = "";
-  });
+    // ================== EXPLORE: Buscar usuarios ==================
+    const searchInput = document.getElementById("searchUser");
+    const searchResults = document.getElementById("searchResults");
 
-  // === Mostrar posts en tiempo real ===
-  const q = query(collection(db, "posts"), orderBy("created", "desc"));
-  onSnapshot(q, (snapshot) => {
-    postsContainer.innerHTML = "";
-    snapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      const postId = docSnap.id;
-
-      const div = document.createElement("div");
-      div.className = "post";
-      div.innerHTML = `
-        <img src="${data.avatar}" class="avatar">
-        <div class="post-content">
-          <div class="post-header">${data.user}</div>
-          <div class="post-text">${data.text || ""}</div>
-          ${data.image ? `<img src="${data.image}" class="post-image">` : ""}
-          <div class="post-actions">
-            <span class="like-btn">❤️ ${data.likes?.length || 0}</span>
-            <span class="comment-toggle">💬 ${data.comments?.length || 0}</span>
-          </div>
-          <div class="comments" style="margin-top:10px; display:none;">
-            <div class="comment-list">
-              ${data.comments?.map(c => `<p><b>${c.user}:</b> ${c.text}</p>`).join("") || ""}
-            </div>
-            <input type="text" placeholder="Escribe un comentario..." class="comment-input" style="width:80%;">
-            <button class="send-comment">Enviar</button>
-          </div>
-        </div>
-      `;
-
-      // === Like ===
-      div.querySelector(".like-btn").addEventListener("click", async () => {
-        const postRef = doc(db, "posts", postId);
-        if (data.likes?.includes(user.username)) {
-          await updateDoc(postRef, { likes: arrayRemove(user.username) });
-        } else {
-          await updateDoc(postRef, { likes: arrayUnion(user.username) });
-        }
-      });
-
-      // === Toggle comentarios ===
-      div.querySelector(".comment-toggle").addEventListener("click", () => {
-        const commentsDiv = div.querySelector(".comments");
-        commentsDiv.style.display = commentsDiv.style.display === "none" ? "block" : "none";
-      });
-
-      // === Enviar comentario ===
-      div.querySelector(".send-comment").addEventListener("click", async () => {
-        const input = div.querySelector(".comment-input");
-        const text = input.value.trim();
-        if (!text) return;
-        const postRef = doc(db, "posts", postId);
-        await updateDoc(postRef, {
-          comments: arrayUnion({ user: user.username, text })
+    searchInput.addEventListener("input", async () => {
+      const val = searchInput.value.trim();
+      searchResults.innerHTML = "";
+      if (!val) return;
+      const q = query(collection(db, "users"), where("username", ">=", val), where("username", "<=", val + "\uf8ff"));
+      const snap = await getDocs(q);
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <b>${data.username}</b> <button>Seguir</button>
+        `;
+        div.querySelector("button").addEventListener("click", async () => {
+          await addDoc(collection(db, "notifications"), {
+            message: `${user.username} empezó a seguir a ${data.username}`,
+            created: serverTimestamp()
+          });
+          alert("Ahora sigues a " + data.username);
         });
-        input.value = "";
+        searchResults.appendChild(div);
       });
-
-      postsContainer.appendChild(div);
     });
-  });
-</script>
-
+  </script>
 </body>
 </html>
