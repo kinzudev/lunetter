@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lunetter</title>
+  <title>Lunetter1</title>
   <style>
     body { margin:0; font-family:Arial, sans-serif; background:#000; color:#fff; }
     .sidebar { width:220px; background:#000; color:#fff; height:100vh; float:left; border-right:1px solid #222; padding:20px; }
@@ -70,19 +70,21 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, collection, doc, setDoc, getDoc, addDoc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+  // ✅ Tu nuevo FirebaseConfig
   const firebaseConfig = {
-    apiKey: "AIzaSyBZvsL3zwUsHmTL0QZxQOkWF28_N2FR4L0",
-    authDomain: "lunetter-55d46.firebaseapp.com",
-    projectId: "lunetter-55d46",
-    storageBucket: "lunetter-55d46.firebasestorage.app",
-    messagingSenderId: "798507844928",
-    appId: "1:798507844928:web:20e8a48a66a85ee6c6e6a5",
-    measurementId: "G-46BL2MEZ68"
+    apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
+    authDomain: "pekora-forum.firebaseapp.com",
+    projectId: "pekora-forum",
+    storageBucket: "pekora-forum.firebasestorage.app",
+    messagingSenderId: "161910967859",
+    appId: "1:161910967859:web:6a28cecaae74b9b7e9dd46",
+    measurementId: "G-BPBTW5KBRK"
   };
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
+  // utilidades
   function randomAvatar() {
     return `https://i.pravatar.cc/150?u=${Math.floor(Math.random()*10000)}`;
   }
@@ -90,6 +92,7 @@
   function getSession() { return JSON.parse(localStorage.getItem("user")); }
   function clearSession() { localStorage.removeItem("user"); }
 
+  // Registro
   async function register(username, password) {
     const userRef = doc(db, "users", username);
     const snap = await getDoc(userRef);
@@ -99,6 +102,7 @@
     return { username, avatar };
   }
 
+  // Login
   async function login(username, password) {
     const userRef = doc(db, "users", username);
     const snap = await getDoc(userRef);
@@ -108,6 +112,7 @@
     return { username: data.username, avatar: data.avatar };
   }
 
+  // Mostrar app
   function showApp(user) {
     document.getElementById("auth").style.display = "none";
     document.getElementById("main").style.display = "block";
@@ -117,6 +122,7 @@
     loadPosts();
   }
 
+  // Render posts
   function renderPost(docSnap, currentUser) {
     const data = docSnap.data();
     const div = document.createElement("div");
@@ -138,12 +144,14 @@
       </div>
     `;
 
+    // Like
     const likeBtn = div.querySelector(".likeBtn");
     likeBtn.addEventListener("click", async () => {
       const ref = doc(db, "posts", docSnap.id);
       await updateDoc(ref, { likes: arrayUnion(currentUser.username) });
     });
 
+    // Comentarios
     const sendComment = div.querySelector(".sendComment");
     sendComment.addEventListener("click", async () => {
       const input = div.querySelector(".commentInput");
@@ -162,6 +170,7 @@
     return div;
   }
 
+  // Cargar posts
   function loadPosts() {
     const currentUser = getSession();
     const q = query(collection(db, "posts"), orderBy("created", "desc"));
@@ -174,6 +183,7 @@
     });
   }
 
+  // Eventos Auth
   document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const username = document.getElementById("regUsername").value.trim();
@@ -207,6 +217,7 @@
     document.getElementById("registerForm").style.display = "flex";
   });
 
+  // Postear
   document.getElementById("postBtn").addEventListener("click", async () => {
     const user = getSession();
     if (!user) return;
@@ -223,11 +234,13 @@
     document.getElementById("postText").value = "";
   });
 
+  // Logout
   document.getElementById("logoutBtn").addEventListener("click", () => {
     clearSession();
     location.reload();
   });
 
+  // Restaurar sesión
   const sessionUser = getSession();
   if (sessionUser) {
     showApp(sessionUser);
