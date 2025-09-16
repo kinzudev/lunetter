@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lunetter - UPDATE</title>
+  <title>Lunetter</title>
   <!-- Tailwind CDN (for quick prototyping) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -788,6 +788,95 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof subscribeFeed === 'function') subscribeFeed();
     });
   }
+});
+</script>
+  
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Crear botón flotante de Chat Live
+  const chatBtn = document.createElement("button");
+  chatBtn.textContent = "Chat Live";
+  chatBtn.className = "fixed bottom-5 right-5 px-4 py-2 bg-blue-600 text-white rounded-full shadow-lg z-50";
+  document.body.appendChild(chatBtn);
+
+  // Crear panel de chat oculto
+  const chatPanel = document.createElement("div");
+  chatPanel.className = "hidden fixed bottom-20 right-5 w-80 h-96 bg-white border rounded-2xl shadow-lg flex flex-col z-50";
+  chatPanel.innerHTML = `
+    <div class="bg-blue-600 text-white p-2 rounded-t-2xl font-bold">CHAT</div>
+    <div id="chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2 text-sm"></div>
+    <form id="chat-form" class="p-2 border-t flex gap-2">
+      <input id="chat-input" type="text" class="flex-1 border rounded px-2 py-1" placeholder="Escribe un mensaje..." required />
+      <button class="px-3 bg-blue-600 text-white rounded">Enviar</button>
+    </form>
+  `;
+  document.body.appendChild(chatPanel);
+
+  // Toggle abrir/cerrar chat
+  chatBtn.addEventListener("click", () => {
+    chatPanel.classList.toggle("hidden");
+  });
+
+  const chatMessages = chatPanel.querySelector("#chat-messages");
+  const chatForm = chatPanel.querySelector("#chat-form");
+  const chatInput = chatPanel.querySelector("#chat-input");
+
+  // Enviar mensaje
+  chatForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!auth.currentUser) {
+      alert("Debes iniciar sesión para chatear.");
+      return;
+    }
+    const user = auth.currentUser;
+    const msg = chatInput.value.trim();
+    if (!msg) return;
+
+    await db.collection("chatMessages").add({
+      uid: user.uid,
+      text: msg,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    chatInput.value = "";
+  });
+
+  // Escuchar mensajes en tiempo real
+  db.collection("chatMessages").orderBy("createdAt").limit(100).onSnapshot(async (snap) => {
+    chatMessages.innerHTML = "";
+    for (const doc of snap.docs) {
+      const data = doc.data();
+      const userSnap = await db.collection("users").doc(data.uid).get();
+      const user = userSnap.exists ? userSnap.data() : {};
+
+      const div = document.createElement("div");
+      div.className = "flex items-center gap-2";
+
+      const img = document.createElement("img");
+      img.src = user.photoURL || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.displayName || "User");
+      img.className = "w-8 h-8 rounded-full";
+
+      const name = document.createElement("span");
+      name.className = "font-semibold";
+      name.textContent = user.displayName || "Usuario";
+
+      // verificado
+      if (user.verified) {
+        const verifiedImg = document.createElement("img");
+        verifiedImg.src = "https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png";
+        verifiedImg.className = "inline-block w-4 h-4 ml-1";
+        name.appendChild(verifiedImg);
+      }
+
+      const text = document.createElement("span");
+      text.textContent = ": " + data.text;
+
+      div.appendChild(img);
+      div.appendChild(name);
+      div.appendChild(text);
+      chatMessages.appendChild(div);
+    }
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
 });
 </script>
 
