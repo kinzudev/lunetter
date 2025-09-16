@@ -490,5 +490,55 @@
       commentsSection.appendChild(comment);
     }
   </script>
+
+  <!-- Añadir Firebase desde CDN -->
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+
+<script>
+  // Tu configuración de Firebase (la copias desde la consola de Firebase)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBZvsL3zwUsHmTL0QZxQOkWF28_N2FR4L0",
+    authDomain: "lunetter-55d46.firebaseapp.com",
+    projectId: "lunetter-55d46",
+    storageBucket: "lunetter-55d46.firebasestorage.app",
+    messagingSenderId: "798507844928",
+    appId: "1:798507844928:web:20e8a48a66a85ee6c6e6a5"
+  };
+
+  // Inicializar Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // Guardar post en Firestore
+  async function addPost() {
+    const text = document.getElementById('postInput').value.trim();
+    if (!text) return;
+    await db.collection("posts").add({
+      user: localStorage.getItem("loggedUser"),
+      text: text,
+      likes: 0,
+      created: Date.now()
+    });
+    document.getElementById('postInput').value = "";
+  }
+
+  // Mostrar posts en tiempo real
+  db.collection("posts").orderBy("created","desc").onSnapshot(snapshot => {
+    const postsDiv = document.getElementById("posts");
+    postsDiv.innerHTML = "";
+    snapshot.forEach(doc => {
+      const post = doc.data();
+      const div = document.createElement("div");
+      div.className = "post";
+      div.innerHTML = `
+        <b>${post.user}</b>: ${post.text} <br>
+        ❤️ ${post.likes}
+      `;
+      postsDiv.appendChild(div);
+    });
+  });
+</script>
+
 </body>
 </html>
