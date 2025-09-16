@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>lunetter</title>
+  <title>lunetter1</title>
   <!-- Tailwind CDN (for quick prototyping) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -311,27 +311,27 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // localizar el input de tipo file
-  const fileInput = document.querySelector('input[type="file"]');
-  if (fileInput) {
-    // crear nuevo input de URL
+  // Buscar todos los inputs file
+  const fileInputs = document.querySelectorAll('input[type="file"]');
+  fileInputs.forEach(fileInput => {
+    // Crear nuevo input URL
     const urlInput = document.createElement("input");
     urlInput.type = "text";
     urlInput.id = "imageUrlInput";
     urlInput.placeholder = "Pega aquí la URL de una imagen (opcional)";
     urlInput.style = "width: 60%; margin-right: 8px;";
 
-    // insertar el input URL justo antes del botón Publicar
+    // Insertar el nuevo input antes del botón Publicar
     const postBtn = document.getElementById("postBtn");
     if (postBtn) {
       postBtn.parentNode.insertBefore(urlInput, postBtn);
     }
 
-    // eliminar el input file
+    // Quitar el input file original
     fileInput.remove();
-  }
+  });
 });
 </script>
-
+  
 </body>
 </html>
