@@ -339,40 +339,53 @@
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
   import { collection, addDoc, serverTimestamp } 
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { db } from "./firebase-init.js"; // 🔥 asegúrate de que tu db esté exportada o ya importada
-  import { getUser } from "./auth.js";     // 🔥 si tienes getUser en el mismo script, ignora esta línea
+  import { db } from "./firebase-init.js"; // 🔥 tu inicialización de Firebase
+  import { getUser } from "./auth.js";     // 🔥 tu función que devuelve el usuario logueado
 
   const storage = getStorage();
 
   // Seleccionamos la caja de posteo
   const postBox = document.querySelector(".post-box");
+  const postBtn = document.getElementById("postBtn");
+  const postInput = document.getElementById("postInput");
 
-  // Input de imagen
+  // Input para imágenes
   const fileInput = document.createElement("input");
   fileInput.type = "file";
   fileInput.accept = "image/*";
   fileInput.id = "imageInput";
-  fileInput.style.color = "white";
-  postBox.insertBefore(fileInput, document.getElementById("postBtn"));
+  fileInput.style.marginTop = "10px";
+  postBox.insertBefore(fileInput, postBtn);
 
-  // Botón dinámico "Subir Imagen"
+  // Preview de la imagen seleccionada
+  const preview = document.createElement("img");
+  preview.style.maxWidth = "200px";
+  preview.style.marginTop = "10px";
+  preview.style.display = "none";
+  postBox.insertBefore(preview, postBtn);
+
+  // Botón "Subir Imagen"
   const uploadBtn = document.createElement("button");
+  uploadBtn.id = "uploadImageBtn";
   uploadBtn.textContent = "Subir Imagen";
-  uploadBtn.style.marginLeft = "10px";
-  uploadBtn.style.display = "none"; // Oculto por defecto
-  postBox.appendChild(uploadBtn);
+  uploadBtn.style.marginTop = "10px";
+  uploadBtn.style.display = "none"; // Oculto al inicio
+  postBox.insertBefore(uploadBtn, postBtn);
 
-  // Mostrar botón cuando se seleccione una imagen
+  // Mostrar botón y preview cuando se elige una imagen
   fileInput.addEventListener("change", () => {
     if (fileInput.files.length > 0) {
+      preview.src = URL.createObjectURL(fileInput.files[0]);
+      preview.style.display = "block";
       uploadBtn.style.display = "inline-block";
     } else {
+      preview.style.display = "none";
       uploadBtn.style.display = "none";
     }
   });
 
-  // Acción al presionar "Subir Imagen"
-  uploadBtn.onclick = async () => {
+  // Acción al hacer clic en "Subir Imagen"
+  uploadBtn.addEventListener("click", async () => {
     const user = getUser();
     if (!user) return alert("Inicia sesión primero");
 
@@ -380,30 +393,37 @@
     const file = fileInput.files[0];
     if (!file) return alert("Selecciona una imagen");
 
-    // Subir imagen a Firebase Storage
-    const filePath = `posts/${user.username}-${Date.now()}-${file.name}`;
-    const storageRef = ref(storage, filePath);
-    await uploadBytes(storageRef, file);
-    const imageUrl = await getDownloadURL(storageRef);
+    try {
+      // Subir a Firebase Storage
+      const filePath = `posts/${user.username}-${Date.now()}-${file.name}`;
+      const storageRef = ref(storage, filePath);
+      await uploadBytes(storageRef, file);
+      const imageUrl = await getDownloadURL(storageRef);
 
-    // Guardar post en Firestore
-    await addDoc(collection(db, "posts"), {
-      user: user.username,
-      avatar: user.avatar,
-      text,
-      image: imageUrl,
-      created: serverTimestamp(),
-      likes: [],
-      comments: []
-    });
+      // Guardar en Firestore
+      await addDoc(collection(db, "posts"), {
+        user: user.username,
+        avatar: user.avatar,
+        text,
+        image: imageUrl,
+        created: serverTimestamp(),
+        likes: [],
+        comments: []
+      });
 
-    // Limpiar inputs
-    postInput.value = "";
-    fileInput.value = "";
-    uploadBtn.style.display = "none";
-  };
+      // Limpiar
+      postInput.value = "";
+      fileInput.value = "";
+      preview.style.display = "none";
+      uploadBtn.style.display = "none";
 
-  // 🔥 Extender renderPost para mostrar imagen si existe
+    } catch (err) {
+      console.error("Error subiendo imagen:", err);
+      alert("Error al subir la imagen");
+    }
+  });
+
+  // Extender renderPost para mostrar imagen en posts
   const oldRenderPost = renderPost;
   renderPost = function (docSnap) {
     const div = oldRenderPost(docSnap);
