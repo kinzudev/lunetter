@@ -1,544 +1,112 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>lunetter</title>
+  <meta charset="UTF-8">
+  <title>Mini Twitter con Firebase</title>
   <style>
     body {
       margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background-color: #000;
-      color: #e6e6e6;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    /* -------- LOGIN PANEL -------- */
-    #loginPanel {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      font-family: "Segoe UI", sans-serif;
       background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .login-box {
-      background: #111;
-      padding: 30px;
-      border-radius: 12px;
-      width: 300px;
-      text-align: center;
-      border: 1px solid #333;
-    }
-
-    .login-box h2 {
-      margin-bottom: 20px;
-    }
-
-    .login-box input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 8px;
-      background: #222;
       color: #fff;
-      outline: none;
     }
-
-    .login-box button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 8px;
-      background: #1DA1F2;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .error {
-      color: red;
-      font-size: 14px;
-      margin-top: 8px;
-    }
-
-    /* -------- APP -------- */
-    #app {
-      display: none;
-      height: 100vh;
-      display: flex;
-    }
-
-    .sidebar {
-      width: 220px;
-      border-right: 1px solid #333;
-      padding: 20px 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .sidebar button {
-      background: none;
-      border: none;
-      color: #e6e6e6;
-      font-size: 18px;
-      margin: 15px 0;
-      cursor: pointer;
-      transition: 0.2s;
-      width: 100%;
-      text-align: left;
-      padding: 10px 20px;
-      border-radius: 30px;
-    }
-
-    .sidebar button:hover {
-      background-color: #111;
-      color: #1DA1F2;
-    }
-
     .feed {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      overflow-y: auto;
-    }
-
-    .new-post {
-      width: 100%;
       max-width: 600px;
-      background: #000;
-      border-bottom: 1px solid #333;
-      display: flex;
-      padding: 15px;
+      margin: auto;
+      padding: 20px;
     }
-
-    .new-post img {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      margin-right: 10px;
-    }
-
-    .new-post-content {
-      flex: 1;
-    }
-
-    .new-post textarea {
+    textarea {
       width: 100%;
-      background: transparent;
+      background: #111;
       color: #fff;
       border: none;
-      resize: none;
-      font-size: 16px;
-      padding: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
       outline: none;
+      resize: none;
     }
-
-    .new-post button {
+    button {
       margin-top: 10px;
       padding: 8px 16px;
-      background: #1DA1F2;
       border: none;
       border-radius: 20px;
-      color: #fff;
-      font-size: 14px;
+      background: #1DA1F2;
+      color: white;
       cursor: pointer;
-      float: right;
     }
-
     .post {
-      width: 100%;
-      max-width: 600px;
-      background: #000;
-      border-bottom: 1px solid #333;
+      background: #111;
       padding: 15px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .post-header-container {
-      display: flex;
-    }
-
-    .post img {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      margin-right: 10px;
-    }
-
-    .post-content {
-      flex: 1;
-    }
-
-    .post-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-
-    .post-name {
-      font-weight: bold;
-      margin-right: 5px;
-    }
-
-    .post-username {
-      color: #777;
-      font-size: 14px;
-    }
-
-    .post-text {
-      font-size: 15px;
-      line-height: 1.4;
-      margin-bottom: 10px;
-    }
-
-    .post-actions {
-      display: flex;
-      gap: 20px;
-      font-size: 14px;
-      color: #777;
-      cursor: pointer;
-    }
-
-    .post-actions span:hover {
-      color: #1DA1F2;
-    }
-
-    .comments {
-      margin-top: 10px;
-      border-left: 2px solid #333;
-      padding-left: 10px;
-    }
-
-    .comment {
-      display: flex;
-      margin-top: 10px;
-    }
-
-    .comment img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      margin-right: 8px;
-    }
-
-    .comment-content {
-      background: #111;
+      margin-top: 15px;
       border-radius: 10px;
-      padding: 8px 12px;
+      border: 1px solid #333;
     }
-
-    .comment-input {
-      display: flex;
-      margin-top: 10px;
-    }
-
-    .comment-input input {
-      flex: 1;
-      background: #111;
-      border: none;
-      color: #fff;
-      padding: 8px;
-      border-radius: 20px;
-      outline: none;
-    }
-
-    .comment-input button {
-      margin-left: 8px;
-      padding: 6px 12px;
-      background: #1DA1F2;
-      border: none;
-      border-radius: 20px;
-      color: #fff;
-      cursor: pointer;
+    .post b {
+      color: #1DA1F2;
     }
   </style>
 </head>
 <body>
-  <!-- LOGIN PANEL -->
-  <div id="loginPanel">
-    <div class="login-box">
-      <h2>Mini Twitter</h2>
-      <input type="text" id="username" placeholder="Usuario">
-      <input type="password" id="password" placeholder="Contraseña">
-      <button onclick="login()">Login</button>
-      <button onclick="register()">Registrarse</button>
-      <div id="errorMsg" class="error"></div>
-    </div>
+  <div class="feed">
+    <h2>Mini Twitter 🚀</h2>
+    <textarea id="postInput" placeholder="¿Qué está pasando?"></textarea>
+    <button onclick="addPost()">Publicar</button>
+    <div id="posts"></div>
   </div>
 
-  <!-- APP -->
-  <div id="app">
-    <div class="sidebar">
-      <button>Home</button>
-      <button>Explore</button>
-      <button>Notifications</button>
-      <button>Profile</button>
-      <button onclick="logout()">Cerrar sesión</button>
-    </div>
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    <div class="feed">
-      <!-- New post form -->
-      <div class="new-post">
-        <img src="https://i.pravatar.cc/48?img=1" alt="Profile">
-        <div class="new-post-content">
-          <textarea id="postInput" rows="3" placeholder="What's happening?"></textarea>
-          <button onclick="addPost()">Post</button>
-        </div>
-      </div>
-
-      <!-- Posts feed -->
-      <div id="posts"></div>
-    </div>
-  </div>
-
-  <script>
-    // --------- LOGIN/REGISTRO ---------
-    window.onload = function () {
-      const loggedUser = localStorage.getItem("loggedUser");
-      if (loggedUser) {
-        document.getElementById("loginPanel").style.display = "none";
-        document.getElementById("app").style.display = "flex";
-      } else {
-        document.getElementById("loginPanel").style.display = "flex";
-        document.getElementById("app").style.display = "none";
-      }
+    // 🔥 Tu configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBZvsL3zwUsHmTL0QZxQOkWF28_N2FR4L0",
+      authDomain: "lunetter-55d46.firebaseapp.com",
+      projectId: "lunetter-55d46",
+      storageBucket: "lunetter-55d46.firebasestorage.app",
+      messagingSenderId: "798507844928",
+      appId: "1:798507844928:web:20e8a48a66a85ee6c6e6a5",
+      measurementId: "G-46BL2MEZ68"
     };
 
-    function getUsers() {
-      const users = localStorage.getItem("users");
-      return users ? JSON.parse(users) : [];
-    }
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    function saveUsers(users) {
-      localStorage.setItem("users", JSON.stringify(users));
-    }
-
-    function register() {
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const error = document.getElementById("errorMsg");
-
-      if (!username || !password) {
-        error.textContent = "Completa todos los campos.";
-        return;
-      }
-
-      let users = getUsers();
-      if (users.find(u => u.username === username)) {
-        error.textContent = "El usuario ya existe.";
-        return;
-      }
-
-      users.push({ username, password });
-      saveUsers(users);
-
-      error.style.color = "lightgreen";
-      error.textContent = "Registro exitoso. Ahora inicia sesión.";
-    }
-
-    function login() {
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const error = document.getElementById("errorMsg");
-
-      let users = getUsers();
-      let user = users.find(u => u.username === username && u.password === password);
-
-      if (user) {
-        localStorage.setItem("loggedUser", username);
-        document.getElementById("loginPanel").style.display = "none";
-        document.getElementById("app").style.display = "flex";
-        error.textContent = "";
-      } else {
-        error.style.color = "red";
-        error.textContent = "Usuario o contraseña incorrectos.";
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem("loggedUser");
-      document.getElementById("loginPanel").style.display = "flex";
-      document.getElementById("app").style.display = "none";
-    }
-
-    // --------- POSTS (likes y comentarios) ---------
-    function addPost() {
-      const input = document.getElementById('postInput');
+    // Función para publicar un post
+    async function addPost() {
+      const input = document.getElementById("postInput");
       const text = input.value.trim();
-      if (text === '') return;
+      if (!text) return;
 
-      const postContainer = document.createElement('div');
-      postContainer.className = 'post';
+      await addDoc(collection(db, "posts"), {
+        user: "Anon",   // 👈 luego lo conectamos con el login
+        text: text,
+        created: serverTimestamp(),
+        likes: 0
+      });
 
-      const headerContainer = document.createElement('div');
-      headerContainer.className = 'post-header-container';
-
-      const avatar = document.createElement('img');
-      avatar.src = "https://i.pravatar.cc/48?img=" + Math.floor(Math.random() * 70);
-
-      const contentWrapper = document.createElement('div');
-      contentWrapper.className = 'post-content';
-
-      const header = document.createElement('div');
-      header.className = 'post-header';
-
-      const name = document.createElement('span');
-      name.className = 'post-name';
-      name.textContent = localStorage.getItem("loggedUser");
-
-      const username = document.createElement('span');
-      username.className = 'post-username';
-      username.textContent = " @" + localStorage.getItem("loggedUser");
-
-      const content = document.createElement('div');
-      content.className = 'post-text';
-      content.textContent = text;
-
-      header.appendChild(name);
-      header.appendChild(username);
-
-      contentWrapper.appendChild(header);
-      contentWrapper.appendChild(content);
-
-      headerContainer.appendChild(avatar);
-      headerContainer.appendChild(contentWrapper);
-
-      postContainer.appendChild(headerContainer);
-
-      // Post actions
-      const actions = document.createElement('div');
-      actions.className = 'post-actions';
-
-      const likeBtn = document.createElement('span');
-      likeBtn.textContent = "❤️ 0";
-      likeBtn.onclick = () => {
-        let count = parseInt(likeBtn.textContent.replace("❤️", "").trim());
-        likeBtn.textContent = "❤️ " + (count + 1);
-      };
-
-      const commentBtn = document.createElement('span');
-      commentBtn.textContent = "💬 Comment";
-      commentBtn.onclick = () => showCommentBox(postContainer);
-
-      actions.appendChild(likeBtn);
-      actions.appendChild(commentBtn);
-
-      postContainer.appendChild(actions);
-
-      // Comment section
-      const commentsSection = document.createElement('div');
-      commentsSection.className = 'comments';
-      postContainer.appendChild(commentsSection);
-
-      const posts = document.getElementById('posts');
-      posts.insertBefore(postContainer, posts.firstChild);
-
-      input.value = '';
+      input.value = "";
     }
 
-    function showCommentBox(postContainer) {
-      if (postContainer.querySelector('.comment-input')) return;
-
-      const commentBox = document.createElement('div');
-      commentBox.className = 'comment-input';
-
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Write a comment...';
-
-      const button = document.createElement('button');
-      button.textContent = 'Reply';
-      button.onclick = () => {
-        if (input.value.trim() === '') return;
-        addComment(postContainer, input.value);
-        commentBox.remove();
-      };
-
-      commentBox.appendChild(input);
-      commentBox.appendChild(button);
-
-      postContainer.appendChild(commentBox);
-    }
-
-    function addComment(postContainer, text) {
-      const commentsSection = postContainer.querySelector('.comments');
-
-      const comment = document.createElement('div');
-      comment.className = 'comment';
-
-      const avatar = document.createElement('img');
-      avatar.src = "https://i.pravatar.cc/32?img=" + Math.floor(Math.random() * 70);
-
-      const content = document.createElement('div');
-      content.className = 'comment-content';
-      content.textContent = text;
-
-      comment.appendChild(avatar);
-      comment.appendChild(content);
-
-      commentsSection.appendChild(comment);
-    }
-  </script>
-
-  <!-- Añadir Firebase desde CDN -->
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
-
-<script>
-  // Tu configuración de Firebase (la copias desde la consola de Firebase)
-  const firebaseConfig = {
-    apiKey: "AIzaSyBZvsL3zwUsHmTL0QZxQOkWF28_N2FR4L0",
-    authDomain: "lunetter-55d46.firebaseapp.com",
-    projectId: "lunetter-55d46",
-    storageBucket: "lunetter-55d46.firebasestorage.app",
-    messagingSenderId: "798507844928",
-    appId: "1:798507844928:web:20e8a48a66a85ee6c6e6a5"
-  };
-
-  // Inicializar Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-
-  // Guardar post en Firestore
-  async function addPost() {
-    const text = document.getElementById('postInput').value.trim();
-    if (!text) return;
-    await db.collection("posts").add({
-      user: localStorage.getItem("loggedUser"),
-      text: text,
-      likes: 0,
-      created: Date.now()
-    });
-    document.getElementById('postInput').value = "";
-  }
-
-  // Mostrar posts en tiempo real
-  db.collection("posts").orderBy("created","desc").onSnapshot(snapshot => {
+    // Mostrar posts en tiempo real
     const postsDiv = document.getElementById("posts");
-    postsDiv.innerHTML = "";
-    snapshot.forEach(doc => {
-      const post = doc.data();
-      const div = document.createElement("div");
-      div.className = "post";
-      div.innerHTML = `
-        <b>${post.user}</b>: ${post.text} <br>
-        ❤️ ${post.likes}
-      `;
-      postsDiv.appendChild(div);
-    });
-  });
-</script>
+    const q = query(collection(db, "posts"), orderBy("created", "desc"));
 
+    onSnapshot(q, (snapshot) => {
+      postsDiv.innerHTML = "";
+      snapshot.forEach(doc => {
+        const post = doc.data();
+        const div = document.createElement("div");
+        div.className = "post";
+        div.innerHTML = `<b>${post.user}</b>: ${post.text} <br> ❤️ ${post.likes || 0}`;
+        postsDiv.appendChild(div);
+      });
+    });
+
+    // 👇 Hacemos global la función para que el botón la encuentre
+    window.addPost = addPost;
+  </script>
 </body>
 </html>
