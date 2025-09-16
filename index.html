@@ -2,21 +2,53 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mini Twitter con Firebase</title>
+  <title>Lunetter</title>
   <style>
     body {
       margin: 0;
       font-family: "Segoe UI", sans-serif;
       background: #000;
       color: #fff;
+      display: flex;
     }
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      border-right: 1px solid #222;
+      padding: 20px;
+      height: 100vh;
+    }
+    .sidebar a {
+      display: block;
+      margin: 15px 0;
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+    }
+    /* Feed */
     .feed {
+      flex: 1;
       max-width: 600px;
       margin: auto;
       padding: 20px;
+      border-left: 1px solid #222;
+      border-right: 1px solid #222;
+      min-height: 100vh;
     }
-    textarea {
-      width: 100%;
+    .postBox {
+      display: flex;
+      align-items: flex-start;
+      border-bottom: 1px solid #222;
+      padding-bottom: 15px;
+    }
+    .postBox img {
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      margin-right: 10px;
+    }
+    .postBox textarea {
+      flex: 1;
       background: #111;
       color: #fff;
       border: none;
@@ -25,32 +57,55 @@
       outline: none;
       resize: none;
     }
-    button {
-      margin-top: 10px;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 20px;
+    .postBox button {
       background: #1DA1F2;
+      border: none;
       color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
       cursor: pointer;
+      margin-left: 10px;
     }
+    /* Posts */
     .post {
-      background: #111;
+      border-bottom: 1px solid #222;
       padding: 15px;
-      margin-top: 15px;
-      border-radius: 10px;
-      border: 1px solid #333;
+      display: flex;
+      gap: 10px;
     }
-    .post b {
+    .post img {
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+    }
+    .postContent {
+      flex: 1;
+    }
+    .postContent b {
       color: #1DA1F2;
     }
   </style>
 </head>
 <body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <a href="#">Home</a>
+    <a href="#">Explore</a>
+    <a href="#">Notifications</a>
+    <a href="#">Profile</a>
+    <a href="#" onclick="logout()">Cerrar sesión</a>
+  </div>
+
+  <!-- Feed -->
   <div class="feed">
-    <h2>Mini Twitter 🚀</h2>
-    <textarea id="postInput" placeholder="¿Qué está pasando?"></textarea>
-    <button onclick="addPost()">Publicar</button>
+    <!-- Caja para postear -->
+    <div class="postBox">
+      <img src="https://i.pravatar.cc/100" alt="avatar">
+      <textarea id="postInput" placeholder="What's happening?"></textarea>
+      <button onclick="addPost()">Post</button>
+    </div>
+
+    <!-- Lista de posts -->
     <div id="posts"></div>
   </div>
 
@@ -74,17 +129,17 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Función para publicar un post
+    // Función para publicar
     async function addPost() {
       const input = document.getElementById("postInput");
       const text = input.value.trim();
       if (!text) return;
 
       await addDoc(collection(db, "posts"), {
-        user: "Anon",   // 👈 luego lo conectamos con el login
+        user: "Anon", // 👈 luego lo conectamos con el login real
+        avatar: "https://i.pravatar.cc/100",
         text: text,
-        created: serverTimestamp(),
-        likes: 0
+        created: serverTimestamp()
       });
 
       input.value = "";
@@ -100,13 +155,22 @@
         const post = doc.data();
         const div = document.createElement("div");
         div.className = "post";
-        div.innerHTML = `<b>${post.user}</b>: ${post.text} <br> ❤️ ${post.likes || 0}`;
+        div.innerHTML = `
+          <img src="${post.avatar || "https://i.pravatar.cc/100"}" alt="avatar">
+          <div class="postContent">
+            <b>${post.user || "Anon"}</b><br>
+            ${post.text}
+          </div>
+        `;
         postsDiv.appendChild(div);
       });
     });
 
-    // 👇 Hacemos global la función para que el botón la encuentre
+    // Hacer global la función para el botón
     window.addPost = addPost;
+    window.logout = function() {
+      alert("Cerrar sesión (aquí iría la lógica real)");
+    }
   </script>
 </body>
 </html>
