@@ -308,5 +308,26 @@
 
   // Helpful: preload some CSS fonts
   </script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const fileInput = document.querySelector('input[type="file"]');
+  if (fileInput) {
+    // Crear el input para URL
+    const urlInput = document.createElement("input");
+    urlInput.type = "text";
+    urlInput.id = "imageUrlInput";
+    urlInput.placeholder = "Pega aquí la URL de una imagen (opcional)";
+    urlInput.style = "width:100%; margin-top:5px;";
+
+    // Insertar el nuevo input después del fileInput
+    fileInput.parentNode.insertBefore(urlInput, fileInput.nextSibling);
+
+    // Eliminar el input file y su label/texto
+    fileInput.remove();
+  }
+});
+</script>
+
 </body>
 </html>
