@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Lunetter con Avatar Personalizado</title>
+  <title>Lunetter</title>
   <style>
     body { margin:0; font-family:"Segoe UI",sans-serif; background:#000; color:#fff; display:flex; }
     /* Panel de login */
@@ -41,12 +41,10 @@
   <!-- Panel de login -->
   <div id="loginPanel">
     <form id="loginForm">
-      <h2>Iniciar Sesión / Registro</h2>
-      <input type="email" id="email" placeholder="Correo" required>
-      <input type="password" id="password" placeholder="Contraseña" required>
+      <h2>Entrar</h2>
+      <input type="text" id="username" placeholder="Nombre de usuario" required>
       <input type="file" id="avatarFile" accept="image/*">
-      <button type="submit">Entrar</button>
-      <button type="button" id="registerBtn">Registrarse</button>
+      <button type="submit">Ingresar</button>
     </form>
   </div>
 
@@ -76,7 +74,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
     // Configuración Firebase
@@ -92,66 +89,50 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
     const storage = getStorage(app);
 
     let currentUser = null;
 
-    // Login/Register
+    // Login simple con username
     const loginForm = document.getElementById("loginForm");
-    const registerBtn = document.getElementById("registerBtn");
     const avatarFileInput = document.getElementById("avatarFile");
 
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        alert("Error: " + err.message);
-      }
-    });
+      const username = document.getElementById("username").value.trim();
+      if (!username) return;
 
-    registerBtn.addEventListener("click", async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      let avatarURL = "https://i.pravatar.cc/100?u=" + username;
       const file = avatarFileInput.files[0];
-      try {
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+      if (file) {
+        const storageRef = ref(storage, "avatars/" + username);
+        await uploadBytes(storageRef, file);
+        avatarURL = await getDownloadURL(storageRef);
+      }
 
-        let photoURL = "https://i.pravatar.cc/100?u=" + email;
-        if (file) {
-          const storageRef = ref(storage, "avatars/" + userCred.user.uid);
-          await uploadBytes(storageRef, file);
-          photoURL = await getDownloadURL(storageRef);
-        }
+      // Guardar sesión local
+      currentUser = { username, avatar: avatarURL };
+      localStorage.setItem("sessionUser", JSON.stringify(currentUser));
 
-        await updateProfile(userCred.user, {
-          displayName: email.split("@")[0],
-          photoURL: photoURL
-        });
-      } catch (err) {
-        alert("Error: " + err.message);
+      startApp();
+    });
+
+    // Restaurar sesión
+    window.addEventListener("load", () => {
+      const savedUser = localStorage.getItem("sessionUser");
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        startApp();
       }
     });
 
-    // Estado de sesión
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById("loginPanel").style.display = "none";
-        document.querySelector(".sidebar").style.display = "block";
-        document.querySelector(".feed").style.display = "block";
-        document.getElementById("userAvatar").src = user.photoURL || "https://i.pravatar.cc/100";
-        renderPosts();
-      } else {
-        currentUser = null;
-        document.getElementById("loginPanel").style.display = "flex";
-        document.querySelector(".sidebar").style.display = "none";
-        document.querySelector(".feed").style.display = "none";
-      }
-    });
+    function startApp() {
+      document.getElementById("loginPanel").style.display = "none";
+      document.querySelector(".sidebar").style.display = "block";
+      document.querySelector(".feed").style.display = "block";
+      document.getElementById("userAvatar").src = currentUser.avatar;
+      renderPosts();
+    }
 
     // Publicar
     async function addPost() {
@@ -160,8 +141,8 @@
       if (!text || !currentUser) return;
 
       await addDoc(collection(db, "posts"), {
-        user: currentUser.displayName || "Anon",
-        avatar: currentUser.photoURL || "https://i.pravatar.cc/100",
+        user: currentUser.username,
+        avatar: currentUser.avatar,
         text: text,
         created: serverTimestamp()
       });
@@ -172,8 +153,8 @@
     // Like
     async function toggleLike(postId) {
       if (!currentUser) return;
-      const likeRef = doc(db, "posts", postId, "likes", currentUser.uid);
-      await setDoc(likeRef, { user: currentUser.displayName }, { merge: true });
+      const likeRef = doc(db, "posts", postId, "likes", currentUser.username);
+      await setDoc(likeRef, { user: currentUser.username }, { merge: true });
     }
 
     // Comentar
@@ -184,7 +165,7 @@
       if (!text) return;
 
       await addDoc(collection(db, "posts", postId, "comments"), {
-        user: currentUser.displayName,
+        user: currentUser.username,
         text: text,
         created: serverTimestamp()
       });
@@ -252,7 +233,9 @@
 
     // Logout
     window.logout = async function() {
-      await signOut(auth);
+      localStorage.removeItem("sessionUser");
+      currentUser = null;
+      location.reload();
     }
 
     // Exponer funciones globales
