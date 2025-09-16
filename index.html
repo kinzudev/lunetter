@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>lunetter - UPDATE</title>
+  <title>lunetter</title>
   <!-- Tailwind CDN (for quick prototyping) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -659,33 +659,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // Sobrescribimos la función de like para que solo cuente una vez
   async function handleLike(postId) {
-    if (!auth.currentUser) return alert("Debes iniciar sesión para dar like");
+    if (!auth.currentUser) {
+      return alert("Debes iniciar sesión para dar like");
+    }
     const uid = auth.currentUser.uid;
 
+    // Documento de like único por usuario
     const likeRef = db.collection("posts").doc(postId).collection("likes").doc(uid);
     const likeDoc = await likeRef.get();
 
     if (likeDoc.exists) {
-      // Ya dio like → no permitir más
-      console.log("Ya diste like a este comentario.");
+      // Ya dio like → nunca más podrá darle
+      alert("Ya diste like a este post.");
       return;
     }
 
-    // Registrar el like
-    await likeRef.set({
-      uid: uid,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    try {
+      // Guardar registro de que este usuario ya dio like
+      await likeRef.set({
+        uid: uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
 
-    // Incrementar contador
-    await db.collection("posts").doc(postId).update({
-      likesCount: firebase.firestore.FieldValue.increment(1)
-    });
+      // Incrementar contador en el post
+      await db.collection("posts").doc(postId).update({
+        likes: firebase.firestore.FieldValue.increment(1)
+      });
+    } catch (err) {
+      console.error("Error al dar like:", err);
+    }
   }
 
-  // Interceptamos los botones de like
+  // Escucha global para todos los botones de like
   window.addEventListener("click", (e) => {
     if (e.target && e.target.classList.contains("like-btn")) {
       const postId = e.target.dataset.postId;
