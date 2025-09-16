@@ -2,158 +2,110 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Lunetter</title>
+  <title>Pekora Forum</title>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"></script>
   <style>
     body {
-      margin: 0;
+      background: #000;
+      color: #fff;
       font-family: Arial, sans-serif;
-      background: #000;
-      color: white;
       display: flex;
-    }
-    .sidebar {
-      width: 220px;
-      background: #000;
-      border-right: 1px solid #222;
+      justify-content: center;
       padding: 20px;
-      height: 100vh;
     }
-    .sidebar a {
-      display: block;
-      padding: 12px;
-      color: white;
-      text-decoration: none;
-      font-size: 18px;
-    }
-    .sidebar a:hover {
-      background: #111;
-      border-radius: 10px;
-    }
-    .main {
-      flex: 1;
-      padding: 20px;
+    .container {
+      width: 600px;
     }
     .post-box {
       display: flex;
-      align-items: flex-start;
       gap: 10px;
       padding: 10px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #222;
+    }
+    .post-box img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
     }
     .post-box textarea {
       flex: 1;
-      background: black;
-      border: 1px solid #333;
-      color: white;
-      border-radius: 10px;
-      padding: 10px;
+      background: #000;
+      border: none;
+      color: #fff;
+      resize: none;
+      font-size: 16px;
     }
     .post-box button {
-      background: #1DA1F2;
+      background: #1d9bf0;
+      color: #fff;
       border: none;
-      color: white;
-      padding: 10px 15px;
       border-radius: 20px;
+      padding: 6px 14px;
       cursor: pointer;
     }
     .post {
-      border-bottom: 1px solid #333;
-      padding: 15px;
       display: flex;
       gap: 10px;
+      padding: 12px;
+      border-bottom: 1px solid #222;
     }
-    .post img {
+    .post img.avatar {
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
     }
-    .post strong {
-      color: #1DA1F2;
+    .post-content {
+      flex: 1;
     }
-    .comment {
-      margin-left: 50px;
+    .post-header {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .post-text {
+      margin-bottom: 8px;
+      white-space: pre-wrap;
+    }
+    .post img.post-image {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 8px;
+    }
+    .post-actions {
+      display: flex;
+      gap: 30px;
+      margin-top: 6px;
       font-size: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .comment button {
-      background: none;
-      border: none;
-      color: red;
+      color: #8899a6;
       cursor: pointer;
     }
-    .auth-container {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .auth-box {
-      background: #111;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
-      text-align: center;
-    }
-    .auth-box input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #333;
-      border-radius: 6px;
-      background: #000;
-      color: white;
-    }
-    .auth-box button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      background: #1DA1F2;
-      border: none;
-      color: white;
-      border-radius: 20px;
-      cursor: pointer;
+    .post-actions span:hover {
+      color: #1d9bf0;
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <a href="#">Home</a>
-    <a href="#">Explore</a>
-    <a href="#">Notifications</a>
-    <a href="#">Profile</a>
-    <a href="#" id="logoutBtn">Cerrar sesión</a>
-  </div>
-
-  <div class="main">
+  <div class="container">
+    <!-- Caja para publicar -->
     <div class="post-box">
-      <img id="userAvatar" src="https://i.pravatar.cc/40" width="40" height="40">
-      <textarea id="postInput" placeholder="What's happening?"></textarea>
+      <img src="https://i.pravatar.cc/50" id="userAvatar">
+      <textarea id="postInput" rows="2" placeholder="¿Qué está pasando?"></textarea>
       <button id="postBtn">Post</button>
+      <button id="postImageBtn">Post Image</button>
+      <input type="file" id="fileInput" accept="image/*" style="display:none">
     </div>
-    <div id="posts"></div>
-  </div>
 
-  <!-- Pantalla de login/register -->
-  <div class="auth-container" id="authContainer">
-    <div class="auth-box">
-      <h2 id="authTitle">Registrar</h2>
-      <input type="text" id="usernameInput" placeholder="Nombre de usuario">
-      <input type="password" id="passwordInput" placeholder="Contraseña">
-      <button id="registerBtn">Registrar</button>
-      <button id="loginBtn">Iniciar Sesión</button>
-    </div>
+    <!-- Lista de posts -->
+    <div id="posts"></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getFirestore, collection, doc, addDoc, onSnapshot, orderBy, query,
-      serverTimestamp, updateDoc, arrayUnion, deleteDoc, getDocs, setDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    // --- Tu config ---
+    // === Config Firebase ===
     const firebaseConfig = {
       apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
       authDomain: "pekora-forum.firebaseapp.com",
@@ -165,300 +117,81 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
-    // Helpers
-    function getUser() {
-      const u = localStorage.getItem("sessionUser");
-      return u ? JSON.parse(u) : null;
-    }
-    function saveUser(user) {
-      localStorage.setItem("sessionUser", JSON.stringify(user));
-    }
-    function escapeHtml(str) {
-      if (!str) return "";
-      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-    }
-    function genId() { return `${Date.now()}-${Math.random().toString(36).slice(2,9)}`; }
-
-    // Auth
-    const authContainer = document.getElementById("authContainer");
-    const registerBtn = document.getElementById("registerBtn");
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    async function userExists(username) {
-      const snap = await getDocs(collection(db,"users"));
-      let found = false;
-      snap.forEach(d => {
-        if(d.id === username) found = true;
-      });
-      return found;
-    }
-
-    registerBtn.addEventListener("click", async () => {
-      const username = document.getElementById("usernameInput").value.trim();
-      const password = document.getElementById("passwordInput").value.trim();
-      if(!username || !password) return alert("Completa los campos");
-
-      if(await userExists(username)) {
-        return alert("Usuario ya existe");
-      }
-      await setDoc(doc(db,"users",username), { username, password, avatar:`https://i.pravatar.cc/150?u=${username}` });
-      saveUser({username, avatar:`https://i.pravatar.cc/150?u=${username}`});
-      authContainer.style.display="none";
-    });
-
-    loginBtn.addEventListener("click", async () => {
-      const username = document.getElementById("usernameInput").value.trim();
-      const password = document.getElementById("passwordInput").value.trim();
-      if(!username || !password) return alert("Completa los campos");
-
-      const snap = await getDocs(collection(db,"users"));
-      let ok = false, avatar="";
-      snap.forEach(d=>{
-        if(d.id===username && d.data().password===password){ ok=true; avatar=d.data().avatar; }
-      });
-      if(!ok) return alert("Credenciales incorrectas");
-      saveUser({username, avatar});
-      authContainer.style.display="none";
-    });
-
-    logoutBtn.addEventListener("click", ()=>{
-      localStorage.removeItem("sessionUser");
-      location.reload();
-    });
-
-    // Mostrar login si no hay sesión
-    if(getUser()) authContainer.style.display="none";
-
-    // Posts
-    const postBtn = document.getElementById("postBtn");
-    const postInput = document.getElementById("postInput");
     const postsContainer = document.getElementById("posts");
+    const postBtn = document.getElementById("postBtn");
+    const postImageBtn = document.getElementById("postImageBtn");
+    const postInput = document.getElementById("postInput");
+    const fileInput = document.getElementById("fileInput");
 
-    postBtn.addEventListener("click", async ()=>{
-      const user=getUser();
-      if(!user) return alert("Inicia sesión");
-      const text=postInput.value.trim();
-      if(!text) return;
-      await addDoc(collection(db,"posts"),{
-        user:user.username,
-        avatar:user.avatar,
-        text,
-        created:serverTimestamp(),
-        likes:[],
-        comments:[]
-      });
-      postInput.value="";
-    });
+    // Usuario simulado (reemplazar por auth)
+    const user = {
+      username: "lunetter",
+      avatar: "https://i.pravatar.cc/150"
+    };
 
-    function renderPost(docSnap){
-      const data=docSnap.data();
-      const postId=docSnap.id;
-      const div=document.createElement("div");
-      div.className="post";
-      div.innerHTML=`
-        <img src="${data.avatar}" width="40" height="40">
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:6px">
-            <strong>${escapeHtml(data.user)}</strong>
-            <span style="color:#999">@${escapeHtml(data.user)}</span>
-            <div style="flex:1"></div>
-            ${(getUser() && getUser().username===data.user)?'<button class="delPostBtn">🗑️</button>':""}
-          </div>
-          <div style="margin:6px 0">${escapeHtml(data.text)}</div>
-          <div>
-            <button class="likeBtn">❤️ ${data.likes.length}</button>
-            <button class="toggleCommentsBtn">💬 ${data.comments.length}</button>
-          </div>
-          <div class="comments" style="display:none"></div>
-          <div style="display:flex;gap:4px;margin-top:6px">
-            <input type="text" class="commentInput" placeholder="Escribe un comentario..." style="flex:1">
-            <button class="sendCommentBtn">Enviar</button>
-          </div>
-        </div>`;
-      const commentsDiv=div.querySelector(".comments");
-      function renderComments(){
-        commentsDiv.innerHTML="";
-        data.comments.forEach(c=>{
-          const cd=document.createElement("div");
-          cd.className="comment";
-          cd.innerHTML=`<span><b>${escapeHtml(c.user)}</b>: ${escapeHtml(c.text)}</span>`;
-          if(getUser() && c.user===getUser().username){
-            const btn=document.createElement("button");
-            btn.textContent="🗑️";
-            btn.onclick=async()=>{
-              const updated=data.comments.filter(cc=>cc.id!==c.id);
-              await updateDoc(doc(db,"posts",postId),{comments:updated});
-            };
-            cd.appendChild(btn);
-          }
-          commentsDiv.appendChild(cd);
-        });
-      }
-      renderComments();
+    // === Publicar texto ===
+    postBtn.addEventListener("click", async () => {
+      const text = postInput.value.trim();
+      if (!text) return;
 
-      div.querySelector(".toggleCommentsBtn").onclick=()=>{
-        commentsDiv.style.display=commentsDiv.style.display==="none"?"block":"none";
-        renderComments();
-      };
-      div.querySelector(".sendCommentBtn").onclick=async()=>{
-        const input=div.querySelector(".commentInput");
-        const txt=input.value.trim();
-        if(!txt) return;
-        if(!getUser()) return alert("Inicia sesión");
-        const newComment={id:genId(), user:getUser().username, text:txt};
-        await updateDoc(doc(db,"posts",postId),{comments:[...data.comments,newComment]});
-        input.value="";
-      };
-      if(div.querySelector(".delPostBtn")){
-        div.querySelector(".delPostBtn").onclick=async()=>{
-          await deleteDoc(doc(db,"posts",postId));
-        };
-      }
-      div.querySelector(".likeBtn").onclick=async()=>{
-        if(!getUser()) return alert("Inicia sesión");
-        if(!data.likes.includes(getUser().username)){
-          await updateDoc(doc(db,"posts",postId),{likes:[...data.likes,getUser().username]});
-        }
-      };
-      return div;
-    }
-
-    const q=query(collection(db,"posts"),orderBy("created","desc"));
-    onSnapshot(q,snap=>{
-      postsContainer.innerHTML="";
-      snap.forEach(d=>{
-        postsContainer.appendChild(renderPost(d));
-      });
-    });
-  </script>
-
-<script type="module">
-  import { getStorage, ref, uploadBytes, getDownloadURL } 
-    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-  import { collection, addDoc, serverTimestamp } 
-    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { db } from "./firebase-init.js";
-  import { getUser } from "./auth.js";
-
-  const storage = getStorage();
-
-  const postBox = document.querySelector(".post-box");
-  const postBtn = document.getElementById("postBtn");
-  const postInput = document.getElementById("postInput");
-
-  // === Crear input de imagen + botón "Post Image" ===
-  const fileInput = document.createElement("input");
-  fileInput.type = "file";
-  fileInput.accept = "image/*";
-  fileInput.style.display = "none"; // oculto, lo abrimos con el botón
-  postBox.appendChild(fileInput);
-
-  const preview = document.createElement("img");
-  preview.style.maxWidth = "250px";
-  preview.style.borderRadius = "10px";
-  preview.style.marginTop = "10px";
-  preview.style.display = "none";
-  postBox.appendChild(preview);
-
-  const postImageBtn = document.createElement("button");
-  postImageBtn.innerText = "Post Image";
-  postImageBtn.style.marginTop = "10px";
-  postImageBtn.style.padding = "6px 12px";
-  postImageBtn.style.background = "#1d9bf0";
-  postImageBtn.style.color = "#fff";
-  postImageBtn.style.border = "none";
-  postImageBtn.style.borderRadius = "20px";
-  postImageBtn.style.cursor = "pointer";
-  postBox.appendChild(postImageBtn);
-
-  // === Publicar texto normal ===
-  postBtn.addEventListener("click", async () => {
-    const user = getUser();
-    if (!user) return alert("Inicia sesión primero");
-
-    const text = postInput.value.trim();
-    if (!text) return alert("Escribe algo primero");
-
-    try {
       await addDoc(collection(db, "posts"), {
         user: user.username,
         avatar: user.avatar,
         text,
         image: null,
-        created: serverTimestamp(),
-        likes: [],
-        comments: []
+        created: serverTimestamp()
       });
 
       postInput.value = "";
-    } catch (err) {
-      console.error("Error publicando texto:", err);
-      alert("Error al publicar el post");
-    }
-  });
+    });
 
-  // === Seleccionar imagen ===
-  postImageBtn.addEventListener("click", () => {
-    fileInput.click();
-  });
+    // === Publicar imagen ===
+    postImageBtn.addEventListener("click", () => fileInput.click());
 
-  fileInput.addEventListener("change", async () => {
-    if (fileInput.files.length > 0) {
-      preview.src = URL.createObjectURL(fileInput.files[0]);
-      preview.style.display = "block";
-
-      const confirmUpload = confirm("¿Quieres publicar esta imagen?");
-      if (!confirmUpload) return;
-
-      const user = getUser();
-      if (!user) return alert("Inicia sesión primero");
-
+    fileInput.addEventListener("change", async () => {
+      if (fileInput.files.length === 0) return;
       const file = fileInput.files[0];
-      try {
-        const filePath = `posts/${user.username}-${Date.now()}-${file.name}`;
-        const storageRef = ref(storage, filePath);
-        await uploadBytes(storageRef, file);
-        const imageUrl = await getDownloadURL(storageRef);
+      const storageRef = ref(storage, "posts/" + Date.now() + "-" + file.name);
+      await uploadBytes(storageRef, file);
+      const imageUrl = await getDownloadURL(storageRef);
 
-        await addDoc(collection(db, "posts"), {
-          user: user.username,
-          avatar: user.avatar,
-          text: "",
-          image: imageUrl,
-          created: serverTimestamp(),
-          likes: [],
-          comments: []
-        });
+      await addDoc(collection(db, "posts"), {
+        user: user.username,
+        avatar: user.avatar,
+        text: postInput.value.trim(),
+        image: imageUrl,
+        created: serverTimestamp()
+      });
 
-        fileInput.value = "";
-        preview.style.display = "none";
-      } catch (err) {
-        console.error("Error publicando imagen:", err);
-        alert("Error al publicar la imagen");
-      }
-    }
-  });
+      postInput.value = "";
+      fileInput.value = "";
+    });
 
-  // === Render posts con imágenes ===
-  const oldRenderPost = renderPost;
-  renderPost = function (docSnap) {
-    const div = oldRenderPost(docSnap);
-    const data = docSnap.data();
-
-    if (data.image) {
-      const img = document.createElement("img");
-      img.src = data.image;
-      img.style.maxWidth = "100%";
-      img.style.borderRadius = "10px";
-      img.style.marginTop = "8px";
-      div.querySelector("div[style*='flex:1']").appendChild(img);
-    }
-
-    return div;
-  };
-</script>
-
+    // === Mostrar posts en tiempo real ===
+    const q = query(collection(db, "posts"), orderBy("created", "desc"));
+    onSnapshot(q, (snapshot) => {
+      postsContainer.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "post";
+        div.innerHTML = `
+          <img src="${data.avatar}" class="avatar">
+          <div class="post-content">
+            <div class="post-header">${data.user}</div>
+            <div class="post-text">${data.text || ""}</div>
+            ${data.image ? `<img src="${data.image}" class="post-image">` : ""}
+            <div class="post-actions">
+              <span>💬 0</span>
+              <span>❤️ 0</span>
+            </div>
+          </div>
+        `;
+        postsContainer.appendChild(div);
+      });
+    });
+  </script>
 </body>
 </html>
