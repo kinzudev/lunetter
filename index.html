@@ -1,398 +1,337 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lunetter1</title>
+  <meta charset="UTF-8">
+  <title>Lunetter</title>
   <style>
-    body { margin:0; font-family:Arial, sans-serif; background:#000; color:#fff; }
-    .sidebar { width:220px; background:#000; color:#fff; height:100vh; float:left; border-right:1px solid #222; padding:20px; }
-    .sidebar a { display:block; margin:20px 0; color:#fff; text-decoration:none; font-size:18px; }
-    .main { margin-left:240px; padding:20px; }
-    .post-box { display:flex; align-items:center; gap:10px; margin-bottom:20px; }
-    .post-box textarea { flex:1; background:#000; border:none; border-bottom:1px solid #333; color:#fff; padding:10px; resize:none; }
-    .post-box button { background:#1da1f2; border:none; padding:8px 16px; border-radius:20px; color:#fff; cursor:pointer; }
-    .post { border-bottom:1px solid #333; padding:15px 0; display:flex; gap:10px; }
-    .post img { width:40px; height:40px; border-radius:50%; }
-    .post .user { font-weight:bold; margin-bottom:5px; }
-    .actions { margin-top:5px; display:flex; gap:10px; }
-    .actions button { background:none; border:none; color:#1da1f2; cursor:pointer; }
-    .comments { margin-top:10px; padding-left:50px; }
-    .comment { font-size:14px; border-bottom:1px solid #222; padding:5px 0; }
-    #auth { position:fixed; top:0; left:0; width:100%; height:100%; background:#000; display:flex; justify-content:center; align-items:center; }
-    #auth form { background:#111; padding:30px; border-radius:10px; display:flex; flex-direction:column; gap:15px; width:300px; }
-    #auth input { padding:10px; border:none; border-radius:5px; }
-    #auth button { padding:10px; background:#1da1f2; border:none; border-radius:5px; color:#fff; cursor:pointer; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: white;
+      display: flex;
+    }
+    .sidebar {
+      width: 220px;
+      background: #000;
+      border-right: 1px solid #222;
+      padding: 20px;
+      height: 100vh;
+    }
+    .sidebar a {
+      display: block;
+      padding: 12px;
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+    }
+    .sidebar a:hover {
+      background: #111;
+      border-radius: 10px;
+    }
+    .main {
+      flex: 1;
+      padding: 20px;
+    }
+    .post-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px;
+      border-bottom: 1px solid #333;
+    }
+    .post-box textarea {
+      flex: 1;
+      background: black;
+      border: 1px solid #333;
+      color: white;
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .post-box button {
+      background: #1DA1F2;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    .post {
+      border-bottom: 1px solid #333;
+      padding: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    .post img {
+      border-radius: 50%;
+    }
+    .post strong {
+      color: #1DA1F2;
+    }
+    .comment {
+      margin-left: 50px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .comment button {
+      background: none;
+      border: none;
+      color: red;
+      cursor: pointer;
+    }
+    .auth-container {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-box {
+      background: #111;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+    .auth-box input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background: #000;
+      color: white;
+    }
+    .auth-box button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #1DA1F2;
+      border: none;
+      color: white;
+      border-radius: 20px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-
-<div id="auth">
-  <!-- Registro -->
-  <form id="registerForm">
-    <h2>Registro</h2>
-    <input type="text" id="regUsername" placeholder="Nombre de usuario" required />
-    <input type="password" id="regPassword" placeholder="Contraseña" required />
-    <button type="submit">Registrar</button>
-    <button type="button" id="toLogin">Iniciar sesión</button>
-    <div id="authError" style="color:red;"></div>
-  </form>
-
-  <!-- Login -->
-  <form id="loginForm" style="display:none;">
-    <h2>Iniciar sesión</h2>
-    <input type="text" id="loginUsername" placeholder="Nombre de usuario" required />
-    <input type="password" id="loginPassword" placeholder="Contraseña" required />
-    <button type="submit">Entrar</button>
-    <button type="button" id="toRegister">Registrarse</button>
-    <div id="authErrorLogin" style="color:red;"></div>
-  </form>
-</div>
-
-<div class="sidebar" id="sidebar" style="display:none;">
-  <a href="#">Home</a>
-  <a href="#">Explore</a>
-  <a href="#">Notifications</a>
-  <a href="#">Profile</a>
-  <a href="#" id="logoutBtn">Cerrar sesión</a>
-</div>
-
-<div class="main" id="main" style="display:none;">
-  <div class="post-box">
-    <img id="currentAvatar" src="" alt="avatar" />
-    <textarea id="postText" placeholder="¿Qué está pasando?"></textarea>
-    <button id="postBtn">Postear</button>
+  <div class="sidebar">
+    <a href="#">Home</a>
+    <a href="#">Explore</a>
+    <a href="#">Notifications</a>
+    <a href="#">Profile</a>
+    <a href="#" id="logoutBtn">Cerrar sesión</a>
   </div>
-  <div id="feed"></div>
-</div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, doc, setDoc, getDoc, addDoc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <div class="main">
+    <div class="post-box">
+      <img id="userAvatar" src="https://i.pravatar.cc/40" width="40" height="40">
+      <textarea id="postInput" placeholder="What's happening?"></textarea>
+      <button id="postBtn">Post</button>
+    </div>
+    <div id="posts"></div>
+  </div>
 
-  // ✅ Tu nuevo FirebaseConfig
-  const firebaseConfig = {
-    apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
-    authDomain: "pekora-forum.firebaseapp.com",
-    projectId: "pekora-forum",
-    storageBucket: "pekora-forum.firebasestorage.app",
-    messagingSenderId: "161910967859",
-    appId: "1:161910967859:web:6a28cecaae74b9b7e9dd46",
-    measurementId: "G-BPBTW5KBRK"
-  };
+  <!-- Pantalla de login/register -->
+  <div class="auth-container" id="authContainer">
+    <div class="auth-box">
+      <h2 id="authTitle">Registrar</h2>
+      <input type="text" id="usernameInput" placeholder="Nombre de usuario">
+      <input type="password" id="passwordInput" placeholder="Contraseña">
+      <button id="registerBtn">Registrar</button>
+      <button id="loginBtn">Iniciar Sesión</button>
+    </div>
+  </div>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore, collection, doc, addDoc, onSnapshot, orderBy, query,
+      serverTimestamp, updateDoc, arrayUnion, deleteDoc, getDocs, setDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // utilidades
-  function randomAvatar() {
-    return `https://i.pravatar.cc/150?u=${Math.floor(Math.random()*10000)}`;
-  }
-  function saveSession(user) { localStorage.setItem("user", JSON.stringify(user)); }
-  function getSession() { return JSON.parse(localStorage.getItem("user")); }
-  function clearSession() { localStorage.removeItem("user"); }
+    // --- Tu config ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
+      authDomain: "pekora-forum.firebaseapp.com",
+      projectId: "pekora-forum",
+      storageBucket: "pekora-forum.firebasestorage.app",
+      messagingSenderId: "161910967859",
+      appId: "1:161910967859:web:6a28cecaae74b9b7e9dd46",
+      measurementId: "G-BPBTW5KBRK"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  // Registro
-  async function register(username, password) {
-    const userRef = doc(db, "users", username);
-    const snap = await getDoc(userRef);
-    if (snap.exists()) throw new Error("Usuario ya existe");
-    const avatar = randomAvatar();
-    await setDoc(userRef, { username, password, avatar, createdAt: serverTimestamp() });
-    return { username, avatar };
-  }
+    // Helpers
+    function getUser() {
+      const u = localStorage.getItem("sessionUser");
+      return u ? JSON.parse(u) : null;
+    }
+    function saveUser(user) {
+      localStorage.setItem("sessionUser", JSON.stringify(user));
+    }
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+    function genId() { return `${Date.now()}-${Math.random().toString(36).slice(2,9)}`; }
 
-  // Login
-  async function login(username, password) {
-    const userRef = doc(db, "users", username);
-    const snap = await getDoc(userRef);
-    if (!snap.exists()) throw new Error("Usuario no encontrado");
-    const data = snap.data();
-    if (data.password !== password) throw new Error("Contraseña incorrecta");
-    return { username: data.username, avatar: data.avatar };
-  }
+    // Auth
+    const authContainer = document.getElementById("authContainer");
+    const registerBtn = document.getElementById("registerBtn");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-  // Mostrar app
-  function showApp(user) {
-    document.getElementById("auth").style.display = "none";
-    document.getElementById("main").style.display = "block";
-    document.getElementById("sidebar").style.display = "block";
-    document.getElementById("currentAvatar").src = user.avatar;
-    saveSession(user);
-    loadPosts();
-  }
-
-  // Render posts
-  function renderPost(docSnap, currentUser) {
-    const data = docSnap.data();
-    const div = document.createElement("div");
-    div.className = "post";
-    div.innerHTML = `
-      <img src="${data.avatar}" />
-      <div style="flex:1;">
-        <div class="user">${data.user}</div>
-        <div>${data.text}</div>
-        <div class="actions">
-          <button class="likeBtn">❤️ ${data.likes ? data.likes.length : 0}</button>
-          <button class="commentBtn">💬 ${data.comments ? data.comments.length : 0}</button>
-        </div>
-        <div class="comments"></div>
-        <div class="comment-box" style="margin-top:5px;">
-          <input type="text" class="commentInput" placeholder="Escribe un comentario..." style="width:80%; padding:5px;" />
-          <button class="sendComment">Enviar</button>
-        </div>
-      </div>
-    `;
-
-    // Like
-    const likeBtn = div.querySelector(".likeBtn");
-    likeBtn.addEventListener("click", async () => {
-      const ref = doc(db, "posts", docSnap.id);
-      await updateDoc(ref, { likes: arrayUnion(currentUser.username) });
-    });
-
-    // Comentarios
-    const sendComment = div.querySelector(".sendComment");
-    sendComment.addEventListener("click", async () => {
-      const input = div.querySelector(".commentInput");
-      if (input.value.trim() !== "") {
-        const ref = doc(db, "posts", docSnap.id);
-        await updateDoc(ref, { comments: arrayUnion({ user: currentUser.username, text: input.value }) });
-        input.value = "";
-      }
-    });
-
-    const commentsDiv = div.querySelector(".comments");
-    if (data.comments) {
-      commentsDiv.innerHTML = data.comments.map(c => `<div class="comment"><b>${c.user}:</b> ${c.text}</div>`).join("");
+    async function userExists(username) {
+      const snap = await getDocs(collection(db,"users"));
+      let found = false;
+      snap.forEach(d => {
+        if(d.id === username) found = true;
+      });
+      return found;
     }
 
-    return div;
-  }
+    registerBtn.addEventListener("click", async () => {
+      const username = document.getElementById("usernameInput").value.trim();
+      const password = document.getElementById("passwordInput").value.trim();
+      if(!username || !password) return alert("Completa los campos");
 
-  // Cargar posts
-  function loadPosts() {
-    const currentUser = getSession();
-    const q = query(collection(db, "posts"), orderBy("created", "desc"));
-    onSnapshot(q, (snapshot) => {
-      const feed = document.getElementById("feed");
-      feed.innerHTML = "";
-      snapshot.forEach((docSnap) => {
-        feed.appendChild(renderPost(docSnap, currentUser));
+      if(await userExists(username)) {
+        return alert("Usuario ya existe");
+      }
+      await setDoc(doc(db,"users",username), { username, password, avatar:`https://i.pravatar.cc/150?u=${username}` });
+      saveUser({username, avatar:`https://i.pravatar.cc/150?u=${username}`});
+      authContainer.style.display="none";
+    });
+
+    loginBtn.addEventListener("click", async () => {
+      const username = document.getElementById("usernameInput").value.trim();
+      const password = document.getElementById("passwordInput").value.trim();
+      if(!username || !password) return alert("Completa los campos");
+
+      const snap = await getDocs(collection(db,"users"));
+      let ok = false, avatar="";
+      snap.forEach(d=>{
+        if(d.id===username && d.data().password===password){ ok=true; avatar=d.data().avatar; }
+      });
+      if(!ok) return alert("Credenciales incorrectas");
+      saveUser({username, avatar});
+      authContainer.style.display="none";
+    });
+
+    logoutBtn.addEventListener("click", ()=>{
+      localStorage.removeItem("sessionUser");
+      location.reload();
+    });
+
+    // Mostrar login si no hay sesión
+    if(getUser()) authContainer.style.display="none";
+
+    // Posts
+    const postBtn = document.getElementById("postBtn");
+    const postInput = document.getElementById("postInput");
+    const postsContainer = document.getElementById("posts");
+
+    postBtn.addEventListener("click", async ()=>{
+      const user=getUser();
+      if(!user) return alert("Inicia sesión");
+      const text=postInput.value.trim();
+      if(!text) return;
+      await addDoc(collection(db,"posts"),{
+        user:user.username,
+        avatar:user.avatar,
+        text,
+        created:serverTimestamp(),
+        likes:[],
+        comments:[]
+      });
+      postInput.value="";
+    });
+
+    function renderPost(docSnap){
+      const data=docSnap.data();
+      const postId=docSnap.id;
+      const div=document.createElement("div");
+      div.className="post";
+      div.innerHTML=`
+        <img src="${data.avatar}" width="40" height="40">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px">
+            <strong>${escapeHtml(data.user)}</strong>
+            <span style="color:#999">@${escapeHtml(data.user)}</span>
+            <div style="flex:1"></div>
+            ${(getUser() && getUser().username===data.user)?'<button class="delPostBtn">🗑️</button>':""}
+          </div>
+          <div style="margin:6px 0">${escapeHtml(data.text)}</div>
+          <div>
+            <button class="likeBtn">❤️ ${data.likes.length}</button>
+            <button class="toggleCommentsBtn">💬 ${data.comments.length}</button>
+          </div>
+          <div class="comments" style="display:none"></div>
+          <div style="display:flex;gap:4px;margin-top:6px">
+            <input type="text" class="commentInput" placeholder="Escribe un comentario..." style="flex:1">
+            <button class="sendCommentBtn">Enviar</button>
+          </div>
+        </div>`;
+      const commentsDiv=div.querySelector(".comments");
+      function renderComments(){
+        commentsDiv.innerHTML="";
+        data.comments.forEach(c=>{
+          const cd=document.createElement("div");
+          cd.className="comment";
+          cd.innerHTML=`<span><b>${escapeHtml(c.user)}</b>: ${escapeHtml(c.text)}</span>`;
+          if(getUser() && c.user===getUser().username){
+            const btn=document.createElement("button");
+            btn.textContent="🗑️";
+            btn.onclick=async()=>{
+              const updated=data.comments.filter(cc=>cc.id!==c.id);
+              await updateDoc(doc(db,"posts",postId),{comments:updated});
+            };
+            cd.appendChild(btn);
+          }
+          commentsDiv.appendChild(cd);
+        });
+      }
+      renderComments();
+
+      div.querySelector(".toggleCommentsBtn").onclick=()=>{
+        commentsDiv.style.display=commentsDiv.style.display==="none"?"block":"none";
+        renderComments();
+      };
+      div.querySelector(".sendCommentBtn").onclick=async()=>{
+        const input=div.querySelector(".commentInput");
+        const txt=input.value.trim();
+        if(!txt) return;
+        if(!getUser()) return alert("Inicia sesión");
+        const newComment={id:genId(), user:getUser().username, text:txt};
+        await updateDoc(doc(db,"posts",postId),{comments:[...data.comments,newComment]});
+        input.value="";
+      };
+      if(div.querySelector(".delPostBtn")){
+        div.querySelector(".delPostBtn").onclick=async()=>{
+          await deleteDoc(doc(db,"posts",postId));
+        };
+      }
+      div.querySelector(".likeBtn").onclick=async()=>{
+        if(!getUser()) return alert("Inicia sesión");
+        if(!data.likes.includes(getUser().username)){
+          await updateDoc(doc(db,"posts",postId),{likes:[...data.likes,getUser().username]});
+        }
+      };
+      return div;
+    }
+
+    const q=query(collection(db,"posts"),orderBy("created","desc"));
+    onSnapshot(q,snap=>{
+      postsContainer.innerHTML="";
+      snap.forEach(d=>{
+        postsContainer.appendChild(renderPost(d));
       });
     });
-  }
-
-  // Eventos Auth
-  document.getElementById("registerForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const username = document.getElementById("regUsername").value.trim();
-    const password = document.getElementById("regPassword").value;
-    try {
-      const user = await register(username, password);
-      showApp(user);
-    } catch (err) {
-      document.getElementById("authError").textContent = err.message;
-    }
-  });
-
-  document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const username = document.getElementById("loginUsername").value.trim();
-    const password = document.getElementById("loginPassword").value;
-    try {
-      const user = await login(username, password);
-      showApp(user);
-    } catch (err) {
-      document.getElementById("authErrorLogin").textContent = err.message;
-    }
-  });
-
-  document.getElementById("toLogin").addEventListener("click", () => {
-    document.getElementById("registerForm").style.display = "none";
-    document.getElementById("loginForm").style.display = "flex";
-  });
-  document.getElementById("toRegister").addEventListener("click", () => {
-    document.getElementById("loginForm").style.display = "none";
-    document.getElementById("registerForm").style.display = "flex";
-  });
-
-  // Postear
-  document.getElementById("postBtn").addEventListener("click", async () => {
-    const user = getSession();
-    if (!user) return;
-    const text = document.getElementById("postText").value.trim();
-    if (text === "") return;
-    await addDoc(collection(db, "posts"), {
-      user: user.username,
-      avatar: user.avatar,
-      text,
-      created: serverTimestamp(),
-      likes: [],
-      comments: []
-    });
-    document.getElementById("postText").value = "";
-  });
-
-  // Logout
-  document.getElementById("logoutBtn").addEventListener("click", () => {
-    clearSession();
-    location.reload();
-  });
-
-  // Restaurar sesión
-  const sessionUser = getSession();
-  if (sessionUser) {
-    showApp(sessionUser);
-  }
-</script>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getFirestore, collection, doc, addDoc, onSnapshot, orderBy, query, serverTimestamp,
-  updateDoc, arrayUnion, deleteDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
-  authDomain: "pekora-forum.firebaseapp.com",
-  projectId: "pekora-forum",
-  storageBucket: "pekora-forum.firebasestorage.app",
-  messagingSenderId: "161910967859",
-  appId: "1:161910967859:web:6a28cecaae74b9b7e9dd46",
-  measurementId: "G-BPBTW5KBRK"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-function getCurrentUserFromStorage() {
-  const keys = ['currentUser','sessionUser','user','loggedUser'];
-  for (const k of keys) {
-    const s = localStorage.getItem(k);
-    if (s) {
-      try { return JSON.parse(s); } catch(e){ return null; }
-    }
-  }
-  return null;
-}
-function genId() { return `${Date.now()}-${Math.random().toString(36).slice(2,9)}`; }
-function escapeHtml(str) {
-  if (!str) return "";
-  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-// --- Render de post ---
-function renderPost(docSnap, sessionUser) {
-  const data = docSnap.data() || {};
-  const postId = docSnap.id;
-  const div = document.createElement("div");
-  div.className = "post";
-
-  div.innerHTML = `
-    <img src="${data.avatar || 'https://i.pravatar.cc/40'}" style="width:40px;height:40px;border-radius:50%;"/>
-    <div style="flex:1;">
-      <div style="display:flex;align-items:center;gap:8px">
-        <strong style="color:#1DA1F2">${escapeHtml(data.user || 'Anon')}</strong>
-        <span style="color:#999;font-size:13px">@${escapeHtml(data.user || 'anon')}</span>
-        <div style="flex:1"></div>
-        ${ (sessionUser && data.user === sessionUser.username) ? '<button class="deletePostBtn" style="background:none;border:none;color:red;cursor:pointer">🗑️</button>' : '' }
-      </div>
-      <div style="margin:8px 0;white-space:pre-wrap">${escapeHtml(data.text || '')}</div>
-      <div class="actions" style="display:flex;gap:10px">
-        <button class="likeBtn">❤️ <span class="likesCount">${(data.likes && data.likes.length) || 0}</span></button>
-        <button class="commentToggleBtn">💬 <span class="commentsCount">${(data.comments && data.comments.length) || 0}</span></button>
-      </div>
-      <div class="comments" style="margin-top:8px;padding-left:8px;display:none"></div>
-      <div class="comment-box" style="margin-top:8px;display:flex;gap:6px;align-items:center">
-        <input type="text" class="commentInput" placeholder="Escribe un comentario..." style="flex:1"/>
-        <button class="sendComment">Enviar</button>
-      </div>
-    </div>
-  `;
-
-  const commentsContainer = div.querySelector(".comments");
-
-  // --- Render comentarios en vivo ---
-  function renderComments(comments) {
-    commentsContainer.innerHTML = "";
-    comments.forEach(c => {
-      const cmDiv = document.createElement("div");
-      cmDiv.className = "comment";
-      cmDiv.style.display = "flex";
-      cmDiv.style.alignItems = "center";
-      cmDiv.style.gap = "8px";
-      cmDiv.innerHTML = `<div style="flex:1"><b>${escapeHtml(c.user)}</b>: ${escapeHtml(c.text)}</div>`;
-
-      if (sessionUser && c.user === sessionUser.username) {
-        const del = document.createElement("button");
-        del.textContent = "🗑️";
-        del.style.background = "none";
-        del.style.border = "none";
-        del.style.color = "red";
-        del.style.cursor = "pointer";
-        del.addEventListener("click", async () => {
-          const updated = (data.comments || []).filter(cc => cc.id !== c.id);
-          await updateDoc(doc(db, "posts", postId), { comments: updated });
-        });
-        cmDiv.appendChild(del);
-      }
-      commentsContainer.appendChild(cmDiv);
-    });
-  }
-
-  // --- Botón toggle comentarios ---
-  div.querySelector(".commentToggleBtn").addEventListener("click", () => {
-    commentsContainer.style.display = commentsContainer.style.display === "none" ? "block" : "none";
-    renderComments(data.comments || []);
-  });
-
-  // --- Botón enviar comentario ---
-  div.querySelector(".sendComment").addEventListener("click", async () => {
-    const input = div.querySelector(".commentInput");
-    const text = input.value.trim();
-    if (!sessionUser) return alert("Inicia sesión para comentar");
-    if (!text) return;
-    const commentObj = { id: genId(), user: sessionUser.username, text, created: serverTimestamp() };
-    await updateDoc(doc(db, "posts", postId), { comments: arrayUnion(commentObj) });
-    input.value = "";
-  });
-
-  // --- Borrar post ---
-  const delBtn = div.querySelector(".deletePostBtn");
-  if (delBtn) {
-    delBtn.addEventListener("click", async () => {
-      if (confirm("¿Eliminar post?")) {
-        await deleteDoc(doc(db, "posts", postId));
-      }
-    });
-  }
-
-  // --- Likes ---
-  div.querySelector(".likeBtn").addEventListener("click", async () => {
-    if (!sessionUser) return alert("Inicia sesión para dar like");
-    await updateDoc(doc(db, "posts", postId), { likes: arrayUnion(sessionUser.username) });
-  });
-
-  // Render inicial comentarios
-  renderComments(data.comments || []);
-
-  return div;
-}
-
-// --- Escucha en vivo ---
-const postsContainer = document.getElementById("posts") || document.getElementById("feed");
-const q = query(collection(db, "posts"), orderBy("created", "desc"));
-onSnapshot(q, (snapshot) => {
-  postsContainer.innerHTML = "";
-  const sessionUser = getCurrentUserFromStorage();
-  snapshot.forEach(docSnap => {
-    const el = renderPost(docSnap, sessionUser);
-    postsContainer.appendChild(el);
-  });
-});
-</script>
-
+  </script>
 </body>
 </html>
