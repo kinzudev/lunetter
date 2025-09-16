@@ -791,5 +791,85 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // --- Crear botón Reglas ---
+  const rulesBtn = document.createElement("button");
+  rulesBtn.textContent = "Reglas";
+  rulesBtn.className = "fixed top-5 left-5 px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md z-50";
+  document.body.appendChild(rulesBtn);
+
+  // --- Crear panel de Reglas ---
+  const rulesPanel = document.createElement("div");
+  rulesPanel.className = "hidden fixed top-20 left-1/2 -translate-x-1/2 w-96 bg-white border rounded-2xl shadow-lg z-50";
+  rulesPanel.innerHTML = `
+    <div class="bg-indigo-600 text-white p-3 rounded-t-2xl font-bold flex justify-between items-center">
+      <span>Reglas</span>
+      <button id="close-rules" class="text-white font-bold">X</button>
+    </div>
+    <div id="rules-content" class="p-4 space-y-2 text-sm text-gray-700">
+      <p>Cargando reglas...</p>
+    </div>
+    <div id="edit-rules-area" class="p-3 hidden border-t text-right">
+      <button id="edit-rules-btn" class="px-3 py-1 bg-blue-600 text-white rounded">Editar reglas</button>
+    </div>
+  `;
+  document.body.appendChild(rulesPanel);
+
+  // --- Mostrar/Ocultar panel ---
+  rulesBtn.addEventListener("click", () => {
+    rulesPanel.classList.toggle("hidden");
+  });
+  rulesPanel.querySelector("#close-rules").addEventListener("click", () => {
+    rulesPanel.classList.add("hidden");
+  });
+
+  const rulesContent = rulesPanel.querySelector("#rules-content");
+  const editArea = rulesPanel.querySelector("#edit-rules-area");
+  const editBtn = rulesPanel.querySelector("#edit-rules-btn");
+
+  // --- Cargar reglas desde Firestore ---
+  function loadRules() {
+    db.collection("settings").doc("reglas").onSnapshot((doc) => {
+      if (doc.exists) {
+        const data = doc.data();
+        rulesContent.innerHTML = "";
+        (data.text || "Sin reglas definidas").split("\n").forEach(line => {
+          const p = document.createElement("p");
+          p.textContent = "• " + line;
+          rulesContent.appendChild(p);
+        });
+      } else {
+        rulesContent.innerHTML = "<p>No hay reglas todavía.</p>";
+      }
+    });
+  }
+  loadRules();
+
+  // --- Editar reglas solo si es kinzudev@gmail.com ---
+  auth.onAuthStateChanged(user => {
+    if (user && user.email === "kinzudev@gmail.com") {
+      editArea.classList.remove("hidden");
+    } else {
+      editArea.classList.add("hidden");
+    }
+  });
+
+  editBtn.addEventListener("click", async () => {
+    const newRules = prompt("Escribe las nuevas reglas (separadas por saltos de línea):");
+    if (!newRules) return;
+    try {
+      await db.collection("settings").doc("reglas").set({
+        text: newRules,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert("Reglas actualizadas.");
+    } catch (err) {
+      alert("Error al actualizar: " + err.message);
+    }
+  });
+});
+</script>
+
 </body>
 </html>
