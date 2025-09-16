@@ -334,14 +334,20 @@
     });
   </script>
 
-  <script type="module">
+<script type="module">
   import { getStorage, ref, uploadBytes, getDownloadURL } 
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  import { collection, addDoc, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { db } from "./firebase-init.js"; // 🔥 asegúrate de que tu db esté exportada o ya importada
+  import { getUser } from "./auth.js";     // 🔥 si tienes getUser en el mismo script, ignora esta línea
 
   const storage = getStorage();
 
-  // Agregar input de imagen al cuadro de posteo
+  // Seleccionamos la caja de posteo
   const postBox = document.querySelector(".post-box");
+
+  // Input de imagen
   const fileInput = document.createElement("input");
   fileInput.type = "file";
   fileInput.accept = "image/*";
@@ -349,25 +355,38 @@
   fileInput.style.color = "white";
   postBox.insertBefore(fileInput, document.getElementById("postBtn"));
 
-  // Modificar botón de publicar para aceptar imagen
-  const postBtn2 = document.getElementById("postBtn");
-  postBtn2.onclick = async () => {
+  // Botón dinámico "Subir Imagen"
+  const uploadBtn = document.createElement("button");
+  uploadBtn.textContent = "Subir Imagen";
+  uploadBtn.style.marginLeft = "10px";
+  uploadBtn.style.display = "none"; // Oculto por defecto
+  postBox.appendChild(uploadBtn);
+
+  // Mostrar botón cuando se seleccione una imagen
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files.length > 0) {
+      uploadBtn.style.display = "inline-block";
+    } else {
+      uploadBtn.style.display = "none";
+    }
+  });
+
+  // Acción al presionar "Subir Imagen"
+  uploadBtn.onclick = async () => {
     const user = getUser();
-    if (!user) return alert("Inicia sesión");
+    if (!user) return alert("Inicia sesión primero");
 
     const text = postInput.value.trim();
     const file = fileInput.files[0];
-    let imageUrl = "";
+    if (!file) return alert("Selecciona una imagen");
 
-    if (!text && !file) return alert("Escribe algo o sube una imagen");
+    // Subir imagen a Firebase Storage
+    const filePath = `posts/${user.username}-${Date.now()}-${file.name}`;
+    const storageRef = ref(storage, filePath);
+    await uploadBytes(storageRef, file);
+    const imageUrl = await getDownloadURL(storageRef);
 
-    if (file) {
-      const filePath = `posts/${user.username}-${Date.now()}-${file.name}`;
-      const storageRef = ref(storage, filePath);
-      await uploadBytes(storageRef, file);
-      imageUrl = await getDownloadURL(storageRef);
-    }
-
+    // Guardar post en Firestore
     await addDoc(collection(db, "posts"), {
       user: user.username,
       avatar: user.avatar,
@@ -378,11 +397,13 @@
       comments: []
     });
 
+    // Limpiar inputs
     postInput.value = "";
     fileInput.value = "";
+    uploadBtn.style.display = "none";
   };
 
-  // Modificar renderPost para mostrar imagen
+  // 🔥 Extender renderPost para mostrar imagen si existe
   const oldRenderPost = renderPost;
   renderPost = function (docSnap) {
     const div = oldRenderPost(docSnap);
