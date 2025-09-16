@@ -290,252 +290,46 @@ document.addEventListener("DOMContentLoaded", () => {
   const ADMIN_EMAIL = "kinzudev@gmail.com";
   const VERIFIED_ICON = "https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png";
 
-  // Crear panel admin oculto (si no existe)
-  if (!document.getElementById('admin-panel')) {
-    const panel = document.createElement("div");
-    panel.id = "admin-panel";
-    panel.style.display = "none";
-    panel.style.position = "fixed";
-    panel.style.top = "3rem";
-    panel.style.right = "1rem";
-    panel.style.zIndex = 9999;
-    panel.style.width = "320px";
-    panel.style.background = "#fff";
-    panel.style.boxShadow = "0 8px 30px rgba(2,6,23,0.2)";
-    panel.style.padding = "16px";
-    panel.style.borderRadius = "12px";
-    panel.innerHTML = `
-      <h3 style="font-weight:700;margin:0 0 8px 0;">Panel Admin</h3>
-      <input id="verify-email" type="text" placeholder="Email del usuario" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:8px;">
-      <div style="display:flex;gap:8px;">
-        <button id="btn-verify" style="flex:1;padding:8px;background:#0ea5e9;color:#fff;border-radius:6px;border:none;cursor:pointer;">Añadir verificado</button>
-        <button id="btn-unverify" style="flex:1;padding:8px;background:#94a3b8;color:#fff;border-radius:6px;border:none;cursor:pointer;">Quitar verificado</button>
-      </div>
-      <div style="height:8px"></div>
-      <div style="display:flex;gap:8px;">
-        <button id="btn-ban" style="flex:1;padding:8px;background:#ef4444;color:#fff;border-radius:6px;border:none;cursor:pointer;">Banear</button>
-        <button id="btn-unban" style="flex:1;padding:8px;background:#10b981;color:#fff;border-radius:6px;border:none;cursor:pointer;">Desbanear</button>
-      </div>
-      <div style="height:8px"></div>
-      <div id="admin-msg" style="font-size:13px;color:#334155;margin-top:8px;min-height:18px;"></div>
-    `;
-    document.body.appendChild(panel);
-  }
+  // Crear panel admin oculto
+  const panel = document.createElement("div");
+  panel.id = "admin-panel";
+  panel.style.display = "none";
+  panel.className = "fixed top-10 right-10 bg-white shadow-lg p-4 rounded-xl z-50 w-80";
+  panel.innerHTML = `
+    <h2 class="text-lg font-bold mb-3">Panel Admin</h2>
+    <input type="text" id="verify-email" placeholder="Email del usuario" class="w-full border p-2 rounded mb-3"/>
+    <button id="btn-verify" class="px-3 py-2 bg-blue-600 text-white rounded">Añadir verificado</button>
+  `;
+  document.body.appendChild(panel);
 
-  const panelEl = document.getElementById("admin-panel");
-  const msgEl = document.getElementById("admin-msg");
-  const setMsg = (t, ok=true) => { msgEl.textContent = t; msgEl.style.color = ok ? "#0f172a" : "#b91c1c"; };
-
-  // abrir/cerrar panel con tecla Insert solo si el admin está logueado
+  // Toggle panel con tecla Insert
   document.addEventListener("keydown", (e) => {
-    try {
-      if (e.key === "Insert" && auth.currentUser && auth.currentUser.email === ADMIN_EMAIL) {
-        panelEl.style.display = panelEl.style.display === "none" ? "block" : "none";
-      }
-    } catch (err) { /* silencio */ }
+    if (e.key === "Insert" && auth.currentUser && auth.currentUser.email === ADMIN_EMAIL) {
+      panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
   });
 
-  // helper: buscar usuario por email en collection 'users'
-  async function findUserByEmail(email) {
-    const q = await db.collection("users").where("email", "==", email).get();
-    if (q.empty) return null;
-    return { id: q.docs[0].id, data: q.docs[0].data() };
-  }
-
-  // Añadir verificado
+  // Guardar estado verificado en Firestore
   document.getElementById("btn-verify").onclick = async () => {
     const email = document.getElementById("verify-email").value.trim();
-    if (!email) return setMsg("Ingresa un email.", false);
-    setMsg("Buscando usuario...");
+    if (!email) return alert("Ingresa un email");
+
     try {
-      const user = await findUserByEmail(email);
-      if (!user) return setMsg("Usuario no encontrado.", false);
-      await db.collection("users").doc(user.id).set({ verified: true }, { merge: true });
-      setMsg("Usuario verificado ✅");
-      // refrescar feed (forzar re-render)
-      if (typeof subscribeFeed === "function") subscribeFeed();
+      const q = await db.collection("users").where("email", "==", email).get();
+      if (q.empty) return alert("Usuario no encontrado");
+
+      q.forEach(async (docSnap) => {
+        await db.collection("users").doc(docSnap.id).set({ verified: true }, { merge: true });
+      });
+
+      alert("Usuario verificado con éxito ✅");
+      document.getElementById("verify-email").value = "";
     } catch (err) {
-      setMsg("Error: " + err.message, false);
+      alert("Error: " + err.message);
     }
   };
 
-  // Quitar verificado
-  document.getElementById("btn-unverify").onclick = async () => {
-    const email = document.getElementById("verify-email").value.trim();
-    if (!email) return setMsg("Ingresa un email.", false);
-    setMsg("Buscando usuario...");
-    try {
-      const user = await findUserByEmail(email);
-      if (!user) return setMsg("Usuario no encontrado.", false);
-      await db.collection("users").doc(user.id).set({ verified: false }, { merge: true });
-      setMsg("Verificado removido ✅");
-      if (typeof subscribeFeed === "function") subscribeFeed();
-    } catch (err) {
-      setMsg("Error: " + err.message, false);
-    }
-  };
-
-  // Banear usuario (set banned: true)
-  document.getElementById("btn-ban").onclick = async () => {
-    const email = document.getElementById("verify-email").value.trim();
-    if (!email) return setMsg("Ingresa un email.", false);
-    setMsg("Buscando usuario...");
-    try {
-      const user = await findUserByEmail(email);
-      if (!user) return setMsg("Usuario no encontrado.", false);
-      await db.collection("users").doc(user.id).set({ banned: true }, { merge: true });
-      setMsg("Usuario baneado ⛔");
-      // opcional: cerrar sesión si el usuario está actualmente logueado en este navegador
-      if (auth.currentUser && auth.currentUser.email === email) {
-        await auth.signOut();
-      }
-      if (typeof subscribeFeed === "function") subscribeFeed();
-    } catch (err) {
-      setMsg("Error: " + err.message, false);
-    }
-  };
-
-  // Desbanear usuario (set banned: false)
-  document.getElementById("btn-unban").onclick = async () => {
-    const email = document.getElementById("verify-email").value.trim();
-    if (!email) return setMsg("Ingresa un email.", false);
-    setMsg("Buscando usuario...");
-    try {
-      const user = await findUserByEmail(email);
-      if (!user) return setMsg("Usuario no encontrado.", false);
-      await db.collection("users").doc(user.id).set({ banned: false }, { merge: true });
-      setMsg("Usuario desbaneado ✅");
-      if (typeof subscribeFeed === "function") subscribeFeed();
-    } catch (err) {
-      setMsg("Error: " + err.message, false);
-    }
-  };
-
-  // Detectar en el onAuthStateChanged si el usuario está baneado:
-  // añadimos un pequeño wrapper si el proyecto no lo tiene ya (intento no romper nada).
-  if (typeof auth !== "undefined") {
-    // Guardar referencia al observer original si existe (no sobrescribimos)
-    const originalOnAuth = auth.onAuthStateChanged.bind(auth);
-    // Re-registrar una función que chequea ban y luego llame a las funciones existentes ya en tu proyecto
-    // (Nota: si ya tienes una onAuthStateChanged en tu HTML, esta funcion se ejecutará también; aquí solo añadimos verificación adicional)
-    originalOnAuth(async (user) => {
-      if (user) {
-        try {
-          const snap = await db.collection("users").doc(user.uid).get();
-          if (snap.exists && snap.data().banned) {
-            // Si está baneado: cerrar sesión y avisar
-            await auth.signOut();
-            alert("Tu cuenta ha sido baneada. Contacta al administrador.");
-            return;
-          }
-        } catch (err) {
-          // Si falla el chequeo, no bloqueamos por seguridad
-          console.error("Error al comprobar ban:", err);
-        }
-      }
-      // No interferimos con otras lógicas - permitimos que el resto de onAuthStateChanged del HTML corra normalmente
-    });
-  }
-
-  // Envoltorio para renderPost: si el autor está baneado, no retorna elemento (oculta post)
-  // Solo si renderPost existe
-  if (typeof renderPost === "function") {
-    const originalRenderPost = renderPost;
-    renderPost = function (doc, userId) {
-      const data = doc.data();
-      // comprobamos bandera 'banned' en users collection; si existe y es true => retorna null (no mostrar)
-      // creación sin bloqueo: devolvemos un placeholder y lo filtrará quien llame; para evitar romper, devolvemos null y quien itere debe comprobar.
-      // pero para seguridad, devolvemos un empty element (invisible) para que no rompa el append.
-      const placeholder = document.createElement('div');
-      try {
-        db.collection("users").doc(data.uid).get().then((snap) => {
-          if (snap.exists && snap.data().banned) {
-            // usuario baneado: devolver elemento vacío (no visible)
-            placeholder.style.display = "none";
-          } else {
-            // no baneado: usar render normal y replace placeholder
-            const el = originalRenderPost(doc, userId);
-            if (el && placeholder.parentNode) {
-              placeholder.replaceWith(el);
-            } else if (el) {
-              // si placeholder no está en DOM aún, simplemente return el
-              // but to keep caller behavior, replace via timeout if needed
-            }
-          }
-        }).catch(()=> {
-          // en caso de error, mostrar post normalmente
-          const el = originalRenderPost(doc, userId);
-          if (el && placeholder.parentNode) placeholder.replaceWith(el);
-        });
-      } catch (err) {
-        const el = originalRenderPost(doc, userId);
-        if (el && placeholder.parentNode) placeholder.replaceWith(el);
-      }
-      return placeholder;
-    };
-  }
-
-  // Modificar renderProfileCard para añadir icono verificado si corresponde y ocultar perfil si baneado (no rompe si no existe)
-  if (typeof renderProfileCard === "function") {
-    const originalRenderProfileCard = renderProfileCard;
-    renderProfileCard = async function (userData) {
-      // Primero chequeamos si el userData corresponde a un usuario baneado
-      if (userData && userData.uid) {
-        try {
-          const snap = await db.collection("users").doc(userData.uid).get();
-          if (snap.exists && snap.data().banned) {
-            // Si es el propio perfil que estamos mostrando y está baneado, mostramos mensaje
-            const c = document.getElementById('profile-card');
-            if (c) {
-              c.innerHTML = '<div class=\"text-center text-red-600\">Usuario baneado</div>';
-            }
-            return;
-          }
-        } catch (err) {
-          // ignore
-        }
-      }
-      // Llamar al render original y luego añadir icono si verified
-      originalRenderProfileCard(userData);
-      try {
-        if (userData && userData.uid) {
-          const snap = await db.collection("users").doc(userData.uid).get();
-          if (snap.exists && snap.data().verified) {
-            const nameEl = document.querySelector("#profile-card h3");
-            if (nameEl && !nameEl.querySelector('.verified-icon')) {
-              const icon = document.createElement("img");
-              icon.src = VERIFIED_ICON;
-              icon.className = "verified-icon";
-              icon.style.width = "20px";
-              icon.style.height = "20px";
-              icon.style.marginLeft = "6px";
-              nameEl.appendChild(icon);
-            }
-          }
-        }
-      } catch (err) { /* noop */ }
-    };
-  }
-
-  // fin DOMContentLoaded
-});
-</script>
-
-  <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const VERIFIED_ICON = "https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png";
-
-  // Función auxiliar para añadir icono al nombre
-  function addVerifiedIcon(el) {
-    if (!el) return;
-    if (el.querySelector(".verified-icon")) return; // evitar duplicados
-    const icon = document.createElement("img");
-    icon.src = VERIFIED_ICON;
-    icon.className = "verified-icon inline-block w-4 h-4 ml-1";
-    el.appendChild(icon);
-  }
-
-  // Hook para posts
+  // Modificar renderizado para mostrar el icono de verificado
   const originalRenderPost = renderPost;
   renderPost = function (doc, userId) {
     const el = originalRenderPost(doc, userId);
@@ -544,27 +338,42 @@ document.addEventListener("DOMContentLoaded", () => {
     db.collection("users").doc(data.uid).get().then((snap) => {
       if (snap.exists && snap.data().verified) {
         const nameEl = el.querySelector(".font-semibold");
-        addVerifiedIcon(nameEl);
+        if (nameEl && !nameEl.querySelector("img")) {
+          const icon = document.createElement("img");
+          icon.src = VERIFIED_ICON;
+          icon.className = "inline-block w-4 h-4 ml-1";
+          nameEl.appendChild(icon);
+        }
       }
     });
 
     return el;
   };
 
-  // Hook para perfil
+  // También actualizar en el perfil
   const originalRenderProfileCard = renderProfileCard;
-  renderProfileCard = async function (userData) {
+  renderProfileCard = function (userData) {
     originalRenderProfileCard(userData);
-    if (!userData || !userData.uid) return;
-
-    try {
-      const snap = await db.collection("users").doc(userData.uid).get();
-      if (snap.exists && snap.data().verified) {
-        const nameEl = document.querySelector("#profile-card h3");
-        addVerifiedIcon(nameEl);
+    if (userData && userData.verified) {
+      const nameEl = document.querySelector("#profile-card h3");
+      if (nameEl && !nameEl.querySelector("img")) {
+        const icon = document.createElement("img");
+        icon.src = VERIFIED_ICON;
+        icon.className = "inline-block w-5 h-5 ml-1";
+        nameEl.appendChild(icon);
       }
-    } catch (err) {
-      console.error("Error añadiendo verificado:", err);
+    } else if (userData) {
+      db.collection("users").doc(userData.uid).get().then((snap) => {
+        if (snap.exists && snap.data().verified) {
+          const nameEl = document.querySelector("#profile-card h3");
+          if (nameEl && !nameEl.querySelector("img")) {
+            const icon = document.createElement("img");
+            icon.src = VERIFIED_ICON;
+            icon.className = "inline-block w-5 h-5 ml-1";
+            nameEl.appendChild(icon);
+          }
+        }
+      });
     }
   };
 });
