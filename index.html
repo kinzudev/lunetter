@@ -193,5 +193,145 @@
       });
     });
   </script>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { 
+    getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, 
+    updateDoc, doc, arrayUnion, arrayRemove 
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+  // === Config Firebase ===
+  const firebaseConfig = {
+    apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
+    authDomain: "pekora-forum.firebaseapp.com",
+    projectId: "pekora-forum",
+    storageBucket: "pekora-forum.firebasestorage.app",
+    messagingSenderId: "161910967859",
+    appId: "1:161910967859:web:6a28cecaae74b9b7e9dd46",
+    measurementId: "G-BPBTW5KBRK"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  const postsContainer = document.getElementById("posts");
+  const postBtn = document.getElementById("postBtn");
+  const postImageBtn = document.getElementById("postImageBtn");
+  const postInput = document.getElementById("postInput");
+  const fileInput = document.getElementById("fileInput");
+
+  // Usuario simulado (reemplazar con auth real)
+  const user = {
+    username: "lunetter",
+    avatar: "https://i.pravatar.cc/150"
+  };
+
+  // === Publicar texto ===
+  postBtn.addEventListener("click", async () => {
+    const text = postInput.value.trim();
+    if (!text) return;
+
+    await addDoc(collection(db, "posts"), {
+      user: user.username,
+      avatar: user.avatar,
+      text,
+      image: null,
+      likes: [],
+      comments: [],
+      created: serverTimestamp()
+    });
+
+    postInput.value = "";
+  });
+
+  // === Publicar imagen ===
+  postImageBtn.addEventListener("click", () => fileInput.click());
+
+  fileInput.addEventListener("change", async () => {
+    if (fileInput.files.length === 0) return;
+    const file = fileInput.files[0];
+    const storageRef = ref(storage, "posts/" + Date.now() + "-" + file.name);
+    await uploadBytes(storageRef, file);
+    const imageUrl = await getDownloadURL(storageRef);
+
+    await addDoc(collection(db, "posts"), {
+      user: user.username,
+      avatar: user.avatar,
+      text: postInput.value.trim(),
+      image: imageUrl,
+      likes: [],
+      comments: [],
+      created: serverTimestamp()
+    });
+
+    postInput.value = "";
+    fileInput.value = "";
+  });
+
+  // === Mostrar posts en tiempo real ===
+  const q = query(collection(db, "posts"), orderBy("created", "desc"));
+  onSnapshot(q, (snapshot) => {
+    postsContainer.innerHTML = "";
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const postId = docSnap.id;
+
+      const div = document.createElement("div");
+      div.className = "post";
+      div.innerHTML = `
+        <img src="${data.avatar}" class="avatar">
+        <div class="post-content">
+          <div class="post-header">${data.user}</div>
+          <div class="post-text">${data.text || ""}</div>
+          ${data.image ? `<img src="${data.image}" class="post-image">` : ""}
+          <div class="post-actions">
+            <span class="like-btn">❤️ ${data.likes?.length || 0}</span>
+            <span class="comment-toggle">💬 ${data.comments?.length || 0}</span>
+          </div>
+          <div class="comments" style="margin-top:10px; display:none;">
+            <div class="comment-list">
+              ${data.comments?.map(c => `<p><b>${c.user}:</b> ${c.text}</p>`).join("") || ""}
+            </div>
+            <input type="text" placeholder="Escribe un comentario..." class="comment-input" style="width:80%;">
+            <button class="send-comment">Enviar</button>
+          </div>
+        </div>
+      `;
+
+      // === Like ===
+      div.querySelector(".like-btn").addEventListener("click", async () => {
+        const postRef = doc(db, "posts", postId);
+        if (data.likes?.includes(user.username)) {
+          await updateDoc(postRef, { likes: arrayRemove(user.username) });
+        } else {
+          await updateDoc(postRef, { likes: arrayUnion(user.username) });
+        }
+      });
+
+      // === Toggle comentarios ===
+      div.querySelector(".comment-toggle").addEventListener("click", () => {
+        const commentsDiv = div.querySelector(".comments");
+        commentsDiv.style.display = commentsDiv.style.display === "none" ? "block" : "none";
+      });
+
+      // === Enviar comentario ===
+      div.querySelector(".send-comment").addEventListener("click", async () => {
+        const input = div.querySelector(".comment-input");
+        const text = input.value.trim();
+        if (!text) return;
+        const postRef = doc(db, "posts", postId);
+        await updateDoc(postRef, {
+          comments: arrayUnion({ user: user.username, text })
+        });
+        input.value = "";
+      });
+
+      postsContainer.appendChild(div);
+    });
+  });
+</script>
+
 </body>
 </html>
