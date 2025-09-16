@@ -379,5 +379,101 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ADMIN_EMAIL = "kinzudev@gmail.com";
+  const BAN_IMAGE = "https://i.imgur.com/yjv3N5r.png"; // imagen de baneo (puedes cambiarla)
+  const BAN_MESSAGE = `
+    <div class="fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center text-white z-50 text-center p-6">
+      <img src="${BAN_IMAGE}" class="w-40 h-40 mb-4" />
+      <h2 class="text-2xl font-bold mb-2">Has sido baneado</h2>
+      <p class="mb-4">Si quieres recuperar tu cuenta envía un mensaje en Discord a los dueños:<br>
+      <b>@enjecteds</b> y <b>@zunex78</b></p>
+    </div>
+  `;
+
+  // Crear panel Ban
+  const panel = document.createElement("div");
+  panel.id = "ban-panel";
+  panel.style.display = "none";
+  panel.className = "fixed top-20 right-10 bg-white shadow-lg p-4 rounded-xl z-50 w-96";
+  panel.innerHTML = `
+    <h2 class="text-lg font-bold mb-3">Panel Ban</h2>
+    <input type="text" id="ban-email" placeholder="Email a banear" class="w-full border p-2 rounded mb-3"/>
+    <button id="btn-ban" class="px-3 py-2 bg-red-600 text-white rounded w-full mb-3">Banear</button>
+    <input type="text" id="unban-email" placeholder="Email a desbanear" class="w-full border p-2 rounded mb-3"/>
+    <button id="btn-unban" class="px-3 py-2 bg-green-600 text-white rounded w-full">Desbanear</button>
+  `;
+  document.body.appendChild(panel);
+
+  // Toggle con Tab
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Tab" && auth.currentUser && auth.currentUser.email === ADMIN_EMAIL) {
+      e.preventDefault();
+      panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+  });
+
+  // Banear
+  document.getElementById("btn-ban").onclick = async () => {
+    const email = document.getElementById("ban-email").value.trim();
+    if (!email) return alert("Ingresa un email");
+
+    try {
+      const q = await db.collection("users").where("email", "==", email).get();
+      if (q.empty) return alert("Usuario no encontrado");
+
+      q.forEach(async (docSnap) => {
+        await db.collection("users").doc(docSnap.id).set({ banned: true }, { merge: true });
+      });
+
+      alert("Usuario baneado ❌");
+      document.getElementById("ban-email").value = "";
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  // Desbanear
+  document.getElementById("btn-unban").onclick = async () => {
+    const email = document.getElementById("unban-email").value.trim();
+    if (!email) return alert("Ingresa un email");
+
+    try {
+      const q = await db.collection("users").where("email", "==", email).get();
+      if (q.empty) return alert("Usuario no encontrado");
+
+      q.forEach(async (docSnap) => {
+        await db.collection("users").doc(docSnap.id).set({ banned: false }, { merge: true });
+      });
+
+      alert("Usuario desbaneado ✅");
+      document.getElementById("unban-email").value = "";
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  // Bloqueo para usuarios baneados
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      try {
+        const snap = await db.collection("users").doc(user.uid).get();
+        if (snap.exists && snap.data().banned) {
+          // Mostrar pantalla baneado
+          document.body.innerHTML = BAN_MESSAGE;
+
+          // Evitar likes y publicaciones
+          document.addEventListener("click", (e) => e.stopImmediatePropagation(), true);
+          document.addEventListener("keydown", (e) => e.stopImmediatePropagation(), true);
+        }
+      } catch (err) {
+        console.error("Error al verificar baneo:", err);
+      }
+    }
+  });
+});
+</script>
+
 </body>
 </html>
