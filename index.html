@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>lunetter</title>
+  <title>Lunetter - UPDATE</title>
   <!-- Tailwind CDN (for quick prototyping) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -657,47 +657,137 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-  <script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
-  async function handleLike(postId) {
-    if (!auth.currentUser) {
-      return alert("Debes iniciar sesión para dar like");
+  // Helper: obtiene el botón de like dentro del post retornado por renderPost
+  function findLikeButtonInPostElement(postEl) {
+    if (!postEl) return null;
+    const buttons = postEl.querySelectorAll('button');
+    for (const b of buttons) {
+      const txt = (b.textContent||'').trim();
+      if (txt.includes('❤')) return b;
     }
+    return null;
+  }
+
+  // Función segura de like (registra un like único por usuario)
+  async function safeLike(postId, btn) {
+    if (!auth.currentUser) return alert('Debes iniciar sesión para dar like.');
     const uid = auth.currentUser.uid;
+    const postRef = db.collection('posts').doc(postId);
+    const likeRef = postRef.collection('likes').doc(uid);
 
-    // Documento de like único por usuario
-    const likeRef = db.collection("posts").doc(postId).collection("likes").doc(uid);
-    const likeDoc = await likeRef.get();
-
-    if (likeDoc.exists) {
-      // Ya dio like → nunca más podrá darle
-      alert("Ya diste like a este post.");
-      return;
-    }
+    // prevenir doble-click rápido
+    if (btn._liking) return;
+    btn._liking = true;
+    btn.disabled = true;
 
     try {
-      // Guardar registro de que este usuario ya dio like
-      await likeRef.set({
-        uid: uid,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      await db.runTransaction(async (t) => {
+        const likeSnap = await t.get(likeRef);
+        if (likeSnap.exists) {
+          // ya dio like
+          throw new Error('ALREADY_LIKED');
+        }
+        // registrar like
+        t.set(likeRef, { uid, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        // incrementar contador en post (campo 'likes' que usa tu app)
+        t.update(postRef, { likes: firebase.firestore.FieldValue.increment(1) });
       });
 
-      // Incrementar contador en el post
-      await db.collection("posts").doc(postId).update({
-        likes: firebase.firestore.FieldValue.increment(1)
-      });
+      // Si llegamos aquí la transacción fue ok -> actualizar UI
+      // Obtener nuevo valor de likes para mantener exactitud visual
+      const postSnap = await postRef.get();
+      const newCount = (postSnap.exists && postSnap.data().likes) ? postSnap.data().likes : null;
+      if (newCount !== null) {
+        btn.textContent = `❤ ${newCount}`;
+      } else {
+        // fallback: incrementar visualmente
+        const cur = parseInt((btn.textContent.replace(/[^0-9]/g,''))||0,10) + 1;
+        btn.textContent = `❤ ${cur}`;
+      }
+      // marcar que ya dio like (evita siguientes intentos)
+      btn.dataset.liked = "1";
+      btn.style.opacity = "0.6";
     } catch (err) {
-      console.error("Error al dar like:", err);
+      if (err.message === 'ALREADY_LIKED') {
+        alert('Ya diste like a este post.');
+        btn.dataset.liked = "1";
+        btn.style.opacity = "0.6";
+      } else {
+        console.error('Error en safeLike:', err);
+        alert('Hubo un error al dar like. Reintenta.');
+      }
+    } finally {
+      btn._liking = false;
+      btn.disabled = true; // dejamos deshabilitado para que no se vuelva a intentar
     }
   }
 
-  // Escucha global para todos los botones de like
-  window.addEventListener("click", (e) => {
-    if (e.target && e.target.classList.contains("like-btn")) {
-      const postId = e.target.dataset.postId;
-      handleLike(postId);
-    }
-  });
+  // Wrap / monkey-patch renderPost para reemplazar el handler del like button
+  if (typeof renderPost === 'function') {
+    const originalRenderPost = renderPost;
+    renderPost = function(doc, userId) {
+      const el = originalRenderPost(doc, userId);
+
+      try {
+        // buscar botón de like que creó tu función original
+        const likeBtn = findLikeButtonInPostElement(el);
+        if (likeBtn) {
+          // si ya hemos instalado handler, saltar
+          if (!likeBtn.dataset.safeLikeInstalled) {
+            // intentar extraer postId del doc (doc.id viene del snapshot)
+            const postId = doc && doc.id ? doc.id : null;
+
+            // quitar onClick anterior si existe (para evitar doble acciones)
+            likeBtn.onclick = null;
+            likeBtn.removeEventListener('click', likeBtn._oldClickHandler);
+
+            // marcar instalado y añadir listener
+            likeBtn.dataset.safeLikeInstalled = "1";
+            likeBtn.addEventListener('click', (e) => {
+              // si ya marcado localmente como liked, bloquear
+              if (likeBtn.dataset.liked === "1") {
+                alert('Ya diste like a este post.');
+                return;
+              }
+              if (!postId) {
+                console.warn('postId no disponible para safeLike');
+                return;
+              }
+              safeLike(postId, likeBtn);
+            });
+
+            // estado inicial: si ya dio like, deshabilitar botón
+            if (auth.currentUser && postId) {
+              const uid = auth.currentUser.uid;
+              db.collection('posts').doc(postId).collection('likes').doc(uid).get().then(snap => {
+                if (snap.exists) {
+                  likeBtn.dataset.liked = "1";
+                  likeBtn.disabled = true;
+                  likeBtn.style.opacity = "0.6";
+                }
+              }).catch(()=>{});
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error parcheando like button:', err);
+      }
+
+      return el;
+    };
+  } else {
+    console.warn('renderPost no existe cuando se cargó este script — asegúrate de pegarlo al final del HTML, después de definir renderPost.');
+  }
+
+  // Adicional: si el usuario cambia (login/logout), refrescar feed para recalcar botones
+  if (typeof auth !== 'undefined') {
+    auth.onAuthStateChanged(() => {
+      // fuerza re-suscripción si tienes subscribeFeed
+      if (typeof subscribeFeed === 'function') subscribeFeed();
+    });
+  }
 });
 </script>
 
