@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Lunetter</title>
+  <title>Lunett1er</title>
   <style>
     body {
       margin: 0;
@@ -339,17 +339,17 @@
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
   import { collection, addDoc, serverTimestamp } 
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { db } from "./firebase-init.js"; // 🔥 tu inicialización de Firebase
+  import { db } from "./firebase-init.js"; // 🔥 inicialización de Firebase
   import { getUser } from "./auth.js";     // 🔥 tu función que devuelve el usuario logueado
 
   const storage = getStorage();
 
-  // Seleccionamos la caja de posteo
+  // Caja de posteo
   const postBox = document.querySelector(".post-box");
   const postBtn = document.getElementById("postBtn");
   const postInput = document.getElementById("postInput");
 
-  // Input para imágenes
+  // Input de imagen
   const fileInput = document.createElement("input");
   fileInput.type = "file";
   fileInput.accept = "image/*";
@@ -357,50 +357,42 @@
   fileInput.style.marginTop = "10px";
   postBox.insertBefore(fileInput, postBtn);
 
-  // Preview de la imagen seleccionada
+  // Preview de la imagen
   const preview = document.createElement("img");
   preview.style.maxWidth = "200px";
   preview.style.marginTop = "10px";
   preview.style.display = "none";
   postBox.insertBefore(preview, postBtn);
 
-  // Botón "Subir Imagen"
-  const uploadBtn = document.createElement("button");
-  uploadBtn.id = "uploadImageBtn";
-  uploadBtn.textContent = "Subir Imagen";
-  uploadBtn.style.marginTop = "10px";
-  uploadBtn.style.display = "none"; // Oculto al inicio
-  postBox.insertBefore(uploadBtn, postBtn);
-
-  // Mostrar botón y preview cuando se elige una imagen
   fileInput.addEventListener("change", () => {
     if (fileInput.files.length > 0) {
       preview.src = URL.createObjectURL(fileInput.files[0]);
       preview.style.display = "block";
-      uploadBtn.style.display = "inline-block";
     } else {
       preview.style.display = "none";
-      uploadBtn.style.display = "none";
     }
   });
 
-  // Acción al hacer clic en "Subir Imagen"
-  uploadBtn.addEventListener("click", async () => {
+  // Botón Post (texto + imagen)
+  postBtn.addEventListener("click", async () => {
     const user = getUser();
     if (!user) return alert("Inicia sesión primero");
 
     const text = postInput.value.trim();
     const file = fileInput.files[0];
-    if (!file) return alert("Selecciona una imagen");
+
+    if (!text && !file) return alert("Escribe algo o sube una imagen");
 
     try {
-      // Subir a Firebase Storage
-      const filePath = `posts/${user.username}-${Date.now()}-${file.name}`;
-      const storageRef = ref(storage, filePath);
-      await uploadBytes(storageRef, file);
-      const imageUrl = await getDownloadURL(storageRef);
+      let imageUrl = null;
 
-      // Guardar en Firestore
+      if (file) {
+        const filePath = `posts/${user.username}-${Date.now()}-${file.name}`;
+        const storageRef = ref(storage, filePath);
+        await uploadBytes(storageRef, file);
+        imageUrl = await getDownloadURL(storageRef);
+      }
+
       await addDoc(collection(db, "posts"), {
         user: user.username,
         avatar: user.avatar,
@@ -411,19 +403,18 @@
         comments: []
       });
 
-      // Limpiar
+      // Reset
       postInput.value = "";
       fileInput.value = "";
       preview.style.display = "none";
-      uploadBtn.style.display = "none";
 
     } catch (err) {
-      console.error("Error subiendo imagen:", err);
-      alert("Error al subir la imagen");
+      console.error("Error publicando post:", err);
+      alert("Error al publicar");
     }
   });
 
-  // Extender renderPost para mostrar imagen en posts
+  // Renderizar post con imagen si existe
   const oldRenderPost = renderPost;
   renderPost = function (docSnap) {
     const div = oldRenderPost(docSnap);
