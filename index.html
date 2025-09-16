@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>lunetter1</title>
+  <title>lunetter</title>
   <!-- Tailwind CDN (for quick prototyping) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,7 +50,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 
   <script>
-  // ---------- CONFIG: pega aquí tu firebaseConfig tal cual ----------
+  // ---------- CONFIG ----------
   const firebaseConfig = {
     apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
     authDomain: "pekora-forum.firebaseapp.com",
@@ -60,15 +60,14 @@
     appId: "1:161910967859:web:6a28cecaae74b9b7e9dd46",
     measurementId: "G-BPBTW5KBRK"
   };
-  // ------------------------------------------------------------------
+  // ----------------------------
 
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
-  const storage = firebase.storage();
 
-  // Simple helpers
+  // Helpers
   const $ = (sel) => document.querySelector(sel);
   const createEl = (tag, attrs = {}, text = '') => {
     const el = document.createElement(tag);
@@ -77,7 +76,7 @@
     return el;
   };
 
-  // ---------- UI templates ----------
+  // ---------- UI ----------
   function renderAuthArea(user){
     const container = $('#auth-area');
     container.innerHTML = '';
@@ -95,7 +94,6 @@
   }
 
   function openAuthModal(){
-    // lightweight modal using prompt-style forms for quick demo
     const mode = prompt('Escribe "r" para registrarte o "l" para iniciar sesión (r/l)');
     if(!mode) return;
     if(mode.toLowerCase() === 'r'){
@@ -115,7 +113,6 @@
     }
   }
 
-  // Profile card and composer
   function renderProfileCard(userData){
     const c = $('#profile-card');
     c.innerHTML = '';
@@ -142,7 +139,6 @@
     const photo = prompt('URL de foto de perfil (dejar vacío para mantener)');
     if(name !== null){
       auth.currentUser.updateProfile({displayName: name, photoURL: photo || userData.photoURL || null}).then(()=>{
-        // Save minimal profile in Firestore for quick reads
         const u = auth.currentUser;
         db.collection('users').doc(u.uid).set({displayName: u.displayName, photoURL: u.photoURL, updatedAt: firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
         alert('Perfil actualizado');
@@ -163,27 +159,21 @@
 
     const textarea = createEl('textarea', {placeholder:'¿Qué está pasando? (max 280 caracteres)', maxlength:280, class:'w-full border rounded p-3 min-h-[80px] resize-none'});
 
-    const fileInput = createEl('input', {type:'file', accept:'image/*'});
+    // Nuevo input de URL en lugar de archivo
+    const urlInput = createEl('input', {type:'text', id:'imageUrlInput', placeholder:'Pega aquí la URL de una imagen (opcional)', class:'w-full border rounded p-2'});
 
     const submit = createEl('button', {class:'px-4 py-2 bg-green-600 text-white rounded'}, 'Publicar');
 
     form.appendChild(textarea);
-    form.appendChild(fileInput);
+    form.appendChild(urlInput);
     form.appendChild(submit);
 
     form.onsubmit = async (e)=>{
       e.preventDefault();
       submit.disabled = true;
       const text = textarea.value.trim();
-      const file = fileInput.files[0];
+      const imageUrl = urlInput.value.trim() || null;
       try{
-        let imageUrl = null;
-        if(file){
-          const path = `posts/${auth.currentUser.uid}/${Date.now()}_${file.name}`;
-          const ref = storage.ref(path);
-          await ref.put(file);
-          imageUrl = await ref.getDownloadURL();
-        }
         const post = {
           uid: auth.currentUser.uid,
           text: text || null,
@@ -193,7 +183,7 @@
         };
         await db.collection('posts').add(post);
         textarea.value = '';
-        fileInput.value = '';
+        urlInput.value = '';
       }catch(err){
         alert('Error publicando: '+err.message);
       }finally{ submit.disabled = false; }
@@ -202,7 +192,6 @@
     c.appendChild(form);
   }
 
-  // Feed rendering
   function renderPost(doc, userId){
     const data = doc.data();
     const container = createEl('article', {class:'bg-white p-4 rounded-2xl shadow-sm'});
@@ -226,7 +215,6 @@
     };
     actions.appendChild(likeBtn);
 
-    // delete if owner
     if(userId === data.uid){
       const del = createEl('button', {class:'px-2 py-1 bg-red-100 rounded text-red-600'}, 'Eliminar');
       del.onclick = async ()=>{
@@ -242,20 +230,16 @@
     container.appendChild(body);
     container.appendChild(actions);
 
-    // populate author info from users collection or auth
     db.collection('users').doc(data.uid).get().then(snap=>{
       const u = snap.exists ? snap.data() : null;
       if(u){
         avatar.src = u.photoURL || ('https://ui-avatars.com/api/?name='+encodeURIComponent(u.displayName||'User'));
         authorName.textContent = u.displayName || 'Usuario';
       } else {
-        // try to get from auth user cache
-        auth.getUser ? null : null; // noop for compat
         authorName.textContent = 'Usuario';
       }
     }).catch(()=>{});
 
-    // timestamp
     if(data.createdAt && data.createdAt.toDate){
       time.textContent = timeAgo(data.createdAt.toDate());
     }
@@ -271,7 +255,6 @@
     const d = Math.floor(h/24); return d + 'd';
   }
 
-  // Real-time feed listener
   let unsubscribeFeed = null;
   function subscribeFeed(){
     if(unsubscribeFeed) unsubscribeFeed();
@@ -284,14 +267,11 @@
     }, err=> console.error('feed err', err));
   }
 
-  // auth observer
   auth.onAuthStateChanged(async user=>{
     renderAuthArea(user);
     if(user){
-      // ensure user doc exists
       const uRef = db.collection('users').doc(user.uid);
       await uRef.set({displayName: user.displayName || null, email: user.email || null, photoURL: user.photoURL || null, lastSeen: firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
-      // fetch and render profile
       const snap = await uRef.get();
       renderProfileCard({...user, ...(snap.exists ? snap.data() : {})});
       renderComposer(user);
@@ -299,39 +279,11 @@
       renderProfileCard(null);
       renderComposer(null);
     }
-    // subscribe to feed always (public feed)
     subscribeFeed();
   });
 
-  // initial subscribe even before auth
   subscribeFeed();
-
-  // Helpful: preload some CSS fonts
   </script>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Buscar todos los inputs file
-  const fileInputs = document.querySelectorAll('input[type="file"]');
-  fileInputs.forEach(fileInput => {
-    // Crear nuevo input URL
-    const urlInput = document.createElement("input");
-    urlInput.type = "text";
-    urlInput.id = "imageUrlInput";
-    urlInput.placeholder = "Pega aquí la URL de una imagen (opcional)";
-    urlInput.style = "width: 60%; margin-right: 8px;";
-
-    // Insertar el nuevo input antes del botón Publicar
-    const postBtn = document.getElementById("postBtn");
-    if (postBtn) {
-      postBtn.parentNode.insertBefore(urlInput, postBtn);
-    }
-
-    // Quitar el input file original
-    fileInput.remove();
-  });
-});
-</script>
   
 </body>
 </html>
