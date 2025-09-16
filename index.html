@@ -1,277 +1,216 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lunetter</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    :root{--accent:#1DA1F2;--muted:#777}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,Arial,sans-serif;background:#000;color:#e6e6e6;display:flex;height:100vh}
-    /* Login */
-    #loginPanel{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;z-index:30}
-    .loginBox{width:340px;background:#0b0c0d;border:1px solid #222;padding:20px;border-radius:12px;display:flex;flex-direction:column;gap:10px}
-    .loginBox h2{margin:0 0 6px 0}
-    .loginBox input{padding:10px;border-radius:8px;border:1px solid #222;background:#0f1113;color:#fff}
-    .rowBtns{display:flex;gap:10px;margin-top:6px}
-    .btn{background:var(--accent);border:none;padding:9px 12px;border-radius:9px;color:#fff;cursor:pointer}
-    .btn.secondary{background:#222}
-    .error{color:#ff6b6b;font-size:13px;min-height:18px}
-    /* Layout */
-    .sidebar{width:220px;border-right:1px solid #111;padding:20px;display:flex;flex-direction:column;gap:8px}
-    .sidebar button{background:none;border:none;color:inherit;text-align:left;padding:10px;border-radius:10px;cursor:pointer;font-size:16px}
-    .sidebar button:hover{background:#0f1113;color:var(--accent)}
-    .main{flex:1;display:flex;justify-content:center;overflow:auto;padding:20px}
-    .feed{width:100%;max-width:640px}
-    .composer{display:flex;gap:12px;padding:14px;border-bottom:1px solid #111}
-    .composer img{width:52px;height:52px;border-radius:50%}
-    .composer textarea{flex:1;background:transparent;border:none;color:#e6e6e6;font-size:15px;resize:none}
-    .post{display:flex;gap:12px;padding:14px;border-bottom:1px solid #111}
-    .post img{width:48px;height:48px;border-radius:50%}
-    .postContent{flex:1}
-    .postHeader{display:flex;align-items:center;gap:8px}
-    .postHeader .name{font-weight:700;color:var(--accent)}
-    .postHeader .user{color:var(--muted);font-size:13px}
-    .postText{margin:8px 0}
-    .actions{display:flex;gap:16px;color:var(--muted);font-size:14px;align-items:center}
-    .actions .likeBtn{cursor:pointer}
-    .actions .likeBtn.liked{color:#ff6b6b}
-    .comments{margin-top:8px;padding-left:8px;border-left:2px solid #111}
-    .comment{display:flex;gap:8px;margin-top:8px}
-    .comment img{width:32px;height:32px;border-radius:50%}
-    .commentBubble{background:#0d0e10;padding:8px;border-radius:8px}
-    .commentInput{display:flex;gap:8px;margin-top:10px}
-    .commentInput input{flex:1;padding:8px;border-radius:8px;border:1px solid #222;background:#0f1113;color:#fff}
-    .hidden{display:none}
+    body { margin: 0; font-family: Arial, sans-serif; background: #000; color: #fff; }
+    .sidebar { width: 220px; background: #000; color: #fff; height: 100vh; float: left; border-right: 1px solid #222; padding: 20px; }
+    .sidebar a { display: block; margin: 20px 0; color: #fff; text-decoration: none; font-size: 18px; }
+    .main { margin-left: 240px; padding: 20px; }
+    .post-box { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .post-box textarea { flex: 1; background: #000; border: none; border-bottom: 1px solid #333; color: #fff; padding: 10px; resize: none; }
+    .post-box button { background: #1da1f2; border: none; padding: 8px 16px; border-radius: 20px; color: #fff; cursor: pointer; }
+    .post { border-bottom: 1px solid #333; padding: 15px 0; display: flex; gap: 10px; }
+    .post img { width: 40px; height: 40px; border-radius: 50%; }
+    .post .user { font-weight: bold; margin-bottom: 5px; }
+    /* Login/Register modal */
+    #auth { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; justify-content: center; align-items: center; }
+    #auth form { background: #111; padding: 30px; border-radius: 10px; display: flex; flex-direction: column; gap: 15px; width: 300px; }
+    #auth input { padding: 10px; border: none; border-radius: 5px; }
+    #auth button { padding: 10px; background: #1da1f2; border: none; border-radius: 5px; color: #fff; cursor: pointer; }
   </style>
 </head>
 <body>
-  <!-- LOGIN / REGISTER -->
-  <div id="loginPanel">
-    <div class="loginBox">
-      <h2>Lunetter — Entrar / Registrarse</h2>
-      <input id="inpUsername" type="text" placeholder="Nombre de usuario (sin espacios)" />
-      <input id="inpPassword" type="password" placeholder="Contraseña" />
-      <label style="font-size:13px;color:#777">Avatar opcional</label>
-      <input id="inpAvatar" type="file" accept="image/*" />
-      <div class="rowBtns">
-        <button id="btnLogin" class="btn">Ingresar</button>
-        <button id="btnRegister" class="btn secondary">Registrarse</button>
-      </div>
-      <div id="loginError" class="error"></div>
-    </div>
+
+<div id="auth">
+  <form id="registerForm">
+    <h2>Registro</h2>
+    <input type="text" id="regUsername" placeholder="Nombre de usuario" required />
+    <input type="password" id="regPassword" placeholder="Contraseña" required />
+    <button type="submit">Registrar</button>
+    <button type="button" id="toLogin">Iniciar sesión</button>
+  </form>
+
+  <form id="loginForm" style="display:none;">
+    <h2>Iniciar sesión</h2>
+    <input type="text" id="loginUsername" placeholder="Nombre de usuario" required />
+    <input type="password" id="loginPassword" placeholder="Contraseña" required />
+    <button type="submit">Entrar</button>
+    <button type="button" id="toRegister">Registrarse</button>
+  </form>
+</div>
+
+<div class="sidebar" id="sidebar" style="display:none;">
+  <a href="#">Home</a>
+  <a href="#">Explore</a>
+  <a href="#">Notifications</a>
+  <a href="#">Profile</a>
+  <a href="#" id="logoutBtn">Cerrar sesión</a>
+</div>
+
+<div class="main" id="main" style="display:none;">
+  <div class="post-box">
+    <img id="currentAvatar" src="" alt="avatar" />
+    <textarea id="postText" placeholder="What's happening?"></textarea>
+    <button id="postBtn">Post</button>
   </div>
+  <div id="feed"></div>
+</div>
 
-  <!-- APP -->
-  <div id="appUI" class="hidden" style="display:flex;width:100%">
-    <aside class="sidebar">
-      <button>Home</button>
-      <button>Explore</button>
-      <button>Notifications</button>
-      <button>Profile</button>
-      <div style="flex:1"></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <img id="sidebarAvatar" src="https://i.pravatar.cc/100" style="width:36px;height:36px;border-radius:50%" />
-        <div style="flex:1">
-          <div id="sidebarUser" style="font-weight:700"></div>
-          <button onclick="logout()" style="background:#222;border:none;color:#ddd;padding:6px;border-radius:8px;cursor:pointer">Cerrar sesión</button>
-        </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, doc, setDoc, getDoc, addDoc, onSnapshot, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBZvsL3zwUsHmTL0QZxQOkWF28_N2FR4L0",
+    authDomain: "lunetter-55d46.firebaseapp.com",
+    projectId: "lunetter-55d46",
+    storageBucket: "lunetter-55d46.firebasestorage.app",
+    messagingSenderId: "798507844928",
+    appId: "1:798507844928:web:20e8a48a66a85ee6c6e6a5",
+    measurementId: "G-46BL2MEZ68"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const authDiv = document.getElementById("auth");
+  const regForm = document.getElementById("registerForm");
+  const loginForm = document.getElementById("loginForm");
+  const mainDiv = document.getElementById("main");
+  const sidebar = document.getElementById("sidebar");
+  const feed = document.getElementById("feed");
+  const postBtn = document.getElementById("postBtn");
+  const postText = document.getElementById("postText");
+  const currentAvatar = document.getElementById("currentAvatar");
+
+  function randomAvatar() {
+    return `https://i.pravatar.cc/150?u=${Math.floor(Math.random()*10000)}`;
+  }
+
+  function saveSession(user) {
+    localStorage.setItem("user", JSON.stringify(user));
+  }
+  function getSession() {
+    return JSON.parse(localStorage.getItem("user"));
+  }
+  function clearSession() {
+    localStorage.removeItem("user");
+  }
+
+  async function register(username, password) {
+    const userRef = doc(db, "users", username);
+    const snap = await getDoc(userRef);
+    if (snap.exists()) {
+      alert("Usuario ya existe");
+      return null;
+    }
+    const avatar = randomAvatar();
+    await setDoc(userRef, { username, password, avatar, createdAt: serverTimestamp() });
+    return { username, avatar };
+  }
+
+  async function login(username, password) {
+    const userRef = doc(db, "users", username);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) {
+      alert("Usuario no encontrado");
+      return null;
+    }
+    const data = snap.data();
+    if (data.password !== password) {
+      alert("Contraseña incorrecta");
+      return null;
+    }
+    return { username: data.username, avatar: data.avatar };
+  }
+
+  function showApp(user) {
+    authDiv.style.display = "none";
+    mainDiv.style.display = "block";
+    sidebar.style.display = "block";
+    currentAvatar.src = user.avatar;
+    saveSession(user);
+    loadPosts();
+  }
+
+  function renderPost(docSnap) {
+    const data = docSnap.data();
+    const div = document.createElement("div");
+    div.className = "post";
+    div.innerHTML = `
+      <img src="${data.avatar}" />
+      <div>
+        <div class="user">${data.user}</div>
+        <div>${data.text}</div>
       </div>
-    </aside>
-    <main class="main">
-      <div class="feed">
-        <div class="composer">
-          <img id="composerAvatar" src="https://i.pravatar.cc/100" />
-          <div style="flex:1;display:flex;flex-direction:column">
-            <textarea id="postInput" rows="3" placeholder="¿Qué está pasando?"></textarea>
-            <div style="display:flex;justify-content:flex-end;margin-top:8px">
-              <button class="btn" onclick="addPost()">Publicar</button>
-            </div>
-          </div>
-        </div>
-        <div id="posts"></div>
-      </div>
-    </main>
-  </div>
+    `;
+    return div;
+  }
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBZvsL3zwUsHmTL0QZxQOkWF28_N2FR4L0",
-      authDomain: "lunetter-55d46.firebaseapp.com",
-      projectId: "lunetter-55d46",
-      storageBucket: "lunetter-55d46.firebasestorage.app",
-      messagingSenderId: "798507844928",
-      appId: "1:798507844928:web:20e8a48a66a85ee6c6e6a5",
-      measurementId: "G-46BL2MEZ68"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-
-    let currentUser = null;
-    const postsDiv = document.getElementById('posts');
-
-    // ----------- util hash ----------
-    async function hashPassword(password) {
-      const enc = new TextEncoder();
-      const data = enc.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');
-    }
-
-    // ----------- login/register ----------
-    const inpUsername=document.getElementById('inpUsername');
-    const inpPassword=document.getElementById('inpPassword');
-    const inpAvatar=document.getElementById('inpAvatar');
-    const btnLogin=document.getElementById('btnLogin');
-    const btnRegister=document.getElementById('btnRegister');
-    const loginError=document.getElementById('loginError');
-
-    btnRegister.onclick=async()=>{
-      loginError.textContent='';
-      const username=inpUsername.value.trim();
-      const password=inpPassword.value;
-      if(!username||!password){loginError.textContent='Completa usuario y contraseña.';return;}
-      if(/\s/.test(username)){loginError.textContent='El nombre no puede tener espacios.';return;}
-      const userRef=doc(db,'users',username);
-      const snap=await getDoc(userRef);
-      if(snap.exists()){loginError.textContent='El usuario ya existe.';return;}
-      let avatar=`https://i.pravatar.cc/100?u=${encodeURIComponent(username)}`;
-      if(inpAvatar.files[0]){const storageRef=ref(storage,`avatars/${username}`);await uploadBytes(storageRef,inpAvatar.files[0]);avatar=await getDownloadURL(storageRef);}
-      const hash=await hashPassword(password);
-      await setDoc(userRef,{username,passwordHash:hash,avatar,createdAt:serverTimestamp()});
-      currentUser={username,avatar};localStorage.setItem('sessionUser',JSON.stringify(currentUser));showApp();
-    };
-
-    btnLogin.onclick=async()=>{
-      loginError.textContent='';
-      const username=inpUsername.value.trim();
-      const password=inpPassword.value;
-      if(!username||!password){loginError.textContent='Completa usuario y contraseña.';return;}
-      const userRef=doc(db,'users',username);
-      const snap=await getDoc(userRef);
-      if(!snap.exists()){loginError.textContent='Usuario no encontrado.';return;}
-      const data=snap.data();
-      const hash=await hashPassword(password);
-      if(data.passwordHash!==hash){loginError.textContent='Contraseña incorrecta.';return;}
-      currentUser={username:data.username,avatar:data.avatar};localStorage.setItem('sessionUser',JSON.stringify(currentUser));showApp();
-    };
-
-    // ----------- posts ----------
-    window.addPost=async()=>{
-      const text=document.getElementById('postInput').value.trim();
-      if(!text)return;
-      await addDoc(collection(db,'posts'),{user:currentUser.username,avatar:currentUser.avatar,text,created:serverTimestamp()});
-      document.getElementById('postInput').value='';
-    };
-
-    function showApp(){
-      document.getElementById('loginPanel').style.display='none';
-      document.getElementById('appUI').classList.remove('hidden');
-      document.getElementById('sidebarUser').textContent=currentUser.username;
-      document.getElementById('sidebarAvatar').src=currentUser.avatar;
-      document.getElementById('composerAvatar').src=currentUser.avatar;
-      renderPosts();
-    }
-
-    function renderPosts(){
-      const q=query(collection(db,'posts'),orderBy('created','desc'));
-      onSnapshot(q,(snap)=>{
-        postsDiv.innerHTML='';
-        snap.forEach(d=>{
-          const p=d.data();
-          const el=document.createElement('div');
-          el.className='post';
-          el.innerHTML=`
-            <img src="${p.avatar}" />
-            <div class="postContent">
-              <div class="postHeader"><span class="name">${p.user}</span> <span class="user">@${p.user}</span></div>
-              <div class="postText">${p.text}</div>
-            </div>`;
-          postsDiv.appendChild(el);
-        });
+  function loadPosts() {
+    const q = query(collection(db, "posts"), orderBy("created", "desc"));
+    onSnapshot(q, (snapshot) => {
+      feed.innerHTML = "";
+      snapshot.forEach((docSnap) => {
+        feed.appendChild(renderPost(docSnap));
       });
-    }
-
-    // ----------- restore session ----------
-    window.addEventListener('load',()=>{
-      const s=localStorage.getItem('sessionUser');
-      if(s){currentUser=JSON.parse(s);showApp();}
     });
+  }
 
-    window.logout=function(){
-      localStorage.removeItem('sessionUser');currentUser=null;
-      document.getElementById('appUI').classList.add('hidden');
-      document.getElementById('loginPanel').style.display='flex';
-    }
-  </script>
-
-  <script>
-  // Detectar si ya hay usuario en localStorage
-  window.addEventListener("load", () => {
-    const sessionUser = localStorage.getItem("sessionUser");
-    if (sessionUser) {
-      document.getElementById("loginPanel").style.display = "none";
-      document.getElementById("appUI").classList.remove("hidden");
-    }
+  // EVENTOS
+  regForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const username = document.getElementById("regUsername").value.trim();
+    const password = document.getElementById("regPassword").value;
+    const user = await register(username, password);
+    if (user) showApp(user);
   });
 
-  // Forzar que después de registrar se muestre el menú principal
-  document.addEventListener("DOMContentLoaded", () => {
-    const btnRegister = document.getElementById("btnRegister");
-    if (btnRegister) {
-      btnRegister.addEventListener("click", () => {
-        setTimeout(() => {
-          document.getElementById("loginPanel").style.display = "none";
-          document.getElementById("appUI").classList.remove("hidden");
-        }, 800); // pequeña espera para que termine el registro
-      });
-    }
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const username = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    const user = await login(username, password);
+    if (user) showApp(user);
   });
-</script>
 
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const btnRegister = document.getElementById("btnRegister");
-    const inpUsername = document.getElementById("inpUsername");
-    const loginError = document.getElementById("loginError");
+  document.getElementById("toLogin").addEventListener("click", () => {
+    regForm.style.display = "none";
+    loginForm.style.display = "flex";
+  });
 
-    btnRegister.addEventListener("click", async () => {
-      const username = inpUsername.value.trim();
-      if (!username) return;
+  document.getElementById("toRegister").addEventListener("click", () => {
+    loginForm.style.display = "none";
+    regForm.style.display = "flex";
+  });
 
-      // Revisar en Firestore si el usuario ya existe
-      try {
-        const userRef = firebase.firestore().collection("users").doc(username);
-        const docSnap = await userRef.get();
-
-        if (docSnap.exists) {
-          loginError.textContent = "Usuario ya existe";
-        } else {
-          loginError.textContent = "";
-          // ⚡ Aquí puedes seguir con tu lógica de crear usuario
-          // Si ya usas setDoc en otro lado, este mensaje es solo la validación
-        }
-      } catch (e) {
-        console.error("Error al validar usuario:", e);
-      }
+  postBtn.addEventListener("click", async () => {
+    const user = getSession();
+    if (!user) return;
+    const text = postText.value.trim();
+    if (text === "") return;
+    await addDoc(collection(db, "posts"), {
+      user: user.username,
+      avatar: user.avatar,
+      text,
+      created: serverTimestamp()
     });
+    postText.value = "";
   });
-</script>
-  
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const btnLogin = document.getElementById("btnLogin");
-    if (btnLogin) {
-      btnLogin.textContent = "Iniciar sesión";
-    }
-  });
-</script>
 
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    clearSession();
+    location.reload();
+  });
+
+  // Mantener sesión
+  const sessionUser = getSession();
+  if (sessionUser) {
+    showApp(sessionUser);
+  }
+</script>
 </body>
 </html>
