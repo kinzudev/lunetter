@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lunetter</title>
+  <title>Mini Twitter Clone</title>
   <style>
     body {
       margin: 0;
@@ -103,6 +103,11 @@
       border-bottom: 1px solid #333;
       padding: 15px;
       display: flex;
+      flex-direction: column;
+    }
+
+    .post-header-container {
+      display: flex;
     }
 
     .post img {
@@ -135,6 +140,68 @@
     .post-text {
       font-size: 15px;
       line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 20px;
+      font-size: 14px;
+      color: #777;
+      cursor: pointer;
+    }
+
+    .post-actions span:hover {
+      color: #1DA1F2;
+    }
+
+    .comments {
+      margin-top: 10px;
+      border-left: 2px solid #333;
+      padding-left: 10px;
+    }
+
+    .comment {
+      display: flex;
+      margin-top: 10px;
+    }
+
+    .comment img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .comment-content {
+      background: #111;
+      border-radius: 10px;
+      padding: 8px 12px;
+    }
+
+    .comment-input {
+      display: flex;
+      margin-top: 10px;
+    }
+
+    .comment-input input {
+      flex: 1;
+      background: #111;
+      border: none;
+      color: #fff;
+      padding: 8px;
+      border-radius: 20px;
+      outline: none;
+    }
+
+    .comment-input button {
+      margin-left: 8px;
+      padding: 6px 12px;
+      background: #1DA1F2;
+      border: none;
+      border-radius: 20px;
+      color: #fff;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -169,6 +236,9 @@
       const postContainer = document.createElement('div');
       postContainer.className = 'post';
 
+      const headerContainer = document.createElement('div');
+      headerContainer.className = 'post-header-container';
+
       const avatar = document.createElement('img');
       avatar.src = "https://i.pravatar.cc/48?img=" + Math.floor(Math.random() * 70);
 
@@ -196,13 +266,84 @@
       contentWrapper.appendChild(header);
       contentWrapper.appendChild(content);
 
-      postContainer.appendChild(avatar);
-      postContainer.appendChild(contentWrapper);
+      headerContainer.appendChild(avatar);
+      headerContainer.appendChild(contentWrapper);
+
+      postContainer.appendChild(headerContainer);
+
+      // Post actions (like & comment)
+      const actions = document.createElement('div');
+      actions.className = 'post-actions';
+
+      const likeBtn = document.createElement('span');
+      likeBtn.textContent = "❤️ 0";
+      likeBtn.onclick = () => {
+        let count = parseInt(likeBtn.textContent.replace("❤️", "").trim());
+        likeBtn.textContent = "❤️ " + (count + 1);
+      };
+
+      const commentBtn = document.createElement('span');
+      commentBtn.textContent = "💬 Comment";
+      commentBtn.onclick = () => showCommentBox(postContainer);
+
+      actions.appendChild(likeBtn);
+      actions.appendChild(commentBtn);
+
+      postContainer.appendChild(actions);
+
+      // Comment section
+      const commentsSection = document.createElement('div');
+      commentsSection.className = 'comments';
+      postContainer.appendChild(commentsSection);
 
       const posts = document.getElementById('posts');
       posts.insertBefore(postContainer, posts.firstChild);
 
       input.value = '';
+    }
+
+    function showCommentBox(postContainer) {
+      // avoid multiple input boxes
+      if (postContainer.querySelector('.comment-input')) return;
+
+      const commentBox = document.createElement('div');
+      commentBox.className = 'comment-input';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Write a comment...';
+
+      const button = document.createElement('button');
+      button.textContent = 'Reply';
+      button.onclick = () => {
+        if (input.value.trim() === '') return;
+        addComment(postContainer, input.value);
+        commentBox.remove();
+      };
+
+      commentBox.appendChild(input);
+      commentBox.appendChild(button);
+
+      postContainer.appendChild(commentBox);
+    }
+
+    function addComment(postContainer, text) {
+      const commentsSection = postContainer.querySelector('.comments');
+
+      const comment = document.createElement('div');
+      comment.className = 'comment';
+
+      const avatar = document.createElement('img');
+      avatar.src = "https://i.pravatar.cc/32?img=" + Math.floor(Math.random() * 70);
+
+      const content = document.createElement('div');
+      content.className = 'comment-content';
+      content.textContent = text;
+
+      comment.appendChild(avatar);
+      comment.appendChild(content);
+
+      commentsSection.appendChild(comment);
     }
   </script>
 </body>
