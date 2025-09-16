@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lunetter</title>
+  <title>Lunetter1</title>
   <style>
     body { margin:0; font-family:Arial, sans-serif; background:#000; color:#fff; }
     .sidebar { width:220px; background:#000; color:#fff; height:100vh; float:left; border-right:1px solid #222; padding:20px; }
@@ -251,10 +251,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore, collection, doc, addDoc, onSnapshot, orderBy, query, serverTimestamp,
-  updateDoc, arrayUnion, getDoc, deleteDoc
+  updateDoc, arrayUnion, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// --- CONFIG: tu firebaseConfig ---
 const firebaseConfig = {
   apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
   authDomain: "pekora-forum.firebaseapp.com",
@@ -268,7 +267,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- Helpers para sesión (intenta varias llaves por compatibilidad) ---
 function getCurrentUserFromStorage() {
   const keys = ['currentUser','sessionUser','user','loggedUser'];
   for (const k of keys) {
@@ -279,30 +277,19 @@ function getCurrentUserFromStorage() {
   }
   return null;
 }
-
-function saveSession(user) {
-  // guarda en una llave común por si la app espera 'currentUser'
-  localStorage.setItem('currentUser', JSON.stringify(user));
+function genId() { return `${Date.now()}-${Math.random().toString(36).slice(2,9)}`; }
+function escapeHtml(str) {
+  if (!str) return "";
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
-// --- util: generar id único para comentarios ---
-function genId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
-}
-
-// --- busca elementos con varios posibles ids ---
-const postsDiv = document.getElementById('posts') || document.getElementById('feed');
-const postInput = document.getElementById('postInput') || document.getElementById('postText');
-const postBtn = document.getElementById('postBtn') || document.getElementById('postBtn');
-
-// --- Render de un post (incluye borrar post y borrar comentarios propios) ---
+// --- Render de post ---
 function renderPost(docSnap, sessionUser) {
   const data = docSnap.data() || {};
   const postId = docSnap.id;
-  const div = document.createElement('div');
-  div.className = 'post';
+  const div = document.createElement("div");
+  div.className = "post";
 
-  // plantilla básica
   div.innerHTML = `
     <img src="${data.avatar || 'https://i.pravatar.cc/40'}" style="width:40px;height:40px;border-radius:50%;"/>
     <div style="flex:1;">
@@ -310,177 +297,101 @@ function renderPost(docSnap, sessionUser) {
         <strong style="color:#1DA1F2">${escapeHtml(data.user || 'Anon')}</strong>
         <span style="color:#999;font-size:13px">@${escapeHtml(data.user || 'anon')}</span>
         <div style="flex:1"></div>
-        ${ (sessionUser && data.user === sessionUser.username) ? '<button class="deletePostBtn" title="Eliminar post" style="background:none;border:none;color:red;cursor:pointer">🗑️</button>' : '' }
+        ${ (sessionUser && data.user === sessionUser.username) ? '<button class="deletePostBtn" style="background:none;border:none;color:red;cursor:pointer">🗑️</button>' : '' }
       </div>
       <div style="margin:8px 0;white-space:pre-wrap">${escapeHtml(data.text || '')}</div>
       <div class="actions" style="display:flex;gap:10px">
-        <button class="likeBtn" style="background:none;border:none;cursor:pointer">❤️ <span class="likesCount">${(data.likes && data.likes.length) || 0}</span></button>
-        <button class="commentToggleBtn" style="background:none;border:none;cursor:pointer">💬 <span class="commentsCount">${(data.comments && data.comments.length) || 0}</span></button>
+        <button class="likeBtn">❤️ <span class="likesCount">${(data.likes && data.likes.length) || 0}</span></button>
+        <button class="commentToggleBtn">💬 <span class="commentsCount">${(data.comments && data.comments.length) || 0}</span></button>
       </div>
-      <div class="comments" style="margin-top:8px;padding-left:8px"></div>
+      <div class="comments" style="margin-top:8px;padding-left:8px;display:none"></div>
       <div class="comment-box" style="margin-top:8px;display:flex;gap:6px;align-items:center">
-        <input type="text" class="commentInput" placeholder="Escribe un comentario..." style="flex:1;padding:6px;border-radius:6px;border:1px solid #222;background:#0f1113;color:#fff" />
-        <button class="sendComment" style="padding:6px 8px;border-radius:6px;background:#1DA1F2;border:none;color:#000;cursor:pointer">Enviar</button>
+        <input type="text" class="commentInput" placeholder="Escribe un comentario..." style="flex:1"/>
+        <button class="sendComment">Enviar</button>
       </div>
     </div>
   `;
 
-  // --- mostrar / ocultar comentarios con el botón ---
-  const commentToggleBtn = div.querySelector('.commentToggleBtn');
-  const commentsContainer = div.querySelector('.comments');
-  commentToggleBtn && commentToggleBtn.addEventListener('click', () => {
-    commentsContainer.style.display = commentsContainer.style.display === 'none' ? 'block' : 'none';
-  });
+  const commentsContainer = div.querySelector(".comments");
 
-  // --- enviar comentario: añadimos objeto con id, user, text, created ---
-  const sendBtn = div.querySelector('.sendComment');
-  sendBtn && sendBtn.addEventListener('click', async () => {
-    const input = div.querySelector('.commentInput');
-    const text = (input && input.value || '').trim();
-    const user = getCurrentUserFromStorage();
-    if (!user) { alert('Inicia sesión para comentar'); return; }
-    if (!text) return;
-    const commentObj = { id: genId(), user: user.username, text, created: serverTimestamp() };
-    const ref = doc(db, 'posts', postId);
-    // usamos arrayUnion para evitar leer-modificar-escribir (más robusto para concurrencia al añadir)
-    await updateDoc(ref, { comments: arrayUnion(commentObj) });
-    input.value = '';
-  });
+  // --- Render comentarios en vivo ---
+  function renderComments(comments) {
+    commentsContainer.innerHTML = "";
+    comments.forEach(c => {
+      const cmDiv = document.createElement("div");
+      cmDiv.className = "comment";
+      cmDiv.style.display = "flex";
+      cmDiv.style.alignItems = "center";
+      cmDiv.style.gap = "8px";
+      cmDiv.innerHTML = `<div style="flex:1"><b>${escapeHtml(c.user)}</b>: ${escapeHtml(c.text)}</div>`;
 
-  // --- renderizar comentarios (y añadir botón eliminar solo si eres autor) ---
-  async function renderComments() {
-    commentsContainer.innerHTML = '';
-    // read latest comments from server to render freshest state (avoids race with other clients)
-    try {
-      const snap = await getDoc(doc(db, 'posts', postId));
-      const serverData = snap.exists() ? snap.data() : {};
-      const comments = Array.isArray(serverData.comments) ? serverData.comments : [];
-      comments.forEach((c, idx) => {
-        const cmDiv = document.createElement('div');
-        cmDiv.className = 'comment';
-        cmDiv.style.display = 'flex';
-        cmDiv.style.alignItems = 'center';
-        cmDiv.style.gap = '8px';
-        cmDiv.innerHTML = `<div style="flex:1"><b>${escapeHtml(c.user)}</b>: ${escapeHtml(c.text)}</div>`;
-        // si es tu comentario, añadir botón borrar
-        const session = getCurrentUserFromStorage();
-        if (session && c.user === session.username) {
-          const del = document.createElement('button');
-          del.textContent = '🗑️';
-          del.title = 'Eliminar comentario';
-          del.style.background = 'none';
-          del.style.border = 'none';
-          del.style.color = 'red';
-          del.style.cursor = 'pointer';
-          del.addEventListener('click', async () => {
-            try {
-              // volver a leer array actual, filtrar por id si existe, si no por la primera coincidencia user+text
-              const s2 = await getDoc(doc(db, 'posts', postId));
-              const cur = (s2.exists() && Array.isArray(s2.data().comments)) ? s2.data().comments : [];
-              let updated;
-              if (c.id) {
-                updated = cur.filter(cc => cc.id !== c.id);
-              } else {
-                // fallback: eliminar la primera coincidencia user+text
-                let removed = false;
-                updated = cur.filter(cc => {
-                  if (removed) return true;
-                  if (cc.user === c.user && cc.text === c.text) { removed = true; return false; }
-                  return true;
-                });
-              }
-              await updateDoc(doc(db, 'posts', postId), { comments: updated });
-            } catch (e) {
-              console.error('Error al borrar comentario', e);
-            }
-          });
-          cmDiv.appendChild(del);
-        }
-        commentsContainer.appendChild(cmDiv);
-      });
-    } catch (err) {
-      console.error('Render comments error', err);
-    }
+      if (sessionUser && c.user === sessionUser.username) {
+        const del = document.createElement("button");
+        del.textContent = "🗑️";
+        del.style.background = "none";
+        del.style.border = "none";
+        del.style.color = "red";
+        del.style.cursor = "pointer";
+        del.addEventListener("click", async () => {
+          const updated = (data.comments || []).filter(cc => cc.id !== c.id);
+          await updateDoc(doc(db, "posts", postId), { comments: updated });
+        });
+        cmDiv.appendChild(del);
+      }
+      commentsContainer.appendChild(cmDiv);
+    });
   }
 
-  // --- borrar post (solo autor) ---
-  const deletePostBtn = div.querySelector('.deletePostBtn');
-  if (deletePostBtn) {
-    deletePostBtn.addEventListener('click', async () => {
-      if (!confirm('¿Eliminar post? Esto no se puede deshacer.')) return;
-      try {
-        await deleteDoc(doc(db, 'posts', postId));
-      } catch (e) {
-        console.error('Error al eliminar post', e);
+  // --- Botón toggle comentarios ---
+  div.querySelector(".commentToggleBtn").addEventListener("click", () => {
+    commentsContainer.style.display = commentsContainer.style.display === "none" ? "block" : "none";
+    renderComments(data.comments || []);
+  });
+
+  // --- Botón enviar comentario ---
+  div.querySelector(".sendComment").addEventListener("click", async () => {
+    const input = div.querySelector(".commentInput");
+    const text = input.value.trim();
+    if (!sessionUser) return alert("Inicia sesión para comentar");
+    if (!text) return;
+    const commentObj = { id: genId(), user: sessionUser.username, text, created: serverTimestamp() };
+    await updateDoc(doc(db, "posts", postId), { comments: arrayUnion(commentObj) });
+    input.value = "";
+  });
+
+  // --- Borrar post ---
+  const delBtn = div.querySelector(".deletePostBtn");
+  if (delBtn) {
+    delBtn.addEventListener("click", async () => {
+      if (confirm("¿Eliminar post?")) {
+        await deleteDoc(doc(db, "posts", postId));
       }
     });
   }
 
-  // --- like: se añade el username al array likes (no se duplica porque puede repetirse; para evitar duplicados
-  // podríamos leer y controlar, pero por simplicidad dejamos que el array tenga únicos o no según tu uso) ---
-  const likeBtn = div.querySelector('.likeBtn');
-  likeBtn && likeBtn.addEventListener('click', async () => {
-    const session = getCurrentUserFromStorage();
-    if (!session) { alert('Inicia sesión para dar like'); return; }
-    const ref = doc(db, 'posts', postId);
-    await updateDoc(ref, { likes: arrayUnion(session.username) });
+  // --- Likes ---
+  div.querySelector(".likeBtn").addEventListener("click", async () => {
+    if (!sessionUser) return alert("Inicia sesión para dar like");
+    await updateDoc(doc(db, "posts", postId), { likes: arrayUnion(sessionUser.username) });
   });
 
-  // --- inicial render de comentarios (y se actualizará cuando onSnapshot re-renderice el post) ---
-  renderComments();
+  // Render inicial comentarios
+  renderComments(data.comments || []);
 
   return div;
 }
 
-// --- utility para escapar HTML en texto plano ---
-function escapeHtml(str) {
-  if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-// --- escucha posts en tiempo real (ordenados) ---
-const postsContainer = postsDiv || document.getElementById('posts') || document.getElementById('feed');
-if (!postsContainer) console.warn('No se encontró contenedor de posts (id="posts" ó id="feed")');
-
-const q = query(collection(db, 'posts'), orderBy('created', 'desc'));
+// --- Escucha en vivo ---
+const postsContainer = document.getElementById("posts") || document.getElementById("feed");
+const q = query(collection(db, "posts"), orderBy("created", "desc"));
 onSnapshot(q, (snapshot) => {
+  postsContainer.innerHTML = "";
   const sessionUser = getCurrentUserFromStorage();
-  if (!postsContainer) return;
-  postsContainer.innerHTML = '';
   snapshot.forEach(docSnap => {
     const el = renderPost(docSnap, sessionUser);
     postsContainer.appendChild(el);
   });
 });
-
-// --- publicar (intenta varios ids para compatibilidad) ---
-const publishBtn = postBtn || document.getElementById('postBtn') || document.querySelector('[data-post-btn]');
-const publishInput = postInput || document.getElementById('postText') || document.querySelector('[data-post-input]');
-
-if (publishBtn && publishInput) {
-  publishBtn.addEventListener('click', async () => {
-    const session = getCurrentUserFromStorage();
-    if (!session) { alert('Inicia sesión para publicar'); return; }
-    const text = (publishInput.value || '').trim();
-    if (!text) return;
-    await addDoc(collection(db, 'posts'), {
-      user: session.username,
-      avatar: session.avatar || `https://i.pravatar.cc/100?u=${encodeURIComponent(session.username)}`,
-      text,
-      created: serverTimestamp(),
-      likes: [],
-      comments: []
-    });
-    publishInput.value = '';
-  });
-} else {
-  console.warn('No se encontró botón o input para publicar (busqué ids postBtn/postInput/postText)');
-}
 </script>
 
 </body>
