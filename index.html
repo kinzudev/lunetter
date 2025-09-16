@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lunetter</title>
+  <title>Lunetter1</title>
   <style>
     body { margin: 0; font-family: Arial, sans-serif; background: #000; color: #fff; }
     .sidebar { width: 220px; background: #000; color: #fff; height: 100vh; float: left; border-right: 1px solid #222; padding: 20px; }
@@ -25,6 +25,7 @@
 <body>
 
 <div id="auth">
+  <!-- Registro -->
   <form id="registerForm">
     <h2>Registro</h2>
     <input type="text" id="regUsername" placeholder="Nombre de usuario" required />
@@ -33,6 +34,7 @@
     <button type="button" id="toLogin">Iniciar sesión</button>
   </form>
 
+  <!-- Login -->
   <form id="loginForm" style="display:none;">
     <h2>Iniciar sesión</h2>
     <input type="text" id="loginUsername" placeholder="Nombre de usuario" required />
@@ -76,30 +78,15 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  const authDiv = document.getElementById("auth");
-  const regForm = document.getElementById("registerForm");
-  const loginForm = document.getElementById("loginForm");
-  const mainDiv = document.getElementById("main");
-  const sidebar = document.getElementById("sidebar");
-  const feed = document.getElementById("feed");
-  const postBtn = document.getElementById("postBtn");
-  const postText = document.getElementById("postText");
-  const currentAvatar = document.getElementById("currentAvatar");
-
+  // utilidades
   function randomAvatar() {
     return `https://i.pravatar.cc/150?u=${Math.floor(Math.random()*10000)}`;
   }
+  function saveSession(user) { localStorage.setItem("user", JSON.stringify(user)); }
+  function getSession() { return JSON.parse(localStorage.getItem("user")); }
+  function clearSession() { localStorage.removeItem("user"); }
 
-  function saveSession(user) {
-    localStorage.setItem("user", JSON.stringify(user));
-  }
-  function getSession() {
-    return JSON.parse(localStorage.getItem("user"));
-  }
-  function clearSession() {
-    localStorage.removeItem("user");
-  }
-
+  // Registro
   async function register(username, password) {
     const userRef = doc(db, "users", username);
     const snap = await getDoc(userRef);
@@ -112,6 +99,7 @@
     return { username, avatar };
   }
 
+  // Login
   async function login(username, password) {
     const userRef = doc(db, "users", username);
     const snap = await getDoc(userRef);
@@ -127,15 +115,17 @@
     return { username: data.username, avatar: data.avatar };
   }
 
+  // Mostrar app
   function showApp(user) {
-    authDiv.style.display = "none";
-    mainDiv.style.display = "block";
-    sidebar.style.display = "block";
-    currentAvatar.src = user.avatar;
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("main").style.display = "block";
+    document.getElementById("sidebar").style.display = "block";
+    document.getElementById("currentAvatar").src = user.avatar;
     saveSession(user);
     loadPosts();
   }
 
+  // Cargar posts
   function renderPost(docSnap) {
     const data = docSnap.data();
     const div = document.createElement("div");
@@ -149,10 +139,10 @@
     `;
     return div;
   }
-
   function loadPosts() {
     const q = query(collection(db, "posts"), orderBy("created", "desc"));
     onSnapshot(q, (snapshot) => {
+      const feed = document.getElementById("feed");
       feed.innerHTML = "";
       snapshot.forEach((docSnap) => {
         feed.appendChild(renderPost(docSnap));
@@ -161,7 +151,7 @@
   }
 
   // EVENTOS
-  regForm.addEventListener("submit", async (e) => {
+  document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const username = document.getElementById("regUsername").value.trim();
     const password = document.getElementById("regPassword").value;
@@ -169,7 +159,7 @@
     if (user) showApp(user);
   });
 
-  loginForm.addEventListener("submit", async (e) => {
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const username = document.getElementById("loginUsername").value.trim();
     const password = document.getElementById("loginPassword").value;
@@ -178,19 +168,18 @@
   });
 
   document.getElementById("toLogin").addEventListener("click", () => {
-    regForm.style.display = "none";
-    loginForm.style.display = "flex";
+    document.getElementById("registerForm").style.display = "none";
+    document.getElementById("loginForm").style.display = "flex";
   });
-
   document.getElementById("toRegister").addEventListener("click", () => {
-    loginForm.style.display = "none";
-    regForm.style.display = "flex";
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("registerForm").style.display = "flex";
   });
 
-  postBtn.addEventListener("click", async () => {
+  document.getElementById("postBtn").addEventListener("click", async () => {
     const user = getSession();
     if (!user) return;
-    const text = postText.value.trim();
+    const text = document.getElementById("postText").value.trim();
     if (text === "") return;
     await addDoc(collection(db, "posts"), {
       user: user.username,
@@ -198,7 +187,7 @@
       text,
       created: serverTimestamp()
     });
-    postText.value = "";
+    document.getElementById("postText").value = "";
   });
 
   document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -206,7 +195,7 @@
     location.reload();
   });
 
-  // Mantener sesión
+  // Restaurar sesión
   const sessionUser = getSession();
   if (sessionUser) {
     showApp(sessionUser);
