@@ -348,85 +348,100 @@
   const postBtn = document.getElementById("postBtn");
   const postInput = document.getElementById("postInput");
 
-  // Crear un contenedor nuevo para imagenes
-  const imageContainer = document.createElement("div");
-  imageContainer.style.display = "flex";
-  imageContainer.style.flexDirection = "column";
-  imageContainer.style.gap = "10px";
-  imageContainer.style.marginTop = "10px";
-
-  // Input de imagen
+  // === Crear input de imagen + botón "Post Image" ===
   const fileInput = document.createElement("input");
   fileInput.type = "file";
   fileInput.accept = "image/*";
-  fileInput.id = "imageInput";
-  fileInput.style.color = "#fff";
-  fileInput.style.cursor = "pointer";
+  fileInput.style.display = "none"; // oculto, lo abrimos con el botón
+  postBox.appendChild(fileInput);
 
-  // Preview
   const preview = document.createElement("img");
   preview.style.maxWidth = "250px";
   preview.style.borderRadius = "10px";
+  preview.style.marginTop = "10px";
   preview.style.display = "none";
+  postBox.appendChild(preview);
 
-  imageContainer.appendChild(fileInput);
-  imageContainer.appendChild(preview);
+  const postImageBtn = document.createElement("button");
+  postImageBtn.innerText = "Post Image";
+  postImageBtn.style.marginTop = "10px";
+  postImageBtn.style.padding = "6px 12px";
+  postImageBtn.style.background = "#1d9bf0";
+  postImageBtn.style.color = "#fff";
+  postImageBtn.style.border = "none";
+  postImageBtn.style.borderRadius = "20px";
+  postImageBtn.style.cursor = "pointer";
+  postBox.appendChild(postImageBtn);
 
-  // Insertamos justo ANTES del botón Post
-  postBox.insertBefore(imageContainer, postBtn);
-
-  // Mostrar preview al elegir archivo
-  fileInput.addEventListener("change", () => {
-    if (fileInput.files.length > 0) {
-      preview.src = URL.createObjectURL(fileInput.files[0]);
-      preview.style.display = "block";
-    } else {
-      preview.style.display = "none";
-    }
-  });
-
-  // Acción al hacer click en Post
+  // === Publicar texto normal ===
   postBtn.addEventListener("click", async () => {
     const user = getUser();
     if (!user) return alert("Inicia sesión primero");
 
     const text = postInput.value.trim();
-    const file = fileInput.files[0];
-
-    if (!text && !file) return alert("Escribe algo o selecciona una imagen");
+    if (!text) return alert("Escribe algo primero");
 
     try {
-      let imageUrl = null;
-
-      if (file) {
-        const filePath = `posts/${user.username}-${Date.now()}-${file.name}`;
-        const storageRef = ref(storage, filePath);
-        await uploadBytes(storageRef, file);
-        imageUrl = await getDownloadURL(storageRef);
-      }
-
       await addDoc(collection(db, "posts"), {
         user: user.username,
         avatar: user.avatar,
         text,
-        image: imageUrl,
+        image: null,
         created: serverTimestamp(),
         likes: [],
         comments: []
       });
 
-      // Limpiar
       postInput.value = "";
-      fileInput.value = "";
-      preview.style.display = "none";
-
     } catch (err) {
-      console.error("Error publicando:", err);
+      console.error("Error publicando texto:", err);
       alert("Error al publicar el post");
     }
   });
 
-  // Render con imagen
+  // === Seleccionar imagen ===
+  postImageBtn.addEventListener("click", () => {
+    fileInput.click();
+  });
+
+  fileInput.addEventListener("change", async () => {
+    if (fileInput.files.length > 0) {
+      preview.src = URL.createObjectURL(fileInput.files[0]);
+      preview.style.display = "block";
+
+      const confirmUpload = confirm("¿Quieres publicar esta imagen?");
+      if (!confirmUpload) return;
+
+      const user = getUser();
+      if (!user) return alert("Inicia sesión primero");
+
+      const file = fileInput.files[0];
+      try {
+        const filePath = `posts/${user.username}-${Date.now()}-${file.name}`;
+        const storageRef = ref(storage, filePath);
+        await uploadBytes(storageRef, file);
+        const imageUrl = await getDownloadURL(storageRef);
+
+        await addDoc(collection(db, "posts"), {
+          user: user.username,
+          avatar: user.avatar,
+          text: "",
+          image: imageUrl,
+          created: serverTimestamp(),
+          likes: [],
+          comments: []
+        });
+
+        fileInput.value = "";
+        preview.style.display = "none";
+      } catch (err) {
+        console.error("Error publicando imagen:", err);
+        alert("Error al publicar la imagen");
+      }
+    }
+  });
+
+  // === Render posts con imágenes ===
   const oldRenderPost = renderPost;
   renderPost = function (docSnap) {
     const div = oldRenderPost(docSnap);
