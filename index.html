@@ -263,5 +263,43 @@
       });
     });
   </script>
+
+<script type="module">
+  import { getFirestore, doc, updateDoc, arrayUnion, arrayRemove, addDoc, collection, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const db = getFirestore();
+
+  // Usuario actual simulado (igual que en tu código principal)
+  const user = {
+    username: "lunetter",
+    avatar: "https://i.pravatar.cc/150"
+  };
+
+  // Función para manejar likes con notificaciones
+  async function toggleLike(postId, postOwner, currentLikes) {
+    const postRef = doc(db, "posts", postId);
+
+    if (currentLikes.includes(user.username)) {
+      // Quitar like
+      await updateDoc(postRef, { likes: arrayRemove(user.username) });
+    } else {
+      // Dar like
+      await updateDoc(postRef, { likes: arrayUnion(user.username) });
+
+      // Crear notificación si el like es a otra persona
+      if (postOwner !== user.username) {
+        await addDoc(collection(db, "notifications"), {
+          message: `${user.username} le dio like a una publicación de ${postOwner}`,
+          created: serverTimestamp()
+        });
+      }
+    }
+  }
+
+  // Expongo la función para que tu script principal pueda llamarla
+  window.toggleLike = toggleLike;
+</script>
+
 </body>
 </html>
