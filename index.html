@@ -475,5 +475,93 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Añadimos render de followers en el perfil
+  async function renderProfileFollowers(userData) {
+    if (!userData) return;
+    const userRef = db.collection("users").doc(auth.currentUser.uid);
+    const snap = await userRef.get();
+    const data = snap.exists ? snap.data() : {};
+
+    let followersCount = data.followers ? data.followers.length : 0;
+    let followingCount = data.following ? data.following.length : 0;
+
+    const c = document.getElementById("profile-card");
+    let stats = document.createElement("div");
+    stats.className = "mt-4 flex justify-around text-sm text-gray-600";
+    stats.innerHTML = `
+      <div><b>${followersCount}</b><br>Seguidores</div>
+      <div><b>${followingCount}</b><br>Siguiendo</div>
+    `;
+    c.appendChild(stats);
+  }
+
+  // Sobrescribimos la función de renderizar posts para incluir botón de seguir
+  const oldRenderPost = renderPost;
+  renderPost = function(doc, userId) {
+    const container = oldRenderPost(doc, userId);
+    const data = doc.data();
+
+    // No agregamos botón si es tu propio post
+    if (auth.currentUser && data.uid !== auth.currentUser.uid) {
+      const followBtn = document.createElement("button");
+      followBtn.className = "px-3 py-1 rounded bg-blue-500 text-white text-sm ml-2";
+
+      const userRef = db.collection("users").doc(auth.currentUser.uid);
+
+      userRef.get().then(snap => {
+        if (snap.exists) {
+          let following = snap.data().following || [];
+          followBtn.textContent = following.includes(data.uid) ? "Dejar de seguir" : "Seguir";
+        }
+      });
+
+      followBtn.onclick = async () => {
+        const currentUserRef = db.collection("users").doc(auth.currentUser.uid);
+        const targetUserRef = db.collection("users").doc(data.uid);
+
+        await db.runTransaction(async (transaction) => {
+          const currentSnap = await transaction.get(currentUserRef);
+          const targetSnap = await transaction.get(targetUserRef);
+
+          let currentData = currentSnap.data() || {};
+          let targetData = targetSnap.data() || {};
+
+          let following = currentData.following || [];
+          let followers = targetData.followers || [];
+
+          if (following.includes(data.uid)) {
+            // Dejar de seguir
+            following = following.filter(uid => uid !== data.uid);
+            followers = followers.filter(uid => uid !== auth.currentUser.uid);
+            followBtn.textContent = "Seguir";
+          } else {
+            // Seguir
+            following.push(data.uid);
+            followers.push(auth.currentUser.uid);
+            followBtn.textContent = "Dejar de seguir";
+          }
+
+          transaction.update(currentUserRef, { following });
+          transaction.update(targetUserRef, { followers });
+        });
+      };
+
+      container.querySelector("div.mt-3")?.appendChild(followBtn);
+    }
+
+    return container;
+  };
+
+  // Re-render profile con followers
+  const oldRenderProfile = renderProfileCard;
+  renderProfileCard = function(userData) {
+    oldRenderProfile(userData);
+    renderProfileFollowers(userData);
+  };
+});
+</script>
+
 </body>
 </html>
