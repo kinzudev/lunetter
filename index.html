@@ -584,5 +584,78 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ADMIN_EMAIL = "kinzudev@gmail.com";
+
+  // --- Agregamos nueva opción al panel de Admin ---
+  const adminTagPanel = `
+    <h2 class="text-lg font-bold mt-6 mb-3">Asignar Tag Admin</h2>
+    <input type="text" id="admin-tag-email" placeholder="Email del usuario" class="w-full border p-2 rounded mb-3"/>
+    <button id="btn-add-admin-tag" class="px-3 py-2 bg-indigo-600 text-white rounded w-full">Dar Tag Admin</button>
+    <button id="btn-remove-admin-tag" class="mt-2 px-3 py-2 bg-gray-600 text-white rounded w-full">Quitar Tag Admin</button>
+  `;
+
+  // Esperamos a que ya exista el panel
+  const observer = new MutationObserver(() => {
+    const panel = document.getElementById("ban-panel");
+    if (panel && !document.getElementById("admin-tag-email")) {
+      panel.insertAdjacentHTML("beforeend", adminTagPanel);
+
+      document.getElementById("btn-add-admin-tag").onclick = async () => {
+        const email = document.getElementById("admin-tag-email").value.trim();
+        if (!email) return alert("Ingresa un email");
+
+        const snap = await db.collection("users").where("email", "==", email).get();
+        if (snap.empty) return alert("Usuario no encontrado");
+
+        snap.forEach(doc => {
+          db.collection("users").doc(doc.id).set({ isAdmin: true }, { merge: true });
+        });
+
+        alert("✅ Tag Admin asignado");
+      };
+
+      document.getElementById("btn-remove-admin-tag").onclick = async () => {
+        const email = document.getElementById("admin-tag-email").value.trim();
+        if (!email) return alert("Ingresa un email");
+
+        const snap = await db.collection("users").where("email", "==", email).get();
+        if (snap.empty) return alert("Usuario no encontrado");
+
+        snap.forEach(doc => {
+          db.collection("users").doc(doc.id).set({ isAdmin: false }, { merge: true });
+        });
+
+        alert("❌ Tag Admin quitado");
+      };
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // --- Editamos renderPost para mostrar el tag Admin ---
+  const oldRenderPost = renderPost;
+  renderPost = function (doc, userId) {
+    const container = oldRenderPost(doc, userId);
+    const data = doc.data();
+
+    const authorNameEl = container.querySelector("div.font-semibold");
+
+    db.collection("users").doc(data.uid).get().then(snap => {
+      if (snap.exists && snap.data().isAdmin) {
+        if (authorNameEl && !authorNameEl.querySelector(".admin-tag")) {
+          const span = document.createElement("span");
+          span.className = "admin-tag ml-2 px-2 py-0.5 text-xs bg-red-600 text-white rounded";
+          span.textContent = "Admin";
+          authorNameEl.appendChild(span);
+        }
+      }
+    });
+
+    return container;
+  };
+});
+</script>
+
 </body>
 </html>
