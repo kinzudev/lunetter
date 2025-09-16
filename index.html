@@ -475,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-  <script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
   // Añadimos render de followers en el perfil
   async function renderProfileFollowers(userData) {
@@ -497,13 +497,34 @@ document.addEventListener("DOMContentLoaded", () => {
     c.appendChild(stats);
   }
 
-  // Sobrescribimos la función de renderizar posts para incluir botón de seguir
+  // Guardamos la función original de renderizar posts
   const oldRenderPost = renderPost;
+
+  // Nueva versión extendida
   renderPost = function(doc, userId) {
     const container = oldRenderPost(doc, userId);
     const data = doc.data();
 
-    // No agregamos botón si es tu propio post
+    // Seleccionamos el nombre del autor en el post
+    const authorNameEl = container.querySelector("div.font-semibold");
+
+    // Mostrar número de seguidores al lado del nombre
+    db.collection("users").doc(data.uid).get().then(snap => {
+      if (snap.exists) {
+        const userData = snap.data();
+        const followersCount = userData.followers ? userData.followers.length : 0;
+
+        // Añadimos el contador de seguidores al lado del nombre
+        if (authorNameEl && !authorNameEl.querySelector(".followers-count")) {
+          const span = document.createElement("span");
+          span.className = "followers-count text-xs text-gray-500 ml-2";
+          span.textContent = `(${followersCount} seguidores)`;
+          authorNameEl.appendChild(span);
+        }
+      }
+    });
+
+    // Botón seguir / dejar de seguir
     if (auth.currentUser && data.uid !== auth.currentUser.uid) {
       const followBtn = document.createElement("button");
       followBtn.className = "px-3 py-1 rounded bg-blue-500 text-white text-sm ml-2";
