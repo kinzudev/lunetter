@@ -339,31 +339,43 @@
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
   import { collection, addDoc, serverTimestamp } 
     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { db } from "./firebase-init.js"; // 🔥 inicialización de Firebase
-  import { getUser } from "./auth.js";     // 🔥 tu función que devuelve el usuario logueado
+  import { db } from "./firebase-init.js";
+  import { getUser } from "./auth.js";
 
   const storage = getStorage();
 
-  // Caja de posteo
   const postBox = document.querySelector(".post-box");
   const postBtn = document.getElementById("postBtn");
   const postInput = document.getElementById("postInput");
+
+  // Crear un contenedor nuevo para imagenes
+  const imageContainer = document.createElement("div");
+  imageContainer.style.display = "flex";
+  imageContainer.style.flexDirection = "column";
+  imageContainer.style.gap = "10px";
+  imageContainer.style.marginTop = "10px";
 
   // Input de imagen
   const fileInput = document.createElement("input");
   fileInput.type = "file";
   fileInput.accept = "image/*";
   fileInput.id = "imageInput";
-  fileInput.style.marginTop = "10px";
-  postBox.insertBefore(fileInput, postBtn);
+  fileInput.style.color = "#fff";
+  fileInput.style.cursor = "pointer";
 
-  // Preview de la imagen
+  // Preview
   const preview = document.createElement("img");
-  preview.style.maxWidth = "200px";
-  preview.style.marginTop = "10px";
+  preview.style.maxWidth = "250px";
+  preview.style.borderRadius = "10px";
   preview.style.display = "none";
-  postBox.insertBefore(preview, postBtn);
 
+  imageContainer.appendChild(fileInput);
+  imageContainer.appendChild(preview);
+
+  // Insertamos justo ANTES del botón Post
+  postBox.insertBefore(imageContainer, postBtn);
+
+  // Mostrar preview al elegir archivo
   fileInput.addEventListener("change", () => {
     if (fileInput.files.length > 0) {
       preview.src = URL.createObjectURL(fileInput.files[0]);
@@ -373,7 +385,7 @@
     }
   });
 
-  // Botón Post (texto + imagen)
+  // Acción al hacer click en Post
   postBtn.addEventListener("click", async () => {
     const user = getUser();
     if (!user) return alert("Inicia sesión primero");
@@ -381,7 +393,7 @@
     const text = postInput.value.trim();
     const file = fileInput.files[0];
 
-    if (!text && !file) return alert("Escribe algo o sube una imagen");
+    if (!text && !file) return alert("Escribe algo o selecciona una imagen");
 
     try {
       let imageUrl = null;
@@ -403,18 +415,18 @@
         comments: []
       });
 
-      // Reset
+      // Limpiar
       postInput.value = "";
       fileInput.value = "";
       preview.style.display = "none";
 
     } catch (err) {
-      console.error("Error publicando post:", err);
-      alert("Error al publicar");
+      console.error("Error publicando:", err);
+      alert("Error al publicar el post");
     }
   });
 
-  // Renderizar post con imagen si existe
+  // Render con imagen
   const oldRenderPost = renderPost;
   renderPost = function (docSnap) {
     const div = oldRenderPost(docSnap);
