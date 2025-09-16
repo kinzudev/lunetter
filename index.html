@@ -210,5 +210,30 @@
       document.getElementById('loginPanel').style.display='flex';
     }
   </script>
+
+  <script>
+  // Detectar si ya hay usuario en localStorage
+  window.addEventListener("load", () => {
+    const sessionUser = localStorage.getItem("sessionUser");
+    if (sessionUser) {
+      document.getElementById("loginPanel").style.display = "none";
+      document.getElementById("appUI").classList.remove("hidden");
+    }
+  });
+
+  // Forzar que después de registrar se muestre el menú principal
+  document.addEventListener("DOMContentLoaded", () => {
+    const btnRegister = document.getElementById("btnRegister");
+    if (btnRegister) {
+      btnRegister.addEventListener("click", () => {
+        setTimeout(() => {
+          document.getElementById("loginPanel").style.display = "none";
+          document.getElementById("appUI").classList.remove("hidden");
+        }, 800); // pequeña espera para que termine el registro
+      });
+    }
+  });
+</script>
+
 </body>
 </html>
