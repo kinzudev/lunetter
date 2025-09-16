@@ -247,141 +247,240 @@
   }
 </script>
 
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, doc, addDoc, onSnapshot, orderBy, query, serverTimestamp,
+  updateDoc, arrayUnion, getDoc, deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // 🔥 Tu Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
-    authDomain: "pekora-forum.firebaseapp.com",
-    projectId: "pekora-forum",
-    storageBucket: "pekora-forum.firebasestorage.app",
-    messagingSenderId: "161910967859",
-    appId: "1:161910967859:web:6a28cecaae74b9b7e9dd46",
-    measurementId: "G-BPBTW5KBRK"
-  };
+// --- CONFIG: tu firebaseConfig ---
+const firebaseConfig = {
+  apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
+  authDomain: "pekora-forum.firebaseapp.com",
+  projectId: "pekora-forum",
+  storageBucket: "pekora-forum.firebasestorage.app",
+  messagingSenderId: "161910967859",
+  appId: "1:161910967859:web:6a28cecaae74b9b7e9dd46",
+  measurementId: "G-BPBTW5KBRK"
+};
 
-  // Inicializar Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  // Usuario actual simulado (aquí ya deberías tener tu login hecho)
-  let currentUser = JSON.parse(localStorage.getItem("currentUser"));
-
-  // 🔥 Renderizar posts con likes, comentarios y borrar
-  function renderPost(docSnap, currentUser) {
-    const data = docSnap.data();
-    const div = document.createElement("div");
-    div.className = "post";
-    div.innerHTML = `
-      <img src="${data.avatar}" />
-      <div style="flex:1;">
-        <div class="user">
-          ${data.user}
-          ${data.user === currentUser.username ? '<button class="deletePostBtn" style="margin-left:10px;color:red;background:none;border:none;cursor:pointer;">🗑️</button>' : ""}
-        </div>
-        <div>${data.text}</div>
-        <div class="actions">
-          <button class="likeBtn">❤️ ${data.likes ? data.likes.length : 0}</button>
-          <button class="commentBtn">💬 ${data.comments ? data.comments.length : 0}</button>
-        </div>
-        <div class="comments"></div>
-        <div class="comment-box" style="margin-top:5px;">
-          <input type="text" class="commentInput" placeholder="Escribe un comentario..." style="width:80%; padding:5px;" />
-          <button class="sendComment">Enviar</button>
-        </div>
-      </div>
-    `;
-
-    // --- Like ---
-    const likeBtn = div.querySelector(".likeBtn");
-    likeBtn.addEventListener("click", async () => {
-      const ref = doc(db, "posts", docSnap.id);
-      await updateDoc(ref, { likes: arrayUnion(currentUser.username) });
-    });
-
-    // --- Comentar ---
-    const sendComment = div.querySelector(".sendComment");
-    sendComment.addEventListener("click", async () => {
-      const input = div.querySelector(".commentInput");
-      if (input.value.trim() !== "") {
-        const ref = doc(db, "posts", docSnap.id);
-        await updateDoc(ref, { comments: arrayUnion({ user: currentUser.username, text: input.value }) });
-        input.value = "";
-      }
-    });
-
-    // --- Renderizar comentarios ---
-    const commentsDiv = div.querySelector(".comments");
-    commentsDiv.innerHTML = "";
-    if (data.comments) {
-      data.comments.forEach((c, index) => {
-        const commentDiv = document.createElement("div");
-        commentDiv.className = "comment";
-        commentDiv.innerHTML = `<b>${c.user}:</b> ${c.text}`;
-
-        // 🗑️ Solo el autor puede borrar su comentario
-        if (c.user === currentUser.username) {
-          const delBtn = document.createElement("button");
-          delBtn.textContent = "🗑️";
-          delBtn.style.marginLeft = "10px";
-          delBtn.style.background = "none";
-          delBtn.style.border = "none";
-          delBtn.style.color = "red";
-          delBtn.style.cursor = "pointer";
-
-          delBtn.addEventListener("click", async () => {
-            const ref = doc(db, "posts", docSnap.id);
-            const updated = data.comments.filter((_, i) => i !== index);
-            await updateDoc(ref, { comments: updated });
-          });
-
-          commentDiv.appendChild(delBtn);
-        }
-
-        commentsDiv.appendChild(commentDiv);
-      });
+// --- Helpers para sesión (intenta varias llaves por compatibilidad) ---
+function getCurrentUserFromStorage() {
+  const keys = ['currentUser','sessionUser','user','loggedUser'];
+  for (const k of keys) {
+    const s = localStorage.getItem(k);
+    if (s) {
+      try { return JSON.parse(s); } catch(e){ return null; }
     }
-
-    // --- Borrar post completo ---
-    if (data.user === currentUser.username) {
-      const delPostBtn = div.querySelector(".deletePostBtn");
-      delPostBtn.addEventListener("click", async () => {
-        const ref = doc(db, "posts", docSnap.id);
-        await deleteDoc(ref); // 🔥 elimina el post entero (texto, likes, comments)
-      });
-    }
-
-    return div;
   }
+  return null;
+}
 
-  // 🔥 Escuchar los posts en tiempo real
-  const postsDiv = document.getElementById("posts");
-  onSnapshot(collection(db, "posts"), (snapshot) => {
-    postsDiv.innerHTML = "";
-    snapshot.forEach(docSnap => {
-      postsDiv.appendChild(renderPost(docSnap, currentUser));
-    });
+function saveSession(user) {
+  // guarda en una llave común por si la app espera 'currentUser'
+  localStorage.setItem('currentUser', JSON.stringify(user));
+}
+
+// --- util: generar id único para comentarios ---
+function genId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
+}
+
+// --- busca elementos con varios posibles ids ---
+const postsDiv = document.getElementById('posts') || document.getElementById('feed');
+const postInput = document.getElementById('postInput') || document.getElementById('postText');
+const postBtn = document.getElementById('postBtn') || document.getElementById('postBtn');
+
+// --- Render de un post (incluye borrar post y borrar comentarios propios) ---
+function renderPost(docSnap, sessionUser) {
+  const data = docSnap.data() || {};
+  const postId = docSnap.id;
+  const div = document.createElement('div');
+  div.className = 'post';
+
+  // plantilla básica
+  div.innerHTML = `
+    <img src="${data.avatar || 'https://i.pravatar.cc/40'}" style="width:40px;height:40px;border-radius:50%;"/>
+    <div style="flex:1;">
+      <div style="display:flex;align-items:center;gap:8px">
+        <strong style="color:#1DA1F2">${escapeHtml(data.user || 'Anon')}</strong>
+        <span style="color:#999;font-size:13px">@${escapeHtml(data.user || 'anon')}</span>
+        <div style="flex:1"></div>
+        ${ (sessionUser && data.user === sessionUser.username) ? '<button class="deletePostBtn" title="Eliminar post" style="background:none;border:none;color:red;cursor:pointer">🗑️</button>' : '' }
+      </div>
+      <div style="margin:8px 0;white-space:pre-wrap">${escapeHtml(data.text || '')}</div>
+      <div class="actions" style="display:flex;gap:10px">
+        <button class="likeBtn" style="background:none;border:none;cursor:pointer">❤️ <span class="likesCount">${(data.likes && data.likes.length) || 0}</span></button>
+        <button class="commentToggleBtn" style="background:none;border:none;cursor:pointer">💬 <span class="commentsCount">${(data.comments && data.comments.length) || 0}</span></button>
+      </div>
+      <div class="comments" style="margin-top:8px;padding-left:8px"></div>
+      <div class="comment-box" style="margin-top:8px;display:flex;gap:6px;align-items:center">
+        <input type="text" class="commentInput" placeholder="Escribe un comentario..." style="flex:1;padding:6px;border-radius:6px;border:1px solid #222;background:#0f1113;color:#fff" />
+        <button class="sendComment" style="padding:6px 8px;border-radius:6px;background:#1DA1F2;border:none;color:#000;cursor:pointer">Enviar</button>
+      </div>
+    </div>
+  `;
+
+  // --- mostrar / ocultar comentarios con el botón ---
+  const commentToggleBtn = div.querySelector('.commentToggleBtn');
+  const commentsContainer = div.querySelector('.comments');
+  commentToggleBtn && commentToggleBtn.addEventListener('click', () => {
+    commentsContainer.style.display = commentsContainer.style.display === 'none' ? 'block' : 'none';
   });
 
-  // 🔥 Publicar un post nuevo
-  const postBtn = document.getElementById("postBtn");
-  if (postBtn) {
-    postBtn.addEventListener("click", async () => {
-      const input = document.getElementById("postInput");
-      if (input.value.trim() !== "") {
-        await addDoc(collection(db, "posts"), {
-          user: currentUser.username,
-          avatar: currentUser.avatar || "https://i.pravatar.cc/40",
-          text: input.value,
-          likes: [],
-          comments: []
-        });
-        input.value = "";
+  // --- enviar comentario: añadimos objeto con id, user, text, created ---
+  const sendBtn = div.querySelector('.sendComment');
+  sendBtn && sendBtn.addEventListener('click', async () => {
+    const input = div.querySelector('.commentInput');
+    const text = (input && input.value || '').trim();
+    const user = getCurrentUserFromStorage();
+    if (!user) { alert('Inicia sesión para comentar'); return; }
+    if (!text) return;
+    const commentObj = { id: genId(), user: user.username, text, created: serverTimestamp() };
+    const ref = doc(db, 'posts', postId);
+    // usamos arrayUnion para evitar leer-modificar-escribir (más robusto para concurrencia al añadir)
+    await updateDoc(ref, { comments: arrayUnion(commentObj) });
+    input.value = '';
+  });
+
+  // --- renderizar comentarios (y añadir botón eliminar solo si eres autor) ---
+  async function renderComments() {
+    commentsContainer.innerHTML = '';
+    // read latest comments from server to render freshest state (avoids race with other clients)
+    try {
+      const snap = await getDoc(doc(db, 'posts', postId));
+      const serverData = snap.exists() ? snap.data() : {};
+      const comments = Array.isArray(serverData.comments) ? serverData.comments : [];
+      comments.forEach((c, idx) => {
+        const cmDiv = document.createElement('div');
+        cmDiv.className = 'comment';
+        cmDiv.style.display = 'flex';
+        cmDiv.style.alignItems = 'center';
+        cmDiv.style.gap = '8px';
+        cmDiv.innerHTML = `<div style="flex:1"><b>${escapeHtml(c.user)}</b>: ${escapeHtml(c.text)}</div>`;
+        // si es tu comentario, añadir botón borrar
+        const session = getCurrentUserFromStorage();
+        if (session && c.user === session.username) {
+          const del = document.createElement('button');
+          del.textContent = '🗑️';
+          del.title = 'Eliminar comentario';
+          del.style.background = 'none';
+          del.style.border = 'none';
+          del.style.color = 'red';
+          del.style.cursor = 'pointer';
+          del.addEventListener('click', async () => {
+            try {
+              // volver a leer array actual, filtrar por id si existe, si no por la primera coincidencia user+text
+              const s2 = await getDoc(doc(db, 'posts', postId));
+              const cur = (s2.exists() && Array.isArray(s2.data().comments)) ? s2.data().comments : [];
+              let updated;
+              if (c.id) {
+                updated = cur.filter(cc => cc.id !== c.id);
+              } else {
+                // fallback: eliminar la primera coincidencia user+text
+                let removed = false;
+                updated = cur.filter(cc => {
+                  if (removed) return true;
+                  if (cc.user === c.user && cc.text === c.text) { removed = true; return false; }
+                  return true;
+                });
+              }
+              await updateDoc(doc(db, 'posts', postId), { comments: updated });
+            } catch (e) {
+              console.error('Error al borrar comentario', e);
+            }
+          });
+          cmDiv.appendChild(del);
+        }
+        commentsContainer.appendChild(cmDiv);
+      });
+    } catch (err) {
+      console.error('Render comments error', err);
+    }
+  }
+
+  // --- borrar post (solo autor) ---
+  const deletePostBtn = div.querySelector('.deletePostBtn');
+  if (deletePostBtn) {
+    deletePostBtn.addEventListener('click', async () => {
+      if (!confirm('¿Eliminar post? Esto no se puede deshacer.')) return;
+      try {
+        await deleteDoc(doc(db, 'posts', postId));
+      } catch (e) {
+        console.error('Error al eliminar post', e);
       }
     });
   }
+
+  // --- like: se añade el username al array likes (no se duplica porque puede repetirse; para evitar duplicados
+  // podríamos leer y controlar, pero por simplicidad dejamos que el array tenga únicos o no según tu uso) ---
+  const likeBtn = div.querySelector('.likeBtn');
+  likeBtn && likeBtn.addEventListener('click', async () => {
+    const session = getCurrentUserFromStorage();
+    if (!session) { alert('Inicia sesión para dar like'); return; }
+    const ref = doc(db, 'posts', postId);
+    await updateDoc(ref, { likes: arrayUnion(session.username) });
+  });
+
+  // --- inicial render de comentarios (y se actualizará cuando onSnapshot re-renderice el post) ---
+  renderComments();
+
+  return div;
+}
+
+// --- utility para escapar HTML en texto plano ---
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// --- escucha posts en tiempo real (ordenados) ---
+const postsContainer = postsDiv || document.getElementById('posts') || document.getElementById('feed');
+if (!postsContainer) console.warn('No se encontró contenedor de posts (id="posts" ó id="feed")');
+
+const q = query(collection(db, 'posts'), orderBy('created', 'desc'));
+onSnapshot(q, (snapshot) => {
+  const sessionUser = getCurrentUserFromStorage();
+  if (!postsContainer) return;
+  postsContainer.innerHTML = '';
+  snapshot.forEach(docSnap => {
+    const el = renderPost(docSnap, sessionUser);
+    postsContainer.appendChild(el);
+  });
+});
+
+// --- publicar (intenta varios ids para compatibilidad) ---
+const publishBtn = postBtn || document.getElementById('postBtn') || document.querySelector('[data-post-btn]');
+const publishInput = postInput || document.getElementById('postText') || document.querySelector('[data-post-input]');
+
+if (publishBtn && publishInput) {
+  publishBtn.addEventListener('click', async () => {
+    const session = getCurrentUserFromStorage();
+    if (!session) { alert('Inicia sesión para publicar'); return; }
+    const text = (publishInput.value || '').trim();
+    if (!text) return;
+    await addDoc(collection(db, 'posts'), {
+      user: session.username,
+      avatar: session.avatar || `https://i.pravatar.cc/100?u=${encodeURIComponent(session.username)}`,
+      text,
+      created: serverTimestamp(),
+      likes: [],
+      comments: []
+    });
+    publishInput.value = '';
+  });
+} else {
+  console.warn('No se encontró botón o input para publicar (busqué ids postBtn/postInput/postText)');
+}
 </script>
 
 </body>
