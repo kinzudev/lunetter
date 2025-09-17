@@ -1358,5 +1358,100 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 </script>
 
+  <script>
+  // Escucha cuando se rendericen los posts para añadir botón de responder
+  function attachReplyButtons() {
+    document.querySelectorAll(".btn-reply").forEach(btn => {
+      btn.onclick = () => {
+        const postId = btn.dataset.id;
+        const replyBox = document.getElementById(`reply-box-${postId}`);
+        if (replyBox) {
+          replyBox.classList.toggle("hidden");
+        }
+      };
+    });
+  }
+
+  // Renderizar respuestas de un post
+  async function renderReplies(postId, container) {
+    const snapshot = await db.collection("posts").doc(postId).collection("replies").orderBy("createdAt", "asc").get();
+    container.innerHTML = "";
+    snapshot.forEach(doc => {
+      const r = doc.data();
+      const div = document.createElement("div");
+      div.className = "mt-2 p-2 border rounded bg-gray-50";
+      div.innerHTML = `
+        <div class="flex items-center gap-2">
+          <img src="${r.photoURL || "https://ui-avatars.com/api/?name="+encodeURIComponent(r.author)}" class="w-6 h-6 rounded-full">
+          <span class="font-semibold">${r.author} ${r.verified ? '<img src="https://img.icons8.com/?size=16&id=2sZ0sdlG9kWP&format=png" class="inline w-4 h-4">' : ""}</span>
+        </div>
+        <p class="ml-8 text-sm">${r.text}</p>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  // Modificar renderPost para añadir botón de responder y mostrar replies
+  const originalRenderPost = renderPost;
+  renderPost = function(doc, userId) {
+    const postEl = originalRenderPost(doc, userId);
+
+    const repliesContainer = document.createElement("div");
+    repliesContainer.className = "mt-3 space-y-2";
+    repliesContainer.id = `replies-${doc.id}`;
+    postEl.appendChild(repliesContainer);
+
+    const replyBox = document.createElement("div");
+    replyBox.className = "hidden mt-2";
+    replyBox.id = `reply-box-${doc.id}`;
+    replyBox.innerHTML = `
+      <textarea placeholder="Escribe una respuesta..." class="w-full border rounded p-2 text-sm mb-2"></textarea>
+      <button class="px-3 py-1 bg-blue-500 text-white rounded">Responder</button>
+    `;
+    const replyBtn = replyBox.querySelector("button");
+    replyBtn.onclick = async () => {
+      const text = replyBox.querySelector("textarea").value.trim();
+      if (!text) return;
+      const user = auth.currentUser;
+      if (!user) return alert("Debes iniciar sesión para responder.");
+      await db.collection("posts").doc(doc.id).collection("replies").add({
+        text,
+        author: user.displayName || user.email,
+        photoURL: user.photoURL || null,
+        verified: user.verified || false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      replyBox.querySelector("textarea").value = "";
+      renderReplies(doc.id, repliesContainer);
+    };
+    postEl.appendChild(replyBox);
+
+    const replyToggleBtn = document.createElement("button");
+    replyToggleBtn.textContent = "Responder";
+    replyToggleBtn.className = "btn-reply text-blue-600 text-sm mt-2";
+    replyToggleBtn.dataset.id = doc.id;
+    postEl.appendChild(replyToggleBtn);
+
+    // Cargar replies
+    renderReplies(doc.id, repliesContainer);
+
+    return postEl;
+  };
+
+  // Reatachar botones al recargar feed
+  const originalSubscribeFeed = subscribeFeed;
+  subscribeFeed = function() {
+    if (unsubscribeFeed) unsubscribeFeed();
+    unsubscribeFeed = db.collection("posts").orderBy("createdAt", "desc").limit(50).onSnapshot(snapshot => {
+      const feed = document.getElementById("feed");
+      feed.innerHTML = "";
+      snapshot.forEach(doc => {
+        feed.appendChild(renderPost(doc, auth.currentUser ? auth.currentUser.uid : null));
+      });
+      attachReplyButtons();
+    });
+  };
+</script>
+
 </body>
 </html>
