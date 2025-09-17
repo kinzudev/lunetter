@@ -1454,20 +1454,86 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const observer = new MutationObserver(() => {
-      document.querySelectorAll(".ver-perfil-btn").forEach(btn => {
-        const post = btn.closest(".post"); // contenedor del post
-        if (post) {
-          post.classList.add("relative"); // hace que se pueda usar absolute
-          btn.classList.add("absolute", "top-2", "right-2", "px-2", "py-1", "bg-blue-500", "text-white", "rounded", "text-sm");
-        }
-      });
-    });
+document.addEventListener("DOMContentLoaded", () => {
+  // detecta botones cuyo texto sea "Ver Perfil" (case-insensitive)
+  function isVerPerfilBtn(el) {
+    if (!el || el.nodeType !== 1) return false;
+    const tag = el.tagName.toLowerCase();
+    if (tag !== 'button' && tag !== 'a' && tag !== 'div' && tag !== 'span') return false;
+    const txt = (el.textContent || el.innerText || '').trim().toLowerCase();
+    return txt === 'ver perfil';
+  }
 
-    // Observa cambios en el DOM (para cuando se cargan posts nuevos en tiempo real)
-    observer.observe(document.body, { childList: true, subtree: true });
+  // heurística para elegir el contenedor del post donde posicionar el botón
+  function findPostContainer(startEl) {
+    let el = startEl.parentElement;
+    const nameSelectors = ['.font-semibold','h3','h4','.username','.author-name','.post-header','.post-title','img'];
+    while (el && el !== document.body) {
+      // si contiene nombres / avatar, lo consideramos el header/post container
+      for (const sel of nameSelectors) {
+        if (el.querySelector(sel)) return el;
+      }
+      // si tiene clases típicas de post o es article -> usarlo
+      if (el.classList && (el.classList.contains('post') || el.classList.contains('card') || el.tagName.toLowerCase() === 'article')) return el;
+      // si tiene data-uid (nosotros lo pusimos antes), también es buen candidato
+      if (el.hasAttribute && el.hasAttribute('data-uid')) return el;
+      el = el.parentElement;
+    }
+    // fallback: nearest article or the original parent
+    return startEl.closest('article') || startEl.closest('.post') || startEl.parentElement;
+  }
+
+  // mueve todos los botones "Ver Perfil" no movidos aún
+  function moveAllVerPerfilButtons() {
+    document.querySelectorAll('button, a, span, div').forEach(el => {
+      if (!isVerPerfilBtn(el)) return;
+      if (el.dataset.verperfilMoved === "1") return; // ya movido
+
+      const container = findPostContainer(el);
+      if (!container) return;
+
+      // asegurar posicionamiento relativo del contenedor
+      const currentPos = window.getComputedStyle(container).position;
+      if (currentPos === 'static') container.style.position = 'relative';
+
+      // mover dentro del contenedor si no está dentro
+      if (el.parentElement !== container) container.appendChild(el);
+
+      // aplicar estilos para ubicar arriba derecha
+      el.style.position = 'absolute';
+      el.style.top = '8px';
+      el.style.right = '8px';
+      el.style.margin = '0';
+      el.style.zIndex = '30';
+      // reducir tamaño para que no rompa el layout
+      el.style.fontSize = '12px';
+      el.style.padding = el.style.padding || '6px 8px';
+      el.style.borderRadius = '6px';
+
+      // marcar como movido para no duplicar
+      el.dataset.verperfilMoved = "1";
+      el.classList.add('moved-ver-perfil');
+    });
+  }
+
+  // ejecutar una vez al cargar
+  moveAllVerPerfilButtons();
+
+  // observar cambios (posts nuevos, re-render, etc.) y volver a mover
+  const mo = new MutationObserver((mutations) => {
+    // ligera debounce para evitar exceso de trabajo
+    if (window._moveVerPerfilTimeout) clearTimeout(window._moveVerPerfilTimeout);
+    window._moveVerPerfilTimeout = setTimeout(() => {
+      moveAllVerPerfilButtons();
+    }, 80);
   });
+  mo.observe(document.body, { childList: true, subtree: true });
+
+  // también reintentar al hacer login/logout (por si cambia la UI)
+  if (typeof auth !== 'undefined' && auth.onAuthStateChanged) {
+    auth.onAuthStateChanged(() => setTimeout(moveAllVerPerfilButtons, 150));
+  }
+});
 </script>
 
 </body>
