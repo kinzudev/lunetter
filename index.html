@@ -1536,5 +1536,88 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const db = firebase.firestore();
+
+  // Crear panel lateral
+  const panel = document.createElement("div");
+  panel.className = "fixed top-20 right-4 w-64 bg-white shadow-lg rounded-2xl p-4 text-sm";
+  panel.innerHTML = `
+    <h3 class="font-bold text-lg mb-3">Cuentas Recomendadas</h3>
+    <div id="recom-list" class="space-y-2 text-gray-700"></div>
+    <div class="mt-4 text-center">
+      <p class="text-xs text-gray-500">Nuevas recomendaciones en:</p>
+      <p id="recom-timer" class="font-mono text-sm text-blue-600"></p>
+    </div>
+  `;
+  document.body.appendChild(panel);
+
+  const listEl = document.getElementById("recom-list");
+  const timerEl = document.getElementById("recom-timer");
+
+  // Función para mostrar cuentas en el panel
+  async function renderRecommended(accounts) {
+    listEl.innerHTML = "";
+    for (const acc of accounts) {
+      const div = document.createElement("div");
+      div.className = "flex items-center gap-2";
+      div.innerHTML = `
+        <img src="${acc.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(acc.displayName || 'User')}" 
+             class="w-8 h-8 rounded-full object-cover" />
+        <span class="font-medium">${acc.displayName || "Usuario"}</span>
+      `;
+      listEl.appendChild(div);
+    }
+  }
+
+  // Suscripción a la colección de recomendados
+  db.collection("recommended").doc("global").onSnapshot(async (doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      const expiresAt = data.expiresAt?.toDate();
+      const accounts = data.accounts || [];
+      renderRecommended(accounts);
+
+      // Iniciar contador
+      function updateTimer() {
+        const now = new Date();
+        const diff = expiresAt - now;
+        if (diff <= 0) {
+          timerEl.textContent = "00:00:00";
+          return;
+        }
+        const h = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, "0");
+        const m = String(Math.floor((diff / (1000 * 60)) % 60)).padStart(2, "0");
+        const s = String(Math.floor((diff / 1000) % 60)).padStart(2, "0");
+        timerEl.textContent = `${h}:${m}:${s}`;
+      }
+      setInterval(updateTimer, 1000);
+      updateTimer();
+    }
+  });
+
+  // Solo un admin puede resetear recomendaciones
+  auth.onAuthStateChanged(async (user) => {
+    if (user && user.email === "kinzudev@gmail.com") {
+      const resetBtn = document.createElement("button");
+      resetBtn.className = "mt-3 px-2 py-1 bg-blue-500 text-white rounded text-xs";
+      resetBtn.textContent = "Resetear recomendaciones";
+      resetBtn.onclick = async () => {
+        const snap = await db.collection("users").get();
+        const allUsers = snap.docs.map(d => d.data());
+        // Seleccionar 3 aleatorios
+        const shuffled = allUsers.sort(() => 0.5 - Math.random()).slice(0, 3);
+        await db.collection("recommended").doc("global").set({
+          accounts: shuffled,
+          expiresAt: firebase.firestore.Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000))
+        });
+      };
+      panel.appendChild(resetBtn);
+    }
+  });
+});
+</script>
+
 </body>
 </html>
