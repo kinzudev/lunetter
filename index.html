@@ -1453,55 +1453,21 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 </script>
 
-  <script>
-  // Guardamos el renderPost original
-  const originalRenderPost2 = renderPost;
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const observer = new MutationObserver(() => {
+      document.querySelectorAll(".ver-perfil-btn").forEach(btn => {
+        const post = btn.closest(".post"); // contenedor del post
+        if (post) {
+          post.classList.add("relative"); // hace que se pueda usar absolute
+          btn.classList.add("absolute", "top-2", "right-2", "px-2", "py-1", "bg-blue-500", "text-white", "rounded", "text-sm");
+        }
+      });
+    });
 
-  renderPost = function(doc, userId) {
-    const postEl = originalRenderPost2(doc, userId);
-
-    // Crear botón Ver Perfil
-    const profileBtn = document.createElement("button");
-    profileBtn.textContent = "Ver Perfil";
-    profileBtn.className = "absolute top-2 right-2 px-2 py-1 bg-blue-500 text-white rounded text-sm";
-
-    // Posicionar el contenedor del post como relativo para que funcione top/right
-    postEl.classList.add("relative");
-
-    profileBtn.onclick = () => {
-      showUserProfile(doc.data().authorEmail, doc.data().author, doc.data().aboutMe || "", doc.data().verified || false);
-    };
-
-    postEl.appendChild(profileBtn);
-
-    return postEl;
-  };
-
-  // Función para mostrar el perfil del usuario
-  function showUserProfile(email, name, aboutMe, verified) {
-    let panel = document.getElementById("profile-panel");
-    if (!panel) {
-      panel = document.createElement("div");
-      panel.id = "profile-panel";
-      panel.className = "fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50";
-      panel.innerHTML = `
-        <div class="bg-white w-96 p-5 rounded shadow-lg relative">
-          <button id="close-profile" class="absolute top-2 right-2 text-gray-600">X</button>
-          <h2 class="text-xl font-bold mb-2">Perfil</h2>
-          <p><strong>Nombre:</strong> <span id="profile-name"></span></p>
-          <p><strong>Email:</strong> <span id="profile-email"></span></p>
-          <p><strong>Sobre mí:</strong> <span id="profile-about"></span></p>
-        </div>
-      `;
-      document.body.appendChild(panel);
-
-      document.getElementById("close-profile").onclick = () => panel.remove();
-    }
-
-    document.getElementById("profile-name").innerHTML = `${name} ${verified ? '<img src="https://img.icons8.com/?size=16&id=2sZ0sdlG9kWP&format=png" class="inline w-4 h-4">' : ""}`;
-    document.getElementById("profile-email").textContent = email;
-    document.getElementById("profile-about").textContent = aboutMe;
-  }
+    // Observa cambios en el DOM (para cuando se cargan posts nuevos en tiempo real)
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
 </script>
 
 </body>
