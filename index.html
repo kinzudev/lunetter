@@ -1025,7 +1025,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
   
-  <script>
+<script>
 document.addEventListener('DOMContentLoaded', () => {
 
   // --- Crear modal para ver perfiles ---
@@ -1067,11 +1067,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = data.email || 'Email no disponible';
         const aboutMe = data.aboutMe || 'Este usuario aún no escribió nada sobre sí mismo.';
         const photo = data.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName);
+        const verified = data.verified === true;
 
         document.getElementById('profile-modal-content').innerHTML = `
           <div style="text-align:center;">
-            <img src="${photo}" alt="avatar" style="width:100px;height:100px;object-cover;border-radius:50%;margin:auto;">
-            <h3 style="font-size:18px;font-weight:600;margin-top:10px;">${displayName}</h3>
+            <img src="${photo}" alt="avatar" style="width:100px;height:100px;object-fit:cover;border-radius:50%;margin:auto;">
+            <h3 style="font-size:18px;font-weight:600;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px;">
+              ${displayName}
+              ${verified ? `<img src="https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png" alt="verificado" style="width:18px;height:18px;">` : ''}
+            </h3>
             <p style="font-size:14px;color:#555;">${email}</p>
           </div>
           <div style="margin-top:15px;text-align:left;">
