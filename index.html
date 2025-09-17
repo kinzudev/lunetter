@@ -1274,5 +1274,117 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const currentUserEmail = firebase.auth().currentUser?.email;
+
+  /***********************
+   * BOTÓN TIENDA
+   ***********************/
+  const rulesBtn = document.getElementById("rules-btn");
+  if (rulesBtn) {
+    const storeBtn = document.createElement("button");
+    storeBtn.id = "store-btn";
+    storeBtn.textContent = "TIENDA";
+    storeBtn.style = "position:fixed;top:60px;left:10px;background:#3b82f6;color:white;padding:10px 14px;border:none;border-radius:8px;cursor:pointer;z-index:1000;";
+    document.body.appendChild(storeBtn);
+
+    storeBtn.addEventListener("click", openStorePanel);
+  }
+
+  /***********************
+   * PANEL TIENDA
+   ***********************/
+  function openStorePanel() {
+    if (document.getElementById("store-panel")) return;
+
+    const panel = document.createElement("div");
+    panel.id = "store-panel";
+    panel.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:white;z-index:2000;overflow:auto;padding:20px;";
+
+    panel.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2 style="font-size:20px;font-weight:bold;">🛍️ Tienda</h2>
+        <button id="close-store" style="background:#ef4444;color:white;padding:6px 12px;border:none;border-radius:6px;cursor:pointer;">Cerrar</button>
+      </div>
+      <div id="store-products" style="display:grid;gap:20px;"></div>
+      ${currentUserEmail === "kinzudev@gmail.com" ? `
+      <div style="margin-top:20px;padding:15px;border:1px solid #ddd;border-radius:8px;">
+        <h3 style="margin-bottom:10px;font-weight:600;">Editar Tienda</h3>
+        <input type="text" id="product-name" placeholder="Nombre del producto" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ccc;border-radius:6px;">
+        <input type="url" id="product-img" placeholder="URL de la imagen" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ccc;border-radius:6px;">
+        <textarea id="product-desc" placeholder="Cómo obtenerlo" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ccc;border-radius:6px;"></textarea>
+        <button id="add-product" style="background:#10b981;color:white;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;">Añadir Producto</button>
+      </div>
+      ` : ""}
+    `;
+
+    document.body.appendChild(panel);
+
+    document.getElementById("close-store").onclick = () => panel.remove();
+
+    loadProducts();
+
+    if (currentUserEmail === "kinzudev@gmail.com") {
+      document.getElementById("add-product").onclick = addProduct;
+    }
+  }
+
+  /***********************
+   * CARGAR PRODUCTOS
+   ***********************/
+  function loadProducts() {
+    const container = document.getElementById("store-products");
+    if (!container) return;
+
+    db.collection("storeProducts").onSnapshot(snapshot => {
+      container.innerHTML = "";
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const product = document.createElement("div");
+        product.style = "border:1px solid #ddd;padding:15px;border-radius:8px;display:flex;gap:12px;align-items:flex-start;";
+        product.innerHTML = `
+          <img src="${data.imgUrl}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;">
+          <div>
+            <h4 style="font-size:16px;font-weight:600;">${data.name}</h4>
+            <p style="font-size:14px;color:#374151;">${data.description}</p>
+          </div>
+        `;
+        container.appendChild(product);
+      });
+    });
+  }
+
+  /***********************
+   * AÑADIR PRODUCTO
+   ***********************/
+  async function addProduct() {
+    const name = document.getElementById("product-name").value.trim();
+    const imgUrl = document.getElementById("product-img").value.trim();
+    const desc = document.getElementById("product-desc").value.trim();
+
+    if (!name || !imgUrl || !desc) {
+      alert("Completa todos los campos");
+      return;
+    }
+
+    try {
+      await db.collection("storeProducts").add({
+        name,
+        imgUrl,
+        description: desc,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      document.getElementById("product-name").value = "";
+      document.getElementById("product-img").value = "";
+      document.getElementById("product-desc").value = "";
+    } catch (err) {
+      console.error("Error al añadir producto:", err);
+      alert("Hubo un error al guardar el producto.");
+    }
+  }
+});
+</script>
+
 </body>
 </html>
