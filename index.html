@@ -1113,148 +1113,196 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
   
-  <script>
+<script>
 document.addEventListener('DOMContentLoaded', () => {
-  // --- Esperar a que exista el admin panel ---
-  function addLogoOption() {
+  /******************************************************************
+   * Admin UI: agregar / quitar logo (inserta sección dentro de #admin-panel)
+   ******************************************************************/
+  function ensureAdminLogoSection() {
     const adminPanel = document.getElementById('admin-panel');
     if (!adminPanel) return;
 
-    // Crear sección
+    // no crear si ya existe
+    if (document.getElementById('admin-logo-section')) return;
+
     const section = document.createElement('div');
-    section.style = "margin-top:20px;padding:10px;border-top:1px solid #ccc;";
+    section.id = 'admin-logo-section';
+    section.style = "margin-top:18px;padding:10px;border-top:1px solid #e5e7eb;";
     section.innerHTML = `
-      <h3 style="font-size:16px;font-weight:bold;margin-bottom:8px;">Agregar / Quitar Logo a Usuario</h3>
-      <input type="email" id="logo-user-email" placeholder="Gmail del usuario" style="width:100%;padding:6px;margin-bottom:6px;border:1px solid #ccc;border-radius:6px;">
-      <input type="text" id="logo-url" placeholder="URL de la imagen" style="width:100%;padding:6px;margin-bottom:6px;border:1px solid #ccc;border-radius:6px;">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button id="add-logo-btn" style="flex:1;padding:6px 12px;background:#059669;color:white;border:none;border-radius:6px;cursor:pointer;">
-          Guardar Logo
-        </button>
-        <button id="remove-logo-btn" style="flex:1;padding:6px 12px;background:#dc2626;color:white;border:none;border-radius:6px;cursor:pointer;">
-          Quitar Logo
-        </button>
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">Agregar / Quitar Logo personalizado</h3>
+      <input type="email" id="logo-user-email" placeholder="Gmail del usuario" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:6px;">
+      <input type="url" id="logo-url" placeholder="URL de la imagen" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:6px;">
+      <div style="display:flex;gap:8px;">
+        <button id="add-logo-btn" style="flex:1;padding:8px;background:#059669;color:white;border:none;border-radius:6px;cursor:pointer;">Guardar Logo</button>
+        <button id="remove-logo-btn" style="flex:1;padding:8px;background:#dc2626;color:white;border:none;border-radius:6px;cursor:pointer;">Quitar Logo</button>
       </div>
-      <p id="logo-status" style="font-size:14px;color:#555;margin-top:6px;"></p>
+      <p id="logo-status" style="margin-top:8px;font-size:13px;color:#374151;"></p>
     `;
     adminPanel.appendChild(section);
 
     const status = document.getElementById('logo-status');
 
-    // --- Guardar logo ---
+    // Guardar logo: busca user doc por email y actualiza customLogo
     document.getElementById('add-logo-btn').addEventListener('click', async () => {
       const email = document.getElementById('logo-user-email').value.trim();
       const url = document.getElementById('logo-url').value.trim();
-
       if (!email || !url) {
-        status.textContent = "Debes ingresar el Gmail y la URL de la imagen.";
-        status.style.color = "red";
+        status.textContent = "Debes completar Gmail y URL.";
+        status.style.color = "crimson";
         return;
       }
-
       try {
-        const snapshot = await db.collection("users").where("email", "==", email).get();
-        if (snapshot.empty) {
-          status.textContent = "No se encontró un usuario con ese Gmail.";
-          status.style.color = "red";
+        const snap = await db.collection('users').where('email', '==', email).limit(1).get();
+        if (snap.empty) {
+          status.textContent = "Usuario no encontrado.";
+          status.style.color = "crimson";
           return;
         }
-
-        snapshot.forEach(async (doc) => {
-          await db.collection("users").doc(doc.id).update({ customLogo: url });
-        });
-
-        status.textContent = "Logo agregado correctamente ✅";
+        const doc = snap.docs[0];
+        await db.collection('users').doc(doc.id).update({ customLogo: url });
+        status.textContent = "Logo guardado ✅";
         status.style.color = "green";
       } catch (err) {
         console.error(err);
         status.textContent = "Error al guardar logo.";
-        status.style.color = "red";
+        status.style.color = "crimson";
       }
     });
 
-    // --- Quitar logo ---
+    // Quitar logo (borra campo customLogo)
     document.getElementById('remove-logo-btn').addEventListener('click', async () => {
       const email = document.getElementById('logo-user-email').value.trim();
-
       if (!email) {
-        status.textContent = "Debes ingresar el Gmail del usuario.";
-        status.style.color = "red";
+        status.textContent = "Ingresa el Gmail del usuario para quitar logo.";
+        status.style.color = "crimson";
         return;
       }
-
       try {
-        const snapshot = await db.collection("users").where("email", "==", email).get();
-        if (snapshot.empty) {
-          status.textContent = "No se encontró un usuario con ese Gmail.";
-          status.style.color = "red";
+        const snap = await db.collection('users').where('email', '==', email).limit(1).get();
+        if (snap.empty) {
+          status.textContent = "Usuario no encontrado.";
+          status.style.color = "crimson";
           return;
         }
-
-        snapshot.forEach(async (doc) => {
-          await db.collection("users").doc(doc.id).update({
-            customLogo: firebase.firestore.FieldValue.delete()
-          });
-        });
-
-        status.textContent = "Logo eliminado correctamente ❌";
+        const doc = snap.docs[0];
+        await db.collection('users').doc(doc.id).update({ customLogo: firebase.firestore.FieldValue.delete() });
+        status.textContent = "Logo eliminado ✅";
         status.style.color = "green";
       } catch (err) {
         console.error(err);
         status.textContent = "Error al eliminar logo.";
-        status.style.color = "red";
+        status.style.color = "crimson";
       }
     });
   }
 
-  // Intentar cada 1s hasta que aparezca el admin panel
-  const interval = setInterval(() => {
+  // intentar hasta que el panel exista (no bloquea si ya está)
+  const adminInterval = setInterval(() => {
     if (document.getElementById('admin-panel')) {
-      clearInterval(interval);
-      addLogoOption();
+      clearInterval(adminInterval);
+      ensureAdminLogoSection();
     }
-  }, 1000);
+  }, 800);
 
-  // --- Mostrar logo al lado del nombre ---
-  function renderNameWithLogo(name, userData) {
-    const span = document.createElement('span');
-    span.textContent = name;
-    span.style.display = "inline-flex";
-    span.style.alignItems = "center";
-    span.style.gap = "5px";
-
-    if (userData && userData.customLogo) {
-      const img = document.createElement('img');
-      img.src = userData.customLogo;
-      img.alt = "logo";
-      img.style.width = "18px";
-      img.style.height = "18px";
-      span.appendChild(img);
+  /******************************************************************
+   * Helper: insertar o actualizar logo junto al nombre dentro de
+   * un elemento nameEl (no reemplaza el nombre, solo añade/actualiza img)
+   ******************************************************************/
+  function upsertCustomLogoInNameEl(nameEl, logoUrl) {
+    if (!nameEl) return;
+    // buscar img con clase custom-logo dentro de nameEl
+    let img = nameEl.querySelector('img.custom-logo');
+    if (logoUrl) {
+      if (img) {
+        // actualizar src si cambió
+        if (img.src !== logoUrl) img.src = logoUrl;
+      } else {
+        img = document.createElement('img');
+        img.className = 'custom-logo';
+        img.src = logoUrl;
+        // estilos pequeños
+        img.style.width = '18px';
+        img.style.height = '18px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '4px';
+        img.style.marginLeft = '6px';
+        img.style.verticalAlign = 'middle';
+        // Insertar al final del nameEl (después de texto e íconos)
+        nameEl.appendChild(img);
+      }
+    } else {
+      if (img) img.remove();
     }
-
-    return span;
   }
 
-  // --- Parchear renderPost para añadir logo ---
+  /******************************************************************
+   * Parchear renderPost: en vez de reemplazar el nombre, BUSCAMOS el
+   * elemento de nombre y añadimos la imagen (si existe customLogo).
+   * Además añadimos data-uid al post element para permitir updates.
+   ******************************************************************/
   if (typeof renderPost === 'function') {
     const originalRenderPost = renderPost;
     renderPost = function(doc, userId) {
       const postEl = originalRenderPost(doc, userId);
-      const uid = doc.data().uid;
+      try {
+        const uid = doc && doc.data ? doc.id ? doc.data().uid || doc.id : (doc.data().uid) : null;
+        // asignar dataset para actualizar más tarde
+        if (postEl && uid) postEl.dataset.uid = uid;
 
-      db.collection("users").doc(uid).get().then(snap => {
-        if (snap.exists) {
-          const userData = snap.data();
-          const nameEl = postEl.querySelector(".username");
-          if (nameEl) {
-            const newName = renderNameWithLogo(userData.displayName || "Usuario", userData);
-            nameEl.replaceWith(newName);
-          }
+        // buscar el elemento que contiene el nombre del autor:
+        // en tu HTML el nombre se usa como 'font-semibold' (authorName). buscamos ese primero.
+        const nameEl = postEl.querySelector('.font-semibold') || postEl.querySelector('h3.text-lg') || postEl.querySelector('h3') || null;
+
+        if (nameEl && uid) {
+          // obtener user doc y colocar logo si existe
+          db.collection('users').doc(uid).get().then(snap => {
+            if (!snap.exists) {
+              upsertCustomLogoInNameEl(nameEl, null);
+              return;
+            }
+            const ud = snap.data();
+            const logo = ud.customLogo || null;
+            upsertCustomLogoInNameEl(nameEl, logo);
+          }).catch(err => {
+            console.error('Error leyendo user para logo:', err);
+          });
         }
-      });
-
+      } catch (err) {
+        console.error('Error en patch renderPost (logo):', err);
+      }
       return postEl;
     };
+  } else {
+    console.warn('renderPost no existe al cargar este script — asegúrate de pegarlo después de definir renderPost.');
+  }
+
+  /******************************************************************
+   * Listener global: si cambian documentos de users (customLogo), actualiza
+   * los posts ya renderizados (usa data-uid atributo).
+   ******************************************************************/
+  try {
+    db.collection('users').onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        const uid = change.doc.id;
+        const data = change.doc.data();
+        // actualizar todas las post elements que correspondan a ese uid
+        const posts = document.querySelectorAll(`[data-uid="${uid}"]`);
+        posts.forEach(postEl => {
+          const nameEl = postEl.querySelector('.font-semibold') || postEl.querySelector('h3.text-lg') || postEl.querySelector('h3') || null;
+          if (nameEl) upsertCustomLogoInNameEl(nameEl, data.customLogo || null);
+        });
+
+        // también actualizar modal/profile si está abierto y corresponde
+        const modalNameEl = document.querySelector('#profile-modal-content h3');
+        if (modalNameEl) {
+          // intentar detectar si el modal muestra al mismo uid (por email comparation fallback)
+          // si el modal contiene el email, actualizamos también (no obligatorio)
+          // simple approach: re-open modal if it's open and user matches (skip complex mapping)
+        }
+      });
+    });
+  } catch (err) {
+    console.warn('No se pudo instalar listener de users:', err);
   }
 });
 </script>
