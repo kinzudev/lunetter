@@ -1536,11 +1536,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-  <script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
   const db = firebase.firestore();
 
-  // Crear barra de búsqueda
+  // Crear barra de búsqueda arriba
   const searchBar = document.createElement("div");
   searchBar.className = "w-full flex justify-center mt-4 mb-6";
   searchBar.innerHTML = `
@@ -1556,7 +1556,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("user-search");
   const resultsBox = document.getElementById("search-results");
 
-  // Función para renderizar resultados
+  // Renderizar resultados
   function renderResults(users) {
     if (!users.length) {
       resultsBox.innerHTML = `<p class="p-3 text-gray-500 text-sm">No se encontraron resultados</p>`;
@@ -1596,13 +1596,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     searchTimeout = setTimeout(async () => {
-      const snap = await db.collection("users")
-        .where("displayName_lower", ">=", query)
-        .where("displayName_lower", "<=", query + "\uf8ff")
-        .get();
+      try {
+        const snap = await db.collection("users")
+          .where("displayName_lower", ">=", query)
+          .where("displayName_lower", "<=", query + "\uf8ff")
+          .get();
 
-      const users = snap.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
-      renderResults(users);
+        const users = snap.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+        renderResults(users);
+      } catch (err) {
+        console.error("Error buscando usuarios:", err);
+      }
     }, 400); // debounce
   });
 
