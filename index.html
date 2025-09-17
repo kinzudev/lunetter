@@ -871,73 +871,157 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-  <script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Contenedor del perfil
-  const profileContainer = document.getElementById("profile-container");
-  if (!profileContainer) return; // si no hay perfil, no hace nada
+<script>
+document.addEventListener('DOMContentLoaded', () => {
 
-  // Crear sección Sobre mí
-  const aboutSection = document.createElement("div");
-  aboutSection.className = "mt-4 p-4 border rounded-lg bg-white shadow";
-  aboutSection.innerHTML = `
-    <h3 class="font-bold text-lg mb-2">Sobre mí</h3>
-    <p id="about-text" class="text-gray-700 italic">Cargando...</p>
-    <div id="about-edit" class="hidden mt-2">
-      <button id="edit-about-btn" class="px-3 py-1 bg-indigo-600 text-white rounded">Editar</button>
-    </div>
-  `;
-  profileContainer.appendChild(aboutSection);
+  // Crea/asegura la sección "Sobre mí" dentro de #profile-card
+  function ensureAboutSectionInProfile() {
+    const profileCard = document.getElementById('profile-card');
+    if (!profileCard) return null;
 
-  const aboutText = document.getElementById("about-text");
-  const aboutEdit = document.getElementById("about-edit");
-  const editAboutBtn = document.getElementById("edit-about-btn");
+    let about = profileCard.querySelector('#about-section');
+    if (about) return about;
 
-  let currentUser = null;
-  let viewedUser = null; // El usuario del perfil que se está viendo
+    about = document.createElement('div');
+    about.id = 'about-section';
+    about.className = 'w-full mt-4 text-sm text-gray-700';
 
-  // --- Detectar usuario logueado ---
-  auth.onAuthStateChanged(async (user) => {
-    currentUser = user;
-    if (!user) return;
+    about.innerHTML = `
+      <h4 class="font-semibold mb-1">Sobre mí</h4>
+      <p id="about-text" class="text-gray-600">Cargando...</p>
 
-    // Determinar de quién es el perfil (por ejemplo, si lo obtienes por ID en la URL)
-    // Aquí supongo que el perfil que ves es el tuyo. Si usas otro sistema pásame detalles.
-    viewedUser = user;
+      <div id="about-editor" style="display:none; margin-top:8px;">
+        <textarea id="about-textarea" rows="4" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;"></textarea>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+          <button id="about-save" style="padding:6px 10px;background:#10b981;color:white;border-radius:6px;border:none;cursor:pointer;">Guardar</button>
+          <button id="about-cancel" style="padding:6px 10px;background:#e5e7eb;color:#111;border-radius:6px;border:none;cursor:pointer;">Cancelar</button>
+        </div>
+      </div>
 
-    // Escuchar cambios en el "sobre mí"
-    db.collection("users").doc(viewedUser.uid).onSnapshot((doc) => {
-      if (doc.exists) {
-        const data = doc.data();
-        aboutText.textContent = data.aboutMe || "Este usuario aún no escribió nada sobre sí mismo.";
-      } else {
-        aboutText.textContent = "Este usuario aún no escribió nada sobre sí mismo.";
-      }
+      <div id="about-edit-btn-wrap" style="margin-top:8px;text-align:right;"></div>
+    `;
+
+    profileCard.appendChild(about);
+    return about;
+  }
+
+  // Instala manejadores de edición (solo para el dueño del perfil)
+  function installEditHandlersFor(uid) {
+    const editWrap = document.getElementById('about-edit-btn-wrap');
+    if (!editWrap) return;
+
+    // Evitar duplicados
+    if (editWrap.querySelector('#about-edit-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'about-edit-btn';
+    btn.textContent = 'Editar "Sobre mí"';
+    btn.style = 'padding:6px 10px;background:#4f46e5;color:white;border-radius:6px;border:none;cursor:pointer;';
+    editWrap.appendChild(btn);
+
+    btn.addEventListener('click', () => {
+      const editor = document.getElementById('about-editor');
+      const aboutText = document.getElementById('about-text');
+      const textarea = document.getElementById('about-textarea');
+
+      textarea.value = (aboutText && aboutText.textContent && aboutText.textContent !== 'Este usuario aún no escribió nada sobre sí mismo.') ? aboutText.textContent : '';
+      aboutText.style.display = 'none';
+      editor.style.display = 'block';
     });
 
-    // Mostrar botón editar solo si es su propio perfil
-    if (currentUser.uid === viewedUser.uid) {
-      aboutEdit.classList.remove("hidden");
-    }
-  });
+    document.getElementById('about-cancel').addEventListener('click', () => {
+      document.getElementById('about-editor').style.display = 'none';
+      document.getElementById('about-text').style.display = 'block';
+    });
 
-  // --- Editar sobre mí ---
-  if (editAboutBtn) {
-    editAboutBtn.addEventListener("click", async () => {
-      const newAbout = prompt("Escribe tu 'Sobre mí':", aboutText.textContent);
-      if (newAbout === null) return;
-
+    document.getElementById('about-save').addEventListener('click', async () => {
+      const newText = document.getElementById('about-textarea').value;
       try {
-        await db.collection("users").doc(currentUser.uid).set(
-          { aboutMe: newAbout },
-          { merge: true }
-        );
-        alert("Tu 'Sobre mí' fue actualizado.");
+        await db.collection('users').doc(uid).set({ aboutMe: newText }, { merge: true });
+        document.getElementById('about-editor').style.display = 'none';
       } catch (err) {
-        alert("Error al guardar: " + err.message);
+        alert('Error al guardar: ' + err.message);
       }
     });
   }
+
+  // Escucha y muestra el campo aboutMe de un uid
+  function listenAndRenderAbout(uid) {
+    const aboutTextEl = document.querySelector('#about-text');
+    if (!aboutTextEl) return;
+
+    // detach previous snapshot? simple approach: keep listener per uid
+    db.collection('users').doc(uid).onSnapshot(doc => {
+      if (!doc.exists) {
+        aboutTextEl.textContent = 'Este usuario aún no escribió nada sobre sí mismo.';
+        const editor = document.getElementById('about-editor'); if (editor) editor.style.display = 'none';
+        const wrap = document.getElementById('about-edit-btn-wrap'); if (wrap) wrap.innerHTML = '';
+        return;
+      }
+      const d = doc.data();
+      aboutTextEl.textContent = d.aboutMe || 'Este usuario aún no escribió nada sobre sí mismo.';
+      // mostrar botón editar solo si el usuario actual es el dueño del perfil
+      if (auth.currentUser && auth.currentUser.uid === uid) {
+        installEditHandlersFor(uid);
+      } else {
+        const wrap = document.getElementById('about-edit-btn-wrap'); if (wrap) wrap.innerHTML = '';
+      }
+    }, err => {
+      console.error('Error escuchando aboutMe:', err);
+    });
+  }
+
+  // Parcheamos renderProfileCard para añadir la sección y sus listeners
+  if (typeof renderProfileCard === 'function') {
+    const originalRenderProfileCard = renderProfileCard;
+    renderProfileCard = function(userData) {
+      originalRenderProfileCard(userData);
+
+      // Asegurar sección
+      const about = ensureAboutSectionInProfile();
+      if (!about) return;
+
+      // Determinar uid del perfil que se está mostrando
+      let uid = null;
+      if (userData && userData.uid) uid = userData.uid;
+      // si no hay uid pero hay email tratamos de buscar el doc (esto cubre casos)
+      if (!uid && userData && userData.email) {
+        db.collection('users').where('email', '==', userData.email).limit(1).get()
+          .then(q => {
+            if (!q.empty) {
+              const uidFound = q.docs[0].id;
+              listenAndRenderAbout(uidFound);
+            } else {
+              // sin doc de usuario
+              const aboutTextEl = document.getElementById('about-text');
+              if (aboutTextEl) aboutTextEl.textContent = 'Este usuario aún no escribió nada sobre sí mismo.';
+            }
+          }).catch(err => {
+            console.error('Error buscando usuario por email:', err);
+          });
+        return;
+      }
+
+      if (uid) {
+        listenAndRenderAbout(uid);
+      }
+    };
+  } else {
+    // Si renderProfileCard no existe todavía, intentamos añadir la sección cuando aparezca el perfil en DOM
+    // (fallback): detectamos cambios en #profile-card
+    const mo = new MutationObserver((mutations) => {
+      const pc = document.getElementById('profile-card');
+      if (pc && pc.children.length > 0) {
+        // instalar sección si falta
+        const about = ensureAboutSectionInProfile();
+        // intentar inferir uid desde un data-attr en el contenedor (si lo tienes)
+        // si no, no podemos activar listeners automáticos en este fallback.
+        mo.disconnect();
+      }
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+  }
+
 });
 </script>
 
