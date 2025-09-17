@@ -871,5 +871,75 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Contenedor del perfil
+  const profileContainer = document.getElementById("profile-container");
+  if (!profileContainer) return; // si no hay perfil, no hace nada
+
+  // Crear sección Sobre mí
+  const aboutSection = document.createElement("div");
+  aboutSection.className = "mt-4 p-4 border rounded-lg bg-white shadow";
+  aboutSection.innerHTML = `
+    <h3 class="font-bold text-lg mb-2">Sobre mí</h3>
+    <p id="about-text" class="text-gray-700 italic">Cargando...</p>
+    <div id="about-edit" class="hidden mt-2">
+      <button id="edit-about-btn" class="px-3 py-1 bg-indigo-600 text-white rounded">Editar</button>
+    </div>
+  `;
+  profileContainer.appendChild(aboutSection);
+
+  const aboutText = document.getElementById("about-text");
+  const aboutEdit = document.getElementById("about-edit");
+  const editAboutBtn = document.getElementById("edit-about-btn");
+
+  let currentUser = null;
+  let viewedUser = null; // El usuario del perfil que se está viendo
+
+  // --- Detectar usuario logueado ---
+  auth.onAuthStateChanged(async (user) => {
+    currentUser = user;
+    if (!user) return;
+
+    // Determinar de quién es el perfil (por ejemplo, si lo obtienes por ID en la URL)
+    // Aquí supongo que el perfil que ves es el tuyo. Si usas otro sistema pásame detalles.
+    viewedUser = user;
+
+    // Escuchar cambios en el "sobre mí"
+    db.collection("users").doc(viewedUser.uid).onSnapshot((doc) => {
+      if (doc.exists) {
+        const data = doc.data();
+        aboutText.textContent = data.aboutMe || "Este usuario aún no escribió nada sobre sí mismo.";
+      } else {
+        aboutText.textContent = "Este usuario aún no escribió nada sobre sí mismo.";
+      }
+    });
+
+    // Mostrar botón editar solo si es su propio perfil
+    if (currentUser.uid === viewedUser.uid) {
+      aboutEdit.classList.remove("hidden");
+    }
+  });
+
+  // --- Editar sobre mí ---
+  if (editAboutBtn) {
+    editAboutBtn.addEventListener("click", async () => {
+      const newAbout = prompt("Escribe tu 'Sobre mí':", aboutText.textContent);
+      if (newAbout === null) return;
+
+      try {
+        await db.collection("users").doc(currentUser.uid).set(
+          { aboutMe: newAbout },
+          { merge: true }
+        );
+        alert("Tu 'Sobre mí' fue actualizado.");
+      } catch (err) {
+        alert("Error al guardar: " + err.message);
+      }
+    });
+  }
+});
+</script>
+
 </body>
 </html>
