@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lunetter1</title>
+  <title>Lunetter</title>
   <!-- Tailwind CDN (for quick prototyping) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1116,12 +1116,97 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   /******************************************************************
-   * Función para insertar/actualizar logo al lado del nombre
+   * Admin UI: agregar / quitar logo (sección dentro de #admin-panel)
+   ******************************************************************/
+  function ensureAdminLogoSection() {
+    const adminPanel = document.getElementById('admin-panel');
+    if (!adminPanel) return;
+    if (document.getElementById('admin-logo-section')) return;
+
+    const section = document.createElement('div');
+    section.id = 'admin-logo-section';
+    section.style = "margin-top:18px;padding:10px;border-top:1px solid #e5e7eb;";
+    section.innerHTML = `
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">Agregar / Quitar Logo personalizado</h3>
+      <input type="email" id="logo-user-email" placeholder="Gmail del usuario" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:6px;">
+      <input type="url" id="logo-url" placeholder="URL de la imagen" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:6px;">
+      <div style="display:flex;gap:8px;">
+        <button id="add-logo-btn" style="flex:1;padding:8px;background:#059669;color:white;border:none;border-radius:6px;cursor:pointer;">Guardar Logo</button>
+        <button id="remove-logo-btn" style="flex:1;padding:8px;background:#dc2626;color:white;border:none;border-radius:6px;cursor:pointer;">Quitar Logo</button>
+      </div>
+      <p id="logo-status" style="margin-top:8px;font-size:13px;color:#374151;"></p>
+    `;
+    adminPanel.appendChild(section);
+
+    const status = document.getElementById('logo-status');
+
+    // Guardar logo
+    document.getElementById('add-logo-btn').addEventListener('click', async () => {
+      const email = document.getElementById('logo-user-email').value.trim();
+      const url = document.getElementById('logo-url').value.trim();
+      if (!email || !url) {
+        status.textContent = "Debes completar Gmail y URL.";
+        status.style.color = "crimson";
+        return;
+      }
+      try {
+        const snap = await db.collection('users').where('email', '==', email).limit(1).get();
+        if (snap.empty) {
+          status.textContent = "Usuario no encontrado.";
+          status.style.color = "crimson";
+          return;
+        }
+        const doc = snap.docs[0];
+        await db.collection('users').doc(doc.id).update({ customLogo: url });
+        status.textContent = "Logo guardado ✅";
+        status.style.color = "green";
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Error al guardar logo.";
+        status.style.color = "crimson";
+      }
+    });
+
+    // Quitar logo
+    document.getElementById('remove-logo-btn').addEventListener('click', async () => {
+      const email = document.getElementById('logo-user-email').value.trim();
+      if (!email) {
+        status.textContent = "Ingresa el Gmail del usuario para quitar logo.";
+        status.style.color = "crimson";
+        return;
+      }
+      try {
+        const snap = await db.collection('users').where('email', '==', email).limit(1).get();
+        if (snap.empty) {
+          status.textContent = "Usuario no encontrado.";
+          status.style.color = "crimson";
+          return;
+        }
+        const doc = snap.docs[0];
+        await db.collection('users').doc(doc.id).update({ customLogo: firebase.firestore.FieldValue.delete() });
+        status.textContent = "Logo eliminado ✅";
+        status.style.color = "green";
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Error al eliminar logo.";
+        status.style.color = "crimson";
+      }
+    });
+  }
+
+  // esperar a que exista el panel
+  const adminInterval = setInterval(() => {
+    if (document.getElementById('admin-panel')) {
+      clearInterval(adminInterval);
+      ensureAdminLogoSection();
+    }
+  }, 800);
+
+  /******************************************************************
+   * Mostrar logo al lado del nombre en posts
    ******************************************************************/
   function upsertCustomLogoInNameEl(nameEl, logoUrl) {
     if (!nameEl) return;
-
-    // convertir contenedor en flex inline
     nameEl.style.display = "inline-flex";
     nameEl.style.alignItems = "center";
     nameEl.style.gap = "4px";
@@ -1145,25 +1230,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /******************************************************************
-   * Parchear renderPost para insertar logo al lado del nombre
-   ******************************************************************/
   if (typeof renderPost === 'function') {
     const originalRenderPost = renderPost;
     renderPost = function(doc, userId) {
       const postEl = originalRenderPost(doc, userId);
       try {
-        const uid = doc && doc.data ? doc.data().uid : null;
+        const uid = doc?.data()?.uid;
         if (postEl && uid) postEl.dataset.uid = uid;
 
         const nameEl = postEl.querySelector('.font-semibold');
         if (nameEl && uid) {
           db.collection('users').doc(uid).get().then(snap => {
             if (snap.exists) {
-              const ud = snap.data();
-              upsertCustomLogoInNameEl(nameEl, ud.customLogo || null);
+              upsertCustomLogoInNameEl(nameEl, snap.data().customLogo || null);
             }
-          }).catch(err => console.error('Error user->logo:', err));
+          });
         }
       } catch (err) {
         console.error('Patch renderPost error:', err);
@@ -1173,7 +1254,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /******************************************************************
-   * Listener en users para actualizar logos en tiempo real
+   * Actualizar logos en tiempo real
    ******************************************************************/
   try {
     db.collection('users').onSnapshot(snapshot => {
