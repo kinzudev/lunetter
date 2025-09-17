@@ -1274,116 +1274,91 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const currentUserEmail = firebase.auth().currentUser?.email;
+<script>
+  // Crear botón de tienda
+  const tiendaBtn = document.createElement("button");
+  tiendaBtn.textContent = "TIENDA";
+  tiendaBtn.className = "fixed top-16 left-4 px-4 py-2 bg-purple-600 text-white rounded shadow";
+  document.body.appendChild(tiendaBtn);
 
-  /***********************
-   * BOTÓN TIENDA
-   ***********************/
-  const rulesBtn = document.getElementById("rules-btn");
-  if (rulesBtn) {
-    const storeBtn = document.createElement("button");
-    storeBtn.id = "store-btn";
-    storeBtn.textContent = "TIENDA";
-    storeBtn.style = "position:fixed;top:60px;left:10px;background:#3b82f6;color:white;padding:10px 14px;border:none;border-radius:8px;cursor:pointer;z-index:1000;";
-    document.body.appendChild(storeBtn);
+  // Panel de tienda
+  const tiendaPanel = document.createElement("div");
+  tiendaPanel.className = "hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+  tiendaPanel.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-lg w-3/4 max-h-[80vh] overflow-y-auto p-6 relative">
+      <h2 class="text-xl font-bold mb-4">Tienda</h2>
+      <div id="tienda-productos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="tienda-admin" class="mt-4"></div>
+      <button id="cerrar-tienda" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">✖</button>
+    </div>
+  `;
+  document.body.appendChild(tiendaPanel);
 
-    storeBtn.addEventListener("click", openStorePanel);
-  }
+  // Mostrar / ocultar panel
+  tiendaBtn.onclick = () => tiendaPanel.classList.remove("hidden");
+  tiendaPanel.querySelector("#cerrar-tienda").onclick = () => tiendaPanel.classList.add("hidden");
 
-  /***********************
-   * PANEL TIENDA
-   ***********************/
-  function openStorePanel() {
-    if (document.getElementById("store-panel")) return;
+  // Renderizar productos
+  async function renderTienda(user) {
+    const cont = document.getElementById("tienda-productos");
+    cont.innerHTML = "";
+    const snapshot = await db.collection("tienda").get();
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      const div = document.createElement("div");
+      div.className = "border rounded p-3 bg-gray-50 shadow-sm";
+      div.innerHTML = `
+        <img src="${p.imagen}" alt="producto" class="w-full h-40 object-cover rounded mb-2">
+        <h3 class="font-semibold">${p.nombre}</h3>
+        <p class="text-sm text-gray-600">${p.descripcion}</p>
+      `;
 
-    const panel = document.createElement("div");
-    panel.id = "store-panel";
-    panel.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:white;z-index:2000;overflow:auto;padding:20px;";
+      // Botón eliminar si es admin
+      if (user && user.email === "kinzudev@gmail.com") {
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "❌ Eliminar";
+        delBtn.className = "mt-2 px-3 py-1 bg-red-500 text-white rounded";
+        delBtn.onclick = async () => {
+          if (confirm("¿Seguro que quieres eliminar este producto?")) {
+            await db.collection("tienda").doc(doc.id).delete();
+            renderTienda(user);
+          }
+        };
+        div.appendChild(delBtn);
+      }
 
-    panel.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <h2 style="font-size:20px;font-weight:bold;">🛍️ Tienda</h2>
-        <button id="close-store" style="background:#ef4444;color:white;padding:6px 12px;border:none;border-radius:6px;cursor:pointer;">Cerrar</button>
-      </div>
-      <div id="store-products" style="display:grid;gap:20px;"></div>
-      ${currentUserEmail === "kinzudev@gmail.com" ? `
-      <div style="margin-top:20px;padding:15px;border:1px solid #ddd;border-radius:8px;">
-        <h3 style="margin-bottom:10px;font-weight:600;">Editar Tienda</h3>
-        <input type="text" id="product-name" placeholder="Nombre del producto" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ccc;border-radius:6px;">
-        <input type="url" id="product-img" placeholder="URL de la imagen" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ccc;border-radius:6px;">
-        <textarea id="product-desc" placeholder="Cómo obtenerlo" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ccc;border-radius:6px;"></textarea>
-        <button id="add-product" style="background:#10b981;color:white;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;">Añadir Producto</button>
-      </div>
-      ` : ""}
-    `;
-
-    document.body.appendChild(panel);
-
-    document.getElementById("close-store").onclick = () => panel.remove();
-
-    loadProducts();
-
-    if (currentUserEmail === "kinzudev@gmail.com") {
-      document.getElementById("add-product").onclick = addProduct;
-    }
-  }
-
-  /***********************
-   * CARGAR PRODUCTOS
-   ***********************/
-  function loadProducts() {
-    const container = document.getElementById("store-products");
-    if (!container) return;
-
-    db.collection("storeProducts").onSnapshot(snapshot => {
-      container.innerHTML = "";
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const product = document.createElement("div");
-        product.style = "border:1px solid #ddd;padding:15px;border-radius:8px;display:flex;gap:12px;align-items:flex-start;";
-        product.innerHTML = `
-          <img src="${data.imgUrl}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;">
-          <div>
-            <h4 style="font-size:16px;font-weight:600;">${data.name}</h4>
-            <p style="font-size:14px;color:#374151;">${data.description}</p>
-          </div>
-        `;
-        container.appendChild(product);
-      });
+      cont.appendChild(div);
     });
-  }
 
-  /***********************
-   * AÑADIR PRODUCTO
-   ***********************/
-  async function addProduct() {
-    const name = document.getElementById("product-name").value.trim();
-    const imgUrl = document.getElementById("product-img").value.trim();
-    const desc = document.getElementById("product-desc").value.trim();
-
-    if (!name || !imgUrl || !desc) {
-      alert("Completa todos los campos");
-      return;
-    }
-
-    try {
-      await db.collection("storeProducts").add({
-        name,
-        imgUrl,
-        description: desc,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      document.getElementById("product-name").value = "";
-      document.getElementById("product-img").value = "";
-      document.getElementById("product-desc").value = "";
-    } catch (err) {
-      console.error("Error al añadir producto:", err);
-      alert("Hubo un error al guardar el producto.");
+    // Botón de añadir productos solo para admin
+    const adminDiv = document.getElementById("tienda-admin");
+    adminDiv.innerHTML = "";
+    if (user && user.email === "kinzudev@gmail.com") {
+      const addBtn = document.createElement("button");
+      addBtn.textContent = "➕ Editar tienda";
+      addBtn.className = "px-4 py-2 bg-green-600 text-white rounded shadow";
+      addBtn.onclick = async () => {
+        const nombre = prompt("Nombre del producto:");
+        const imagen = prompt("URL de la imagen:");
+        const descripcion = prompt("Descripción del producto:");
+        if (nombre && imagen) {
+          await db.collection("tienda").add({ nombre, imagen, descripcion });
+          renderTienda(user);
+        }
+      };
+      adminDiv.appendChild(addBtn);
     }
   }
-});
+
+  // Escuchar cambios de auth
+  auth.onAuthStateChanged(user => {
+    renderTienda(user);
+  });
+
+  // Escuchar cambios en tiempo real de la tienda
+  db.collection("tienda").onSnapshot(() => {
+    renderTienda(auth.currentUser);
+  });
 </script>
 
 </body>
