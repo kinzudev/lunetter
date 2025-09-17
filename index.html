@@ -1536,13 +1536,13 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-  <script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
   const db = firebase.firestore();
 
-  // Crear panel lateral
+  // Crear panel de recomendaciones debajo de Reglas y Tienda
   const panel = document.createElement("div");
-  panel.className = "fixed top-20 right-4 w-64 bg-white shadow-lg rounded-2xl p-4 text-sm";
+  panel.className = "mt-4 bg-white shadow-lg rounded-2xl p-4 text-sm";
   panel.innerHTML = `
     <h3 class="font-bold text-lg mb-3">Cuentas Recomendadas</h3>
     <div id="recom-list" class="space-y-2 text-gray-700"></div>
@@ -1551,28 +1551,39 @@ document.addEventListener("DOMContentLoaded", () => {
       <p id="recom-timer" class="font-mono text-sm text-blue-600"></p>
     </div>
   `;
-  document.body.appendChild(panel);
 
-  const listEl = document.getElementById("recom-list");
-  const timerEl = document.getElementById("recom-timer");
+  // Insertar debajo de los botones Reglas y TIENDA
+  const reglasBtn = document.querySelector("#reglas-btn") || document.querySelector("button:contains('Reglas')");
+  const tiendaBtn = document.querySelector("#tienda-btn") || document.querySelector("button:contains('TIENDA')");
+  if (tiendaBtn && tiendaBtn.parentNode) {
+    tiendaBtn.parentNode.insertBefore(panel, tiendaBtn.nextSibling);
+  } else if (reglasBtn && reglasBtn.parentNode) {
+    reglasBtn.parentNode.insertBefore(panel, reglasBtn.nextSibling);
+  } else {
+    document.body.appendChild(panel); // fallback
+  }
+
+  const listEl = panel.querySelector("#recom-list");
+  const timerEl = panel.querySelector("#recom-timer");
 
   // Función para mostrar cuentas en el panel
   async function renderRecommended(accounts) {
     listEl.innerHTML = "";
     for (const acc of accounts) {
+      if (!acc || !acc.displayName) continue;
       const div = document.createElement("div");
       div.className = "flex items-center gap-2";
       div.innerHTML = `
-        <img src="${acc.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(acc.displayName || 'User')}" 
+        <img src="${acc.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(acc.displayName)}" 
              class="w-8 h-8 rounded-full object-cover" />
-        <span class="font-medium">${acc.displayName || "Usuario"}</span>
+        <span class="font-medium">${acc.displayName}</span>
       `;
       listEl.appendChild(div);
     }
   }
 
-  // Suscripción a la colección de recomendados
-  db.collection("recommended").doc("global").onSnapshot(async (doc) => {
+  // Suscripción al documento de recomendaciones
+  db.collection("recommended").doc("global").onSnapshot((doc) => {
     if (doc.exists) {
       const data = doc.data();
       const expiresAt = data.expiresAt?.toDate();
@@ -1597,7 +1608,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Solo un admin puede resetear recomendaciones
+  // Solo el admin puede resetear recomendaciones
   auth.onAuthStateChanged(async (user) => {
     if (user && user.email === "kinzudev@gmail.com") {
       const resetBtn = document.createElement("button");
