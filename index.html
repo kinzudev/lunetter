@@ -1536,5 +1536,143 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Crear el botón "Juegos"
+  const juegosBtn = document.createElement("button");
+  juegosBtn.textContent = "Juegos";
+  juegosBtn.className = "fixed top-28 left-4 bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700";
+  document.body.appendChild(juegosBtn);
+
+  // Crear el panel de Juegos
+  const juegosPanel = document.createElement("div");
+  juegosPanel.className = "fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50";
+  juegosPanel.innerHTML = `
+    <div class="bg-white w-3/4 h-3/4 rounded-2xl shadow-lg overflow-y-auto p-6 relative">
+      <h2 class="text-2xl font-bold mb-4">🎮 Juegos</h2>
+      <button id="closeJuegos" class="absolute top-3 right-3 text-red-500 font-bold">X</button>
+      
+      <div class="space-y-6">
+        <!-- Juego 1: Adivina el número -->
+        <div class="p-4 border rounded-lg">
+          <h3 class="text-xl font-semibold mb-2">🔢 Adivina el número</h3>
+          <p>Piensa un número entre 1 y 100. ¿Podrás adivinarlo?</p>
+          <input type="number" id="guessInput" class="border p-1 rounded mt-2" placeholder="Tu número">
+          <button id="guessBtn" class="bg-green-600 text-white px-3 py-1 rounded ml-2">Probar</button>
+          <p id="guessResult" class="mt-2 text-sm"></p>
+        </div>
+
+        <!-- Juego 2: Piedra Papel Tijera -->
+        <div class="p-4 border rounded-lg">
+          <h3 class="text-xl font-semibold mb-2">✊✋✌ Piedra, Papel o Tijera</h3>
+          <div class="flex gap-2">
+            <button class="rpsBtn bg-blue-600 text-white px-3 py-1 rounded" data-choice="piedra">Piedra</button>
+            <button class="rpsBtn bg-blue-600 text-white px-3 py-1 rounded" data-choice="papel">Papel</button>
+            <button class="rpsBtn bg-blue-600 text-white px-3 py-1 rounded" data-choice="tijera">Tijera</button>
+          </div>
+          <p id="rpsResult" class="mt-2 text-sm"></p>
+        </div>
+
+        <!-- Juego 3: Tres en Raya -->
+        <div class="p-4 border rounded-lg">
+          <h3 class="text-xl font-semibold mb-2">⭕❌ Tres en Raya</h3>
+          <div id="ticTacToe" class="grid grid-cols-3 gap-1 w-40">
+            <!-- Casillas -->
+          </div>
+          <p id="ticTacToeStatus" class="mt-2 text-sm"></p>
+          <button id="resetTicTacToe" class="mt-2 bg-gray-600 text-white px-3 py-1 rounded">Reiniciar</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(juegosPanel);
+
+  // Mostrar/Ocultar panel
+  juegosBtn.onclick = () => juegosPanel.classList.remove("hidden");
+  juegosPanel.querySelector("#closeJuegos").onclick = () => juegosPanel.classList.add("hidden");
+
+  // --- Juego 1: Adivina el número ---
+  let secretNumber = Math.floor(Math.random() * 100) + 1;
+  document.querySelector("#guessBtn").onclick = () => {
+    const guess = parseInt(document.querySelector("#guessInput").value);
+    const result = document.querySelector("#guessResult");
+    if (isNaN(guess)) return result.textContent = "⚠ Ingresa un número válido";
+    if (guess === secretNumber) {
+      result.textContent = "🎉 ¡Correcto! El número era " + secretNumber;
+      secretNumber = Math.floor(Math.random() * 100) + 1; // reiniciar
+    } else if (guess < secretNumber) {
+      result.textContent = "⬆ El número es mayor";
+    } else {
+      result.textContent = "⬇ El número es menor";
+    }
+  };
+
+  // --- Juego 2: Piedra Papel Tijera ---
+  const opciones = ["piedra", "papel", "tijera"];
+  document.querySelectorAll(".rpsBtn").forEach(btn => {
+    btn.onclick = () => {
+      const userChoice = btn.dataset.choice;
+      const pcChoice = opciones[Math.floor(Math.random() * 3)];
+      let result = "";
+      if (userChoice === pcChoice) result = "🤝 Empate. Ambos eligieron " + pcChoice;
+      else if (
+        (userChoice === "piedra" && pcChoice === "tijera") ||
+        (userChoice === "papel" && pcChoice === "piedra") ||
+        (userChoice === "tijera" && pcChoice === "papel")
+      ) result = "🎉 Ganaste. PC eligió " + pcChoice;
+      else result = "😢 Perdiste. PC eligió " + pcChoice;
+      document.querySelector("#rpsResult").textContent = result;
+    };
+  });
+
+  // --- Juego 3: Tres en Raya ---
+  const ticTacToeBoard = document.querySelector("#ticTacToe");
+  let board = Array(9).fill(null);
+  let currentPlayer = "X";
+
+  function renderBoard() {
+    ticTacToeBoard.innerHTML = "";
+    board.forEach((cell, i) => {
+      const btn = document.createElement("button");
+      btn.className = "w-12 h-12 border flex items-center justify-center text-lg font-bold";
+      btn.textContent = cell || "";
+      btn.onclick = () => makeMove(i);
+      ticTacToeBoard.appendChild(btn);
+    });
+  }
+
+  function makeMove(i) {
+    if (board[i]) return;
+    board[i] = currentPlayer;
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    renderBoard();
+    checkWinner();
+  }
+
+  function checkWinner() {
+    const wins = [
+      [0,1,2],[3,4,5],[6,7,8], // filas
+      [0,3,6],[1,4,7],[2,5,8], // columnas
+      [0,4,8],[2,4,6]          // diagonales
+    ];
+    for (let [a,b,c] of wins) {
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+        document.querySelector("#ticTacToeStatus").textContent = `🎉 Ganó ${board[a]}!`;
+        return;
+      }
+    }
+  }
+
+  document.querySelector("#resetTicTacToe").onclick = () => {
+    board = Array(9).fill(null);
+    currentPlayer = "X";
+    document.querySelector("#ticTacToeStatus").textContent = "";
+    renderBoard();
+  };
+
+  renderBoard();
+});
+</script>
+
 </body>
 </html>
