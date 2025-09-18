@@ -2062,11 +2062,8 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const db = firebase.firestore();
 
-  // Intentamos usar el elemento existente que muestra el contador
-  // (si usaste el script anterior, existe un elemento con id="cuentas-count")
+  // Crear o usar el contador
   let countEl = document.getElementById("cuentas-count");
-
-  // Si no existe, creamos un visual pequeño (visible solo al admin en pantalla)
   if (!countEl) {
     const mini = document.createElement("div");
     mini.id = "cuentas-count";
@@ -2084,39 +2081,33 @@ document.addEventListener("DOMContentLoaded", () => {
     countEl = mini;
   }
 
-  // Mostrar 0 inmediatamente
+  // Siempre empezar en 0
   let displayedCount = 0;
   function updateDisplay() {
     countEl.textContent = `Cuentas Registradas: ${displayedCount}`;
   }
-  displayedCount = 0;
   updateDisplay();
 
-  // Suscribirse a cambios en la colección users, pero IGNORAR el primer snapshot
-  // (el primer snapshot trae todos los docs ya existentes — no queremos contarlos)
+  // Escuchar solo nuevos registros DESPUÉS de abrir la página
   let initialSnapshotHandled = false;
 
   db.collection("users").onSnapshot(snapshot => {
-    // Si aún no manejamos el primer snapshot, lo marcamos y no contamos esos 'added'
     if (!initialSnapshotHandled) {
+      // La primera vez siempre ignoramos todos los usuarios ya existentes
       initialSnapshotHandled = true;
-      console.log("Primer snapshot recibido: ignorando usuarios ya existentes.");
+      console.log("Ignorando usuarios existentes. Contador inicia en 0.");
       return;
     }
 
-    // Después del primer snapshot, procesamos solo los cambios posteriores
     snapshot.docChanges().forEach(change => {
       if (change.type === "added") {
         displayedCount += 1;
         updateDisplay();
       }
-      // opcional: podríamos manejar removed/modified si quieres decrementos
     });
   }, err => {
     console.error("Error escuchando users:", err);
   });
-
-  // Nota: si quieres que el admin pueda restablecer a 0 manualmente, dime y lo añado.
 });
 </script>
 
