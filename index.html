@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lunette1r</title>
+  <title>Lunetter</title>
   <!-- Tailwind CDN (for quick prototyping) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2054,86 +2054,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Botón cerrar advertencia
   warningPanel.querySelector("#close-warning").addEventListener("click", () => {
     warningPanel.style.display = "none";
-  });
-});
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  auth.onAuthStateChanged(user => {
-    if (user && user.email === "kinzudev@gmail.com") {
-      // Crear botón CUENTAS
-      const cuentasBtn = document.createElement("button");
-      cuentasBtn.textContent = "Cuentas";
-      cuentasBtn.style.position = "fixed";
-      cuentasBtn.style.bottom = "20px";
-      cuentasBtn.style.right = "20px";
-      cuentasBtn.style.background = "#2563eb";
-      cuentasBtn.style.color = "white";
-      cuentasBtn.style.padding = "10px 16px";
-      cuentasBtn.style.border = "none";
-      cuentasBtn.style.borderRadius = "8px";
-      cuentasBtn.style.cursor = "pointer";
-      cuentasBtn.style.zIndex = "1000";
-      document.body.appendChild(cuentasBtn);
-
-      // Crear panel oculto
-      const panel = document.createElement("div");
-      panel.style.position = "fixed";
-      panel.style.top = "50%";
-      panel.style.left = "50%";
-      panel.style.transform = "translate(-50%, -50%)";
-      panel.style.width = "400px";
-      panel.style.height = "200px";
-      panel.style.background = "#1f2937";
-      panel.style.color = "white";
-      panel.style.padding = "20px";
-      panel.style.borderRadius = "12px";
-      panel.style.boxShadow = "0 8px 24px rgba(0,0,0,0.3)";
-      panel.style.display = "none";
-      panel.style.zIndex = "1100";
-
-      const title = document.createElement("h2");
-      title.textContent = "Cuentas Registradas";
-      title.style.marginBottom = "20px";
-
-      const countEl = document.createElement("p");
-      countEl.id = "cuentas-count";
-      countEl.textContent = "Cuentas Registradas: 0";
-
-      panel.appendChild(title);
-      panel.appendChild(countEl);
-      document.body.appendChild(panel);
-
-      // Abrir / cerrar panel
-      cuentasBtn.addEventListener("click", () => {
-        panel.style.display = panel.style.display === "none" ? "block" : "none";
-      });
-
-      // Siempre iniciar en 0
-      let displayedCount = 0;
-      function updateDisplay() {
-        countEl.textContent = `Cuentas Registradas: ${displayedCount}`;
-      }
-      updateDisplay();
-
-      let initialSnapshotHandled = false;
-      db.collection("users").onSnapshot(snapshot => {
-        if (!initialSnapshotHandled) {
-          initialSnapshotHandled = true;
-          return; // Ignorar usuarios ya existentes
-        }
-        snapshot.docChanges().forEach(change => {
-          if (change.type === "added") {
-            displayedCount += 1;
-            updateDisplay();
-          }
-        });
-      });
-    }
   });
 });
 </script>
