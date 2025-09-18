@@ -2058,80 +2058,65 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-  <script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
-  const auth = firebase.auth();
   const db = firebase.firestore();
 
-  let cuentasBtn, cuentasPanel;
+  // Intentamos usar el elemento existente que muestra el contador
+  // (si usaste el script anterior, existe un elemento con id="cuentas-count")
+  let countEl = document.getElementById("cuentas-count");
 
-  function createCuentasUI() {
-    // Botón "Cuentas"
-    cuentasBtn = document.createElement("button");
-    cuentasBtn.textContent = "Cuentas";
-    cuentasBtn.style.position = "fixed";
-    cuentasBtn.style.bottom = "20px";
-    cuentasBtn.style.right = "20px";
-    cuentasBtn.style.padding = "10px 16px";
-    cuentasBtn.style.border = "none";
-    cuentasBtn.style.borderRadius = "8px";
-    cuentasBtn.style.background = "#10b981";
-    cuentasBtn.style.color = "white";
-    cuentasBtn.style.fontWeight = "bold";
-    cuentasBtn.style.cursor = "pointer";
-    cuentasBtn.style.zIndex = "1000";
-    cuentasBtn.style.display = "none"; // solo visible si es kinzudev
-    document.body.appendChild(cuentasBtn);
-
-    // Panel
-    cuentasPanel = document.createElement("div");
-    cuentasPanel.style.position = "fixed";
-    cuentasPanel.style.top = "0";
-    cuentasPanel.style.left = "0";
-    cuentasPanel.style.width = "100%";
-    cuentasPanel.style.height = "100%";
-    cuentasPanel.style.background = "rgba(0,0,0,0.6)";
-    cuentasPanel.style.display = "none";
-    cuentasPanel.style.justifyContent = "center";
-    cuentasPanel.style.alignItems = "center";
-    cuentasPanel.style.zIndex = "2000";
-    cuentasPanel.innerHTML = `
-      <div style="background:white;padding:20px;border-radius:12px;max-width:400px;width:100%;text-align:center;">
-        <h2 style="font-size:20px;margin-bottom:16px;">📊 Cuentas Registradas</h2>
-        <p id="cuentas-count" style="font-size:18px;font-weight:bold;margin-bottom:20px;">Cargando...</p>
-        <button id="cerrar-cuentas" style="padding:8px 14px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;">Cerrar</button>
-      </div>
-    `;
-    document.body.appendChild(cuentasPanel);
-
-    // Abrir panel
-    cuentasBtn.addEventListener("click", () => {
-      cuentasPanel.style.display = "flex";
-    });
-
-    // Cerrar panel
-    cuentasPanel.querySelector("#cerrar-cuentas").addEventListener("click", () => {
-      cuentasPanel.style.display = "none";
-    });
-
-    // Contador en tiempo real
-    db.collection("users").onSnapshot((snap) => {
-      const count = snap.size;
-      document.getElementById("cuentas-count").textContent = `Cuentas Registradas: ${count}`;
-    });
+  // Si no existe, creamos un visual pequeño (visible solo al admin en pantalla)
+  if (!countEl) {
+    const mini = document.createElement("div");
+    mini.id = "cuentas-count";
+    mini.style.position = "fixed";
+    mini.style.bottom = "100px";
+    mini.style.right = "20px";
+    mini.style.background = "#111827";
+    mini.style.color = "white";
+    mini.style.padding = "8px 12px";
+    mini.style.borderRadius = "8px";
+    mini.style.zIndex = "1200";
+    mini.style.boxShadow = "0 6px 18px rgba(0,0,0,0.2)";
+    mini.textContent = "Cuentas Registradas: 0";
+    document.body.appendChild(mini);
+    countEl = mini;
   }
 
-  // Crear la UI y mostrar solo si es kinzudev@gmail.com
-  createCuentasUI();
+  // Mostrar 0 inmediatamente
+  let displayedCount = 0;
+  function updateDisplay() {
+    countEl.textContent = `Cuentas Registradas: ${displayedCount}`;
+  }
+  displayedCount = 0;
+  updateDisplay();
 
-  auth.onAuthStateChanged((user) => {
-    if (user && user.email === "kinzudev@gmail.com") {
-      cuentasBtn.style.display = "block";
-    } else {
-      cuentasBtn.style.display = "none";
-      cuentasPanel.style.display = "none";
+  // Suscribirse a cambios en la colección users, pero IGNORAR el primer snapshot
+  // (el primer snapshot trae todos los docs ya existentes — no queremos contarlos)
+  let initialSnapshotHandled = false;
+
+  db.collection("users").onSnapshot(snapshot => {
+    // Si aún no manejamos el primer snapshot, lo marcamos y no contamos esos 'added'
+    if (!initialSnapshotHandled) {
+      initialSnapshotHandled = true;
+      console.log("Primer snapshot recibido: ignorando usuarios ya existentes.");
+      return;
     }
+
+    // Después del primer snapshot, procesamos solo los cambios posteriores
+    snapshot.docChanges().forEach(change => {
+      if (change.type === "added") {
+        displayedCount += 1;
+        updateDisplay();
+      }
+      // opcional: podríamos manejar removed/modified si quieres decrementos
+    });
+  }, err => {
+    console.error("Error escuchando users:", err);
   });
+
+  // Nota: si quieres que el admin pueda restablecer a 0 manualmente, dime y lo añado.
 });
 </script>
 
