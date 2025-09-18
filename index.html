@@ -1696,5 +1696,293 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ADMIN_EMAIL = "lunetter@gmail.com";
+
+  // ---------- Crear panel admin (oculto) ----------
+  const adminPanel = document.createElement('div');
+  adminPanel.id = 'ban-admin-panel';
+  adminPanel.style.display = 'none';
+  adminPanel.style.position = 'fixed';
+  adminPanel.style.top = '80px';
+  adminPanel.style.right = '20px';
+  adminPanel.style.zIndex = 99999;
+  adminPanel.style.width = '360px';
+  adminPanel.style.background = '#fff';
+  adminPanel.style.borderRadius = '12px';
+  adminPanel.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
+  adminPanel.style.padding = '14px';
+  adminPanel.innerHTML = `
+    <h3 style="margin:0 0 8px 0;">Panel Admin - Baneos</h3>
+    <label style="font-size:13px">Email del usuario</label>
+    <input id="ban-email" type="email" placeholder="usuario@gmail.com" style="width:100%;padding:8px;margin:6px 0;border:1px solid #ddd;border-radius:6px;" />
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <button id="ban-perm" style="flex:1;padding:8px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;">Banear Permanente</button>
+      <button id="unban-btn" style="flex:1;padding:8px;background:#10b981;color:#fff;border:none;border-radius:6px;cursor:pointer;">Desbanear</button>
+    </div>
+    <div style="font-size:13px;margin-bottom:6px;">Ban temporal (opcional):</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <input id="ban-days" type="number" min="0" placeholder="días" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:6px;" />
+      <input id="ban-hours" type="number" min="0" placeholder="horas" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:6px;" />
+      <input id="ban-secs" type="number" min="0" placeholder="seg" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:6px;" />
+    </div>
+    <button id="ban-temp" style="width:100%;padding:8px;background:#f59e0b;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-bottom:8px;">Banear Temporal</button>
+    <div id="admin-msg" style="font-size:13px;color:#374151;min-height:18px;"></div>
+  `;
+  document.body.appendChild(adminPanel);
+
+  // ---------- Overlay de baneo para mostrar a usuarios baneados ----------
+  const banOverlay = document.createElement('div');
+  banOverlay.id = 'ban-overlay';
+  banOverlay.style.display = 'none';
+  banOverlay.style.position = 'fixed';
+  banOverlay.style.inset = '0';
+  banOverlay.style.background = 'rgba(0,0,0,0.95)';
+  banOverlay.style.color = 'white';
+  banOverlay.style.zIndex = 100000;
+  banOverlay.style.display = 'none';
+  banOverlay.style.justifyContent = 'center';
+  banOverlay.style.alignItems = 'center';
+  banOverlay.style.textAlign = 'center';
+  banOverlay.innerHTML = `
+    <div style="max-width:800px;padding:20px;">
+      <img src="https://i.imgur.com/yjv3N5r.png" alt="baneado" style="width:120px;height:120px;object-fit:contain;margin-bottom:16px;">
+      <h1 style="font-size:28px;margin:0 0 8px 0;">Has sido baneado</h1>
+      <p style="margin:0 0 10px 0;">porfavor contacta a <strong>@enjecteds</strong> y <strong>@zunex78</strong></p>
+      <p id="ban-countdown" style="font-family:monospace;font-size:18px;margin-top:8px;"></p>
+    </div>
+  `;
+  document.body.appendChild(banOverlay);
+
+  // Helpers DOM
+  const msgEl = adminPanel.querySelector('#admin-msg');
+  const emailInput = adminPanel.querySelector('#ban-email');
+  const btnBanPerm = adminPanel.querySelector('#ban-perm');
+  const btnBanTemp = adminPanel.querySelector('#ban-temp');
+  const btnUnban = adminPanel.querySelector('#unban-btn');
+  const daysInput = adminPanel.querySelector('#ban-days');
+  const hoursInput = adminPanel.querySelector('#ban-hours');
+  const secsInput = adminPanel.querySelector('#ban-secs');
+  const countdownEl = banOverlay.querySelector('#ban-countdown');
+
+  // Firestore refs
+  const db = firebase.firestore();
+  const authObj = firebase.auth();
+
+  // Mostrar/ocultar admin panel con tecla Insert solo si eres admin
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Insert' && authObj.currentUser && authObj.currentUser.email === ADMIN_EMAIL) {
+      adminPanel.style.display = adminPanel.style.display === 'none' ? 'block' : 'none';
+    }
+  });
+
+  // Busca usuario por email en users (si no existe crea doc mínimo)
+  async function findOrCreateUserByEmail(email) {
+    const q = await db.collection('users').where('email', '==', email).limit(1).get();
+    if (!q.empty) return { id: q.docs[0].id, data: q.docs[0].data() };
+    // crear doc mínimo (sin uid real) — si el usuario no ha iniciado sesión, no hay uid; guardamos doc con email como id
+    const newDocRef = db.collection('users').doc();
+    await newDocRef.set({ email, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    return { id: newDocRef.id, data: { email } };
+  }
+
+  // Banear permanente: banned:true, banExpires: null
+  btnBanPerm.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!email) return (msgEl.textContent = 'Ingresa un email.');
+    msgEl.textContent = 'Buscando usuario...';
+    try {
+      const q = await db.collection('users').where('email', '==', email).limit(1).get();
+      if (q.empty) {
+        // crear nuevo doc con baneo
+        const newRef = db.collection('users').doc();
+        await newRef.set({ email, banned: true, banExpires: null, bannedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      } else {
+        const id = q.docs[0].id;
+        await db.collection('users').doc(id).set({ banned: true, banExpires: null, bannedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      }
+      msgEl.textContent = 'Usuario baneado permanentemente.';
+    } catch (err) {
+      console.error(err);
+      msgEl.textContent = 'Error: ' + err.message;
+    }
+  });
+
+  // Banear temporal: calcular fecha de expiración
+  btnBanTemp.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!email) return (msgEl.textContent = 'Ingresa un email.');
+    const days = parseInt(daysInput.value) || 0;
+    const hours = parseInt(hoursInput.value) || 0;
+    const secs = parseInt(secsInput.value) || 0;
+    const totalMs = ((days*24 + hours)*60 + (secs/60))*60*1000; // careful: secs treated as seconds -> convert later
+    // Fix: compute correctly
+    const totalMilliseconds = (days * 24 * 3600 + hours * 3600 + secs) * 1000;
+    if (totalMilliseconds <= 0) return (msgEl.textContent = 'Ingresa una duración válida.');
+    msgEl.textContent = 'Buscando usuario...';
+    try {
+      const expiresDate = new Date(Date.now() + totalMilliseconds);
+      const q = await db.collection('users').where('email', '==', email).limit(1).get();
+      if (q.empty) {
+        const newRef = db.collection('users').doc();
+        await newRef.set({ email, banned: true, banExpires: firebase.firestore.Timestamp.fromDate(expiresDate), bannedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      } else {
+        const id = q.docs[0].id;
+        await db.collection('users').doc(id).set({ banned: true, banExpires: firebase.firestore.Timestamp.fromDate(expiresDate), bannedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      }
+      msgEl.textContent = `Usuario baneado hasta ${expiresDate.toLocaleString()}.`;
+    } catch (err) {
+      console.error(err);
+      msgEl.textContent = 'Error: ' + err.message;
+    }
+  });
+
+  // Desbanear
+  btnUnban.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!email) return (msgEl.textContent = 'Ingresa un email.');
+    msgEl.textContent = 'Buscando usuario...';
+    try {
+      const q = await db.collection('users').where('email', '==', email).limit(1).get();
+      if (q.empty) return (msgEl.textContent = 'Usuario no encontrado.');
+      const id = q.docs[0].id;
+      await db.collection('users').doc(id).set({ banned: false, banExpires: null, unbannedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      msgEl.textContent = 'Usuario desbaneado.';
+    } catch (err) {
+      console.error(err);
+      msgEl.textContent = 'Error: ' + err.message;
+    }
+  });
+
+  // ---------- Mostrar overlay localmente si el usuario actual está baneado ----------
+  let banListenerUnsub = null;
+  function attachBanListenerForCurrentUser(uid) {
+    if (banListenerUnsub) banListenerUnsub();
+    banListenerUnsub = db.collection('users').doc(uid).onSnapshot(doc => {
+      if (!doc.exists) return hideBanOverlay();
+      const data = doc.data();
+      if (data && data.banned) {
+        const expires = data.banExpires && data.banExpires.toDate ? data.banExpires.toDate() : (data.banExpires ? new Date(data.banExpires) : null);
+        showBanOverlay(expires);
+      } else {
+        hideBanOverlay();
+      }
+    }, err => {
+      console.error('Error listening user ban:', err);
+    });
+  }
+
+  // Overlay control
+  let overlayInterval = null;
+  function showBanOverlay(expiresAt) {
+    banOverlay.style.display = 'flex';
+    // block interactions by preventing pointer events to underlying content
+    document.body.style.overflow = 'hidden';
+    // disable composer and like buttons if present
+    document.querySelectorAll('.like-btn, button.like, .btn-like').forEach(b => b.disabled = true);
+    const composer = document.getElementById('composer');
+    if (composer) {
+      composer.querySelectorAll('button, input, textarea').forEach(i => i.disabled = true);
+    }
+
+    // update countdown
+    function update() {
+      if (!expiresAt) {
+        countdownEl.textContent = 'Baneo permanente';
+        return;
+      }
+      const diff = expiresAt.getTime() - Date.now();
+      if (diff <= 0) {
+        // auto unban locally: ask Firestore to lift? Prefer to re-check doc - here hide overlay and rely on server update
+        countdownEl.textContent = 'Expirado — esperando actualización...';
+        clearInterval(overlayInterval);
+        return;
+      }
+      const s = Math.floor(diff / 1000) % 60;
+      const m = Math.floor(diff / (1000*60)) % 60;
+      const h = Math.floor(diff / (1000*60*60)) % 24;
+      const d = Math.floor(diff / (1000*60*60*24));
+      const parts = [];
+      if (d) parts.push(d + 'd');
+      if (h) parts.push(h + 'h');
+      parts.push(String(m).padStart(2,'0') + 'm');
+      parts.push(String(s).padStart(2,'0') + 's');
+      countdownEl.textContent = 'Tiempo restante: ' + parts.join(' ');
+    }
+
+    update();
+    if (overlayInterval) clearInterval(overlayInterval);
+    overlayInterval = setInterval(update, 1000);
+
+    // stop most inputs/key events
+    function stopEv(e) { e.stopImmediatePropagation(); }
+    document.addEventListener('click', stopEv, true);
+    document.addEventListener('keydown', stopEv, true);
+    // store cleanup handler
+    banOverlay._stopHandlers = stopEv;
+  }
+
+  function hideBanOverlay() {
+    banOverlay.style.display = 'none';
+    document.body.style.overflow = '';
+    document.querySelectorAll('.like-btn, button.like, .btn-like').forEach(b => { b.disabled = false; });
+    const composer = document.getElementById('composer');
+    if (composer) {
+      composer.querySelectorAll('button, input, textarea').forEach(i => i.disabled = false);
+    }
+    if (overlayInterval) { clearInterval(overlayInterval); overlayInterval = null; }
+    if (banOverlay._stopHandlers) {
+      document.removeEventListener('click', banOverlay._stopHandlers, true);
+      document.removeEventListener('keydown', banOverlay._stopHandlers, true);
+      banOverlay._stopHandlers = null;
+    }
+  }
+
+  // ---------- Realtime: si otro admin banea a alguien y es el usuario actual, mostrar overlay ----------
+  authObj.onAuthStateChanged(async (user) => {
+    if (user) {
+      // attach listener to the user's doc (create doc if missing)
+      const uRef = db.collection('users').doc(user.uid);
+      const snap = await uRef.get();
+      if (!snap.exists) {
+        // Create minimal user doc to store bans
+        await uRef.set({ email: user.email || null, displayName: user.displayName || null }, { merge: true });
+      }
+      attachBanListenerForCurrentUser(user.uid);
+    } else {
+      if (banListenerUnsub) { banListenerUnsub(); banListenerUnsub = null; }
+      hideBanOverlay();
+    }
+  });
+
+  // ---------- Also listen to users collection changes to immediately show overlay if current user was banned by admin via email doc different than uid doc ----------
+  // (Some ban operations create docs by email; we'll also check by email)
+  let usersSnapshotUnsub = null;
+  authObj.onAuthStateChanged(user => {
+    if (usersSnapshotUnsub) { usersSnapshotUnsub(); usersSnapshotUnsub = null; }
+    if (!user) return;
+    usersSnapshotUnsub = db.collection('users').where('email','==', user.email).onSnapshot(snap => {
+      if (snap.empty) return;
+      const doc = snap.docs[0];
+      const data = doc.data();
+      if (data && data.banned) {
+        const expires = data.banExpires && data.banExpires.toDate ? data.banExpires.toDate() : (data.banExpires ? new Date(data.banExpires) : null);
+        showBanOverlay(expires);
+      } else {
+        hideBanOverlay();
+      }
+    });
+  });
+
+  // Cleanup on unload
+  window.addEventListener('beforeunload', () => {
+    if (banListenerUnsub) banListenerUnsub();
+    if (usersSnapshotUnsub) usersSnapshotUnsub();
+  });
+
+});
+</script>
+
 </body>
 </html>
