@@ -1965,101 +1965,96 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // Buscar el botón que tenga el texto "Reglas"
-  const botones = Array.from(document.querySelectorAll("button"));
-  const reglasBtn = botones.find(b => b.textContent.trim() === "Reglas");
+  // Crear el botón fijo arriba a la derecha
+  const mobileBtn = document.createElement("button");
+  mobileBtn.textContent = "Mobil Versión";
+  mobileBtn.style.position = "fixed";
+  mobileBtn.style.top = "10px";
+  mobileBtn.style.right = "10px";
+  mobileBtn.style.zIndex = "1000";
+  mobileBtn.style.padding = "8px 14px";
+  mobileBtn.style.border = "none";
+  mobileBtn.style.borderRadius = "6px";
+  mobileBtn.style.background = "#2563eb";
+  mobileBtn.style.color = "white";
+  mobileBtn.style.cursor = "pointer";
+  mobileBtn.style.fontWeight = "bold";
+  document.body.appendChild(mobileBtn);
 
-  if (reglasBtn) {
-    // Crear botón de Mobile Versión
-    const mobileBtn = document.createElement("button");
-    mobileBtn.textContent = "Mobil Versión";
-    mobileBtn.style.marginLeft = "8px";
-    mobileBtn.style.padding = "6px 12px";
-    mobileBtn.style.border = "none";
-    mobileBtn.style.borderRadius = "6px";
-    mobileBtn.style.background = "#2563eb";
-    mobileBtn.style.color = "white";
-    mobileBtn.style.cursor = "pointer";
-    mobileBtn.style.fontWeight = "bold";
+  // Crear estilos para modo móvil
+  const mobileStyle = document.createElement("style");
+  mobileStyle.id = "mobile-style";
+  mobileStyle.textContent = `
+    body.mobile-version {
+      font-size: 14px !important;
+      max-width: 480px;
+      margin: auto;
+      background: #f9fafb;
+    }
+    body.mobile-version .post, 
+    body.mobile-version .card,
+    body.mobile-version .panel {
+      width: 100% !important;
+      margin: 8px 0 !important;
+      border-radius: 10px !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    body.mobile-version header,
+    body.mobile-version nav {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  `;
+  document.head.appendChild(mobileStyle);
+  mobileStyle.disabled = true;
 
-    // Insertar botón después de Reglas
-    reglasBtn.insertAdjacentElement("afterend", mobileBtn);
+  // Crear advertencia
+  const warningPanel = document.createElement("div");
+  warningPanel.style.position = "fixed";
+  warningPanel.style.top = "0";
+  warningPanel.style.left = "0";
+  warningPanel.style.width = "100%";
+  warningPanel.style.height = "100%";
+  warningPanel.style.background = "rgba(0,0,0,0.7)";
+  warningPanel.style.display = "none";
+  warningPanel.style.justifyContent = "center";
+  warningPanel.style.alignItems = "center";
+  warningPanel.style.zIndex = "10000";
+  warningPanel.innerHTML = `
+    <div style="background:white;padding:20px;border-radius:12px;text-align:center;max-width:320px;">
+      <h2 style="margin-bottom:12px;">⚠️ Advertencia</h2>
+      <p style="margin-bottom:16px;">Esto es solo para teléfonos!</p>
+      <button id="close-warning" style="padding:8px 16px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;">Entendido</button>
+    </div>
+  `;
+  document.body.appendChild(warningPanel);
 
-    // Crear estilos para modo móvil
-    const mobileStyle = document.createElement("style");
-    mobileStyle.id = "mobile-style";
-    mobileStyle.textContent = `
-      body.mobile-version {
-        font-size: 14px !important;
-        max-width: 480px;
-        margin: auto;
-        background: #f9fafb;
+  let mobileEnabled = false;
+  let warningShown = false;
+
+  mobileBtn.addEventListener("click", () => {
+    if (!mobileEnabled) {
+      if (!warningShown) {
+        warningPanel.style.display = "flex";
+        warningShown = true;
       }
-      body.mobile-version .post, 
-      body.mobile-version .card,
-      body.mobile-version .panel {
-        width: 100% !important;
-        margin: 8px 0 !important;
-        border-radius: 10px !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      }
-      body.mobile-version header,
-      body.mobile-version nav {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-    `;
-    document.head.appendChild(mobileStyle);
-    mobileStyle.disabled = true;
+      document.body.classList.add("mobile-version");
+      mobileStyle.disabled = false;
+      mobileEnabled = true;
+      mobileBtn.textContent = "Versión Normal";
+    } else {
+      document.body.classList.remove("mobile-version");
+      mobileStyle.disabled = true;
+      mobileEnabled = false;
+      mobileBtn.textContent = "Mobil Versión";
+    }
+  });
 
-    // Crear advertencia
-    const warningPanel = document.createElement("div");
-    warningPanel.style.position = "fixed";
-    warningPanel.style.top = "0";
-    warningPanel.style.left = "0";
-    warningPanel.style.width = "100%";
-    warningPanel.style.height = "100%";
-    warningPanel.style.background = "rgba(0,0,0,0.7)";
+  // Botón cerrar advertencia
+  warningPanel.querySelector("#close-warning").addEventListener("click", () => {
     warningPanel.style.display = "none";
-    warningPanel.style.justifyContent = "center";
-    warningPanel.style.alignItems = "center";
-    warningPanel.style.zIndex = "10000";
-    warningPanel.innerHTML = `
-      <div style="background:white;padding:20px;border-radius:12px;text-align:center;max-width:320px;">
-        <h2 style="margin-bottom:12px;">⚠️ Advertencia</h2>
-        <p style="margin-bottom:16px;">Esto es solo para teléfonos!</p>
-        <button id="close-warning" style="padding:8px 16px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;">Entendido</button>
-      </div>
-    `;
-    document.body.appendChild(warningPanel);
-
-    let mobileEnabled = false;
-    let warningShown = false;
-
-    mobileBtn.addEventListener("click", () => {
-      if (!mobileEnabled) {
-        if (!warningShown) {
-          warningPanel.style.display = "flex";
-          warningShown = true;
-        }
-        document.body.classList.add("mobile-version");
-        mobileStyle.disabled = false;
-        mobileEnabled = true;
-      } else {
-        document.body.classList.remove("mobile-version");
-        mobileStyle.disabled = true;
-        mobileEnabled = false;
-      }
-    });
-
-    // Botón cerrar advertencia
-    warningPanel.querySelector("#close-warning").addEventListener("click", () => {
-      warningPanel.style.display = "none";
-    });
-  } else {
-    console.warn("No se encontró el botón Reglas. Revisa el texto exacto.");
-  }
+  });
 });
 </script>
 
