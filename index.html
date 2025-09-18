@@ -1696,7 +1696,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-  <script>
+<script>
 document.addEventListener('DOMContentLoaded', () => {
   const ADMIN_EMAIL = "lunetter@gmail.com";
 
@@ -1741,13 +1741,14 @@ document.addEventListener('DOMContentLoaded', () => {
   banOverlay.style.background = 'rgba(0,0,0,0.95)';
   banOverlay.style.color = 'white';
   banOverlay.style.zIndex = 100000;
-  banOverlay.style.display = 'none';
   banOverlay.style.justifyContent = 'center';
   banOverlay.style.alignItems = 'center';
   banOverlay.style.textAlign = 'center';
+  banOverlay.style.padding = '20px';
   banOverlay.innerHTML = `
-    <div style="max-width:800px;padding:20px;">
-      <img src="https://i.imgur.com/yjv3N5r.png" alt="baneado" style="width:120px;height:120px;object-fit:contain;margin-bottom:16px;">
+    <div style="max-width:820px;padding:20px;">
+      <!-- Imagen personalizada encima del texto (añadida por petición) -->
+      <img src="https://images.squarespace-cdn.com/content/64affeccb8061b07b302a082/1695378472779-JVAFCRPLZTWQXOMHIAUA/Sticker-1.png?content-type=image%2Fpng" alt="baneado" style="max-width:220px;height:auto;display:block;margin:0 auto 18px;" />
       <h1 style="font-size:28px;margin:0 0 8px 0;">Has sido baneado</h1>
       <p style="margin:0 0 10px 0;">porfavor contacta a <strong>@enjecteds</strong> y <strong>@zunex78</strong></p>
       <p id="ban-countdown" style="font-family:monospace;font-size:18px;margin-top:8px;"></p>
@@ -1777,16 +1778,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Busca usuario por email en users (si no existe crea doc mínimo)
-  async function findOrCreateUserByEmail(email) {
-    const q = await db.collection('users').where('email', '==', email).limit(1).get();
-    if (!q.empty) return { id: q.docs[0].id, data: q.docs[0].data() };
-    // crear doc mínimo (sin uid real) — si el usuario no ha iniciado sesión, no hay uid; guardamos doc con email como id
-    const newDocRef = db.collection('users').doc();
-    await newDocRef.set({ email, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-    return { id: newDocRef.id, data: { email } };
-  }
-
   // Banear permanente: banned:true, banExpires: null
   btnBanPerm.addEventListener('click', async () => {
     const email = emailInput.value.trim();
@@ -1795,7 +1786,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const q = await db.collection('users').where('email', '==', email).limit(1).get();
       if (q.empty) {
-        // crear nuevo doc con baneo
         const newRef = db.collection('users').doc();
         await newRef.set({ email, banned: true, banExpires: null, bannedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
       } else {
@@ -1816,8 +1806,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const days = parseInt(daysInput.value) || 0;
     const hours = parseInt(hoursInput.value) || 0;
     const secs = parseInt(secsInput.value) || 0;
-    const totalMs = ((days*24 + hours)*60 + (secs/60))*60*1000; // careful: secs treated as seconds -> convert later
-    // Fix: compute correctly
     const totalMilliseconds = (days * 24 * 3600 + hours * 3600 + secs) * 1000;
     if (totalMilliseconds <= 0) return (msgEl.textContent = 'Ingresa una duración válida.');
     msgEl.textContent = 'Buscando usuario...';
@@ -1877,16 +1865,13 @@ document.addEventListener('DOMContentLoaded', () => {
   let overlayInterval = null;
   function showBanOverlay(expiresAt) {
     banOverlay.style.display = 'flex';
-    // block interactions by preventing pointer events to underlying content
     document.body.style.overflow = 'hidden';
-    // disable composer and like buttons if present
     document.querySelectorAll('.like-btn, button.like, .btn-like').forEach(b => b.disabled = true);
     const composer = document.getElementById('composer');
     if (composer) {
       composer.querySelectorAll('button, input, textarea').forEach(i => i.disabled = true);
     }
 
-    // update countdown
     function update() {
       if (!expiresAt) {
         countdownEl.textContent = 'Baneo permanente';
@@ -1894,7 +1879,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const diff = expiresAt.getTime() - Date.now();
       if (diff <= 0) {
-        // auto unban locally: ask Firestore to lift? Prefer to re-check doc - here hide overlay and rely on server update
         countdownEl.textContent = 'Expirado — esperando actualización...';
         clearInterval(overlayInterval);
         return;
@@ -1915,11 +1899,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (overlayInterval) clearInterval(overlayInterval);
     overlayInterval = setInterval(update, 1000);
 
-    // stop most inputs/key events
     function stopEv(e) { e.stopImmediatePropagation(); }
     document.addEventListener('click', stopEv, true);
     document.addEventListener('keydown', stopEv, true);
-    // store cleanup handler
     banOverlay._stopHandlers = stopEv;
   }
 
@@ -1942,11 +1924,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------- Realtime: si otro admin banea a alguien y es el usuario actual, mostrar overlay ----------
   authObj.onAuthStateChanged(async (user) => {
     if (user) {
-      // attach listener to the user's doc (create doc if missing)
       const uRef = db.collection('users').doc(user.uid);
       const snap = await uRef.get();
       if (!snap.exists) {
-        // Create minimal user doc to store bans
         await uRef.set({ email: user.email || null, displayName: user.displayName || null }, { merge: true });
       }
       attachBanListenerForCurrentUser(user.uid);
@@ -1956,8 +1936,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ---------- Also listen to users collection changes to immediately show overlay if current user was banned by admin via email doc different than uid doc ----------
-  // (Some ban operations create docs by email; we'll also check by email)
+  // También comprobar por email en caso de docs creados por email
   let usersSnapshotUnsub = null;
   authObj.onAuthStateChanged(user => {
     if (usersSnapshotUnsub) { usersSnapshotUnsub(); usersSnapshotUnsub = null; }
