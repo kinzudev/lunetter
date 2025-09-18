@@ -2058,5 +2058,82 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let cuentasBtn, cuentasPanel;
+
+  function createCuentasUI() {
+    // Botón "Cuentas"
+    cuentasBtn = document.createElement("button");
+    cuentasBtn.textContent = "Cuentas";
+    cuentasBtn.style.position = "fixed";
+    cuentasBtn.style.bottom = "20px";
+    cuentasBtn.style.right = "20px";
+    cuentasBtn.style.padding = "10px 16px";
+    cuentasBtn.style.border = "none";
+    cuentasBtn.style.borderRadius = "8px";
+    cuentasBtn.style.background = "#10b981";
+    cuentasBtn.style.color = "white";
+    cuentasBtn.style.fontWeight = "bold";
+    cuentasBtn.style.cursor = "pointer";
+    cuentasBtn.style.zIndex = "1000";
+    cuentasBtn.style.display = "none"; // solo visible si es kinzudev
+    document.body.appendChild(cuentasBtn);
+
+    // Panel
+    cuentasPanel = document.createElement("div");
+    cuentasPanel.style.position = "fixed";
+    cuentasPanel.style.top = "0";
+    cuentasPanel.style.left = "0";
+    cuentasPanel.style.width = "100%";
+    cuentasPanel.style.height = "100%";
+    cuentasPanel.style.background = "rgba(0,0,0,0.6)";
+    cuentasPanel.style.display = "none";
+    cuentasPanel.style.justifyContent = "center";
+    cuentasPanel.style.alignItems = "center";
+    cuentasPanel.style.zIndex = "2000";
+    cuentasPanel.innerHTML = `
+      <div style="background:white;padding:20px;border-radius:12px;max-width:400px;width:100%;text-align:center;">
+        <h2 style="font-size:20px;margin-bottom:16px;">📊 Cuentas Registradas</h2>
+        <p id="cuentas-count" style="font-size:18px;font-weight:bold;margin-bottom:20px;">Cargando...</p>
+        <button id="cerrar-cuentas" style="padding:8px 14px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;">Cerrar</button>
+      </div>
+    `;
+    document.body.appendChild(cuentasPanel);
+
+    // Abrir panel
+    cuentasBtn.addEventListener("click", () => {
+      cuentasPanel.style.display = "flex";
+    });
+
+    // Cerrar panel
+    cuentasPanel.querySelector("#cerrar-cuentas").addEventListener("click", () => {
+      cuentasPanel.style.display = "none";
+    });
+
+    // Contador en tiempo real
+    db.collection("users").onSnapshot((snap) => {
+      const count = snap.size;
+      document.getElementById("cuentas-count").textContent = `Cuentas Registradas: ${count}`;
+    });
+  }
+
+  // Crear la UI y mostrar solo si es kinzudev@gmail.com
+  createCuentasUI();
+
+  auth.onAuthStateChanged((user) => {
+    if (user && user.email === "kinzudev@gmail.com") {
+      cuentasBtn.style.display = "block";
+    } else {
+      cuentasBtn.style.display = "none";
+      cuentasPanel.style.display = "none";
+    }
+  });
+});
+</script>
+
 </body>
 </html>
