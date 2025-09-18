@@ -1963,11 +1963,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-  <script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
-  // Encontrar el botón de Reglas
-  const reglasBtn = document.querySelector("button#reglas, .reglas-btn, button:contains('Reglas')");
-  
+  // Buscar el botón que tenga el texto "Reglas"
+  const botones = Array.from(document.querySelectorAll("button"));
+  const reglasBtn = botones.find(b => b.textContent.trim() === "Reglas");
+
   if (reglasBtn) {
     // Crear botón de Mobile Versión
     const mobileBtn = document.createElement("button");
@@ -1980,11 +1981,11 @@ document.addEventListener("DOMContentLoaded", () => {
     mobileBtn.style.color = "white";
     mobileBtn.style.cursor = "pointer";
     mobileBtn.style.fontWeight = "bold";
-    
+
     // Insertar botón después de Reglas
     reglasBtn.insertAdjacentElement("afterend", mobileBtn);
 
-    // Crear estilo móvil
+    // Crear estilos para modo móvil
     const mobileStyle = document.createElement("style");
     mobileStyle.id = "mobile-style";
     mobileStyle.textContent = `
@@ -2056,6 +2057,8 @@ document.addEventListener("DOMContentLoaded", () => {
     warningPanel.querySelector("#close-warning").addEventListener("click", () => {
       warningPanel.style.display = "none";
     });
+  } else {
+    console.warn("No se encontró el botón Reglas. Revisa el texto exacto.");
   }
 });
 </script>
