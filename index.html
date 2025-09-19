@@ -2145,7 +2145,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadTopUsers();
   });
 
-  // Función para cargar top usuarios con nombre real y foto
+  // Función para cargar top usuarios con nombre real, foto y verificado con imagen
   async function loadTopUsers() {
     const postsSnapshot = await db.collection("posts").get();
     const counts = {};
@@ -2166,7 +2166,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const u = doc.data();
       usersMap[doc.id] = {
         displayName: u.displayName || "Usuario",
-        photoURL: u.photoURL || "https://via.placeholder.com/40", // Default si no tiene foto
+        photoURL: u.photoURL || "https://via.placeholder.com/40",
         verified: u.verified || false
       };
     });
@@ -2209,17 +2209,19 @@ document.addEventListener("DOMContentLoaded", () => {
       img.style.borderRadius = "50%";
       nameCell.appendChild(img);
 
-      // Nombre + Verificado
+      // Nombre
       const nameSpan = document.createElement("span");
       nameSpan.textContent = user.name;
       nameCell.appendChild(nameSpan);
 
+      // Verificado con imagen
       if (user.verified) {
-        const check = document.createElement("span");
-        check.textContent = "✔️";
-        check.style.color = "#3b82f6";
-        check.style.marginLeft = "4px";
-        nameCell.appendChild(check);
+        const verifyImg = document.createElement("img");
+        verifyImg.src = "https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png";
+        verifyImg.style.width = "18px";
+        verifyImg.style.height = "18px";
+        verifyImg.style.marginLeft = "4px";
+        nameCell.appendChild(verifyImg);
       }
 
       row.appendChild(nameCell);
