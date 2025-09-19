@@ -2067,7 +2067,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tablaBtn = document.createElement("button");
   tablaBtn.textContent = "Tabla";
   tablaBtn.style.position = "fixed";
-  tablaBtn.style.top = "80px";  // 👈 lo bajamos un poco más
+  tablaBtn.style.top = "80px"; // Un poco más abajo
   tablaBtn.style.right = "20px";
   tablaBtn.style.background = "#2563eb";
   tablaBtn.style.color = "white";
@@ -2084,7 +2084,7 @@ document.addEventListener("DOMContentLoaded", () => {
   panel.style.top = "50%";
   panel.style.left = "50%";
   panel.style.transform = "translate(-50%, -50%)";
-  panel.style.width = "600px";
+  panel.style.width = "650px";
   panel.style.height = "500px";
   panel.style.background = "#1f2937";
   panel.style.color = "white";
@@ -2145,7 +2145,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadTopUsers();
   });
 
-  // Función para cargar top usuarios con nombre real
+  // Función para cargar top usuarios con nombre real y foto
   async function loadTopUsers() {
     const postsSnapshot = await db.collection("posts").get();
     const counts = {};
@@ -2159,14 +2159,15 @@ document.addEventListener("DOMContentLoaded", () => {
       counts[uid].count++;
     });
 
-    // Ahora buscamos los datos de los usuarios en Firestore
+    // Buscar los datos de los usuarios en Firestore
     const usersSnapshot = await db.collection("users").get();
     const usersMap = {};
     usersSnapshot.forEach(doc => {
       const u = doc.data();
       usersMap[doc.id] = {
         displayName: u.displayName || "Usuario",
-        photoURL: u.photoURL || null
+        photoURL: u.photoURL || "https://via.placeholder.com/40", // Default si no tiene foto
+        verified: u.verified || false
       };
     });
 
@@ -2175,7 +2176,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .map(([uid, data]) => ({
         uid,
         count: data.count,
-        name: usersMap[uid]?.displayName || "Usuario"
+        name: usersMap[uid]?.displayName || "Usuario",
+        photoURL: usersMap[uid]?.photoURL,
+        verified: usersMap[uid]?.verified
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 50);
@@ -2193,8 +2196,32 @@ document.addEventListener("DOMContentLoaded", () => {
       row.appendChild(topCell);
 
       const nameCell = document.createElement("td");
-      nameCell.textContent = user.name;
       nameCell.style.padding = "6px";
+      nameCell.style.display = "flex";
+      nameCell.style.alignItems = "center";
+      nameCell.style.gap = "8px";
+
+      // Foto
+      const img = document.createElement("img");
+      img.src = user.photoURL;
+      img.style.width = "32px";
+      img.style.height = "32px";
+      img.style.borderRadius = "50%";
+      nameCell.appendChild(img);
+
+      // Nombre + Verificado
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = user.name;
+      nameCell.appendChild(nameSpan);
+
+      if (user.verified) {
+        const check = document.createElement("span");
+        check.textContent = "✔️";
+        check.style.color = "#3b82f6";
+        check.style.marginLeft = "4px";
+        nameCell.appendChild(check);
+      }
+
       row.appendChild(nameCell);
 
       const postsCell = document.createElement("td");
