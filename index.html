@@ -2058,5 +2058,151 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // Crear botón "Tabla"
+  const tablaBtn = document.createElement("button");
+  tablaBtn.textContent = "Tabla";
+  tablaBtn.style.position = "fixed";
+  tablaBtn.style.top = "20px";
+  tablaBtn.style.right = "20px";
+  tablaBtn.style.background = "#2563eb";
+  tablaBtn.style.color = "white";
+  tablaBtn.style.padding = "10px 16px";
+  tablaBtn.style.border = "none";
+  tablaBtn.style.borderRadius = "8px";
+  tablaBtn.style.cursor = "pointer";
+  tablaBtn.style.zIndex = "1000";
+  document.body.appendChild(tablaBtn);
+
+  // Crear panel oculto
+  const panel = document.createElement("div");
+  panel.style.position = "fixed";
+  panel.style.top = "50%";
+  panel.style.left = "50%";
+  panel.style.transform = "translate(-50%, -50%)";
+  panel.style.width = "600px";
+  panel.style.height = "500px";
+  panel.style.background = "#1f2937";
+  panel.style.color = "white";
+  panel.style.padding = "20px";
+  panel.style.borderRadius = "12px";
+  panel.style.boxShadow = "0 8px 24px rgba(0,0,0,0.3)";
+  panel.style.display = "none";
+  panel.style.overflowY = "auto";
+  panel.style.zIndex = "1100";
+
+  const title = document.createElement("h2");
+  title.textContent = "Tabla global de top personas con más posts";
+  title.style.marginBottom = "20px";
+  panel.appendChild(title);
+
+  const table = document.createElement("table");
+  table.style.width = "100%";
+  table.style.borderCollapse = "collapse";
+
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  ["Top", "Usuario", "Posts"].forEach(txt => {
+    const th = document.createElement("th");
+    th.textContent = txt;
+    th.style.borderBottom = "2px solid #374151";
+    th.style.padding = "8px";
+    th.style.textAlign = "left";
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  tbody.id = "tabla-top-users";
+  table.appendChild(tbody);
+
+  panel.appendChild(table);
+
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Cerrar";
+  closeBtn.style.marginTop = "20px";
+  closeBtn.style.padding = "8px 12px";
+  closeBtn.style.background = "#dc2626";
+  closeBtn.style.color = "white";
+  closeBtn.style.border = "none";
+  closeBtn.style.borderRadius = "8px";
+  closeBtn.style.cursor = "pointer";
+  closeBtn.addEventListener("click", () => {
+    panel.style.display = "none";
+  });
+  panel.appendChild(closeBtn);
+
+  document.body.appendChild(panel);
+
+  // Abrir panel al clickear
+  tablaBtn.addEventListener("click", () => {
+    panel.style.display = "block";
+  });
+
+  // Obtener y renderizar top 50
+  function loadTopUsers() {
+    db.collection("posts").get().then(snapshot => {
+      const counts = {};
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const uid = data.uid;
+        if (!counts[uid]) {
+          counts[uid] = { count: 0, name: data.name || "Usuario", email: data.email || "" };
+        }
+        counts[uid].count++;
+      });
+
+      const sorted = Object.values(counts).sort((a, b) => b.count - a.count).slice(0, 50);
+
+      const tbody = document.getElementById("tabla-top-users");
+      tbody.innerHTML = "";
+
+      sorted.forEach((user, index) => {
+        const row = document.createElement("tr");
+
+        const topCell = document.createElement("td");
+        topCell.textContent = index + 1;
+        topCell.style.padding = "6px";
+        row.appendChild(topCell);
+
+        const nameCell = document.createElement("td");
+        nameCell.textContent = user.name;
+        nameCell.style.padding = "6px";
+        row.appendChild(nameCell);
+
+        const postsCell = document.createElement("td");
+        postsCell.textContent = user.count;
+        postsCell.style.padding = "6px";
+        row.appendChild(postsCell);
+
+        tbody.appendChild(row);
+      });
+    });
+  }
+
+  // Actualizar cada vez que se abra
+  tablaBtn.addEventListener("click", loadTopUsers);
+
+  // Mostrar cuántos posts lleva el usuario actual
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      db.collection("posts").where("uid", "==", user.uid).get().then(snapshot => {
+        const myPosts = snapshot.size;
+        const info = document.createElement("p");
+        info.textContent = `Has publicado ${myPosts} posts.`;
+        info.style.marginTop = "15px";
+        info.style.fontWeight = "bold";
+        panel.appendChild(info);
+      });
+    }
+  });
+});
+</script>
+
 </body>
 </html>
