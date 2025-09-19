@@ -2058,7 +2058,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-  <script>
+<script>
 document.addEventListener("DOMContentLoaded", () => {
   const auth = firebase.auth();
   const db = firebase.firestore();
@@ -2139,56 +2139,74 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.body.appendChild(panel);
 
-  // Abrir panel al clickear
+  // Abrir panel
   tablaBtn.addEventListener("click", () => {
     panel.style.display = "block";
+    loadTopUsers();
   });
 
-  // Obtener y renderizar top 50
-  function loadTopUsers() {
-    db.collection("posts").get().then(snapshot => {
-      const counts = {};
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const uid = data.uid;
-        if (!counts[uid]) {
-          counts[uid] = { count: 0, name: data.name || "Usuario", email: data.email || "" };
-        }
-        counts[uid].count++;
-      });
+  // Función para cargar top usuarios con nombre real
+  async function loadTopUsers() {
+    const postsSnapshot = await db.collection("posts").get();
+    const counts = {};
 
-      const sorted = Object.values(counts).sort((a, b) => b.count - a.count).slice(0, 50);
+    postsSnapshot.forEach(doc => {
+      const data = doc.data();
+      const uid = data.uid;
+      if (!counts[uid]) {
+        counts[uid] = { count: 0 };
+      }
+      counts[uid].count++;
+    });
 
-      const tbody = document.getElementById("tabla-top-users");
-      tbody.innerHTML = "";
+    // Ahora buscamos los datos de los usuarios en Firestore
+    const usersSnapshot = await db.collection("users").get();
+    const usersMap = {};
+    usersSnapshot.forEach(doc => {
+      const u = doc.data();
+      usersMap[doc.id] = {
+        displayName: u.displayName || "Usuario",
+        photoURL: u.photoURL || null
+      };
+    });
 
-      sorted.forEach((user, index) => {
-        const row = document.createElement("tr");
+    // Ordenar por cantidad de posts
+    const sorted = Object.entries(counts)
+      .map(([uid, data]) => ({
+        uid,
+        count: data.count,
+        name: usersMap[uid]?.displayName || "Usuario"
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 50);
 
-        const topCell = document.createElement("td");
-        topCell.textContent = index + 1;
-        topCell.style.padding = "6px";
-        row.appendChild(topCell);
+    // Renderizar
+    const tbody = document.getElementById("tabla-top-users");
+    tbody.innerHTML = "";
 
-        const nameCell = document.createElement("td");
-        nameCell.textContent = user.name;
-        nameCell.style.padding = "6px";
-        row.appendChild(nameCell);
+    sorted.forEach((user, index) => {
+      const row = document.createElement("tr");
 
-        const postsCell = document.createElement("td");
-        postsCell.textContent = user.count;
-        postsCell.style.padding = "6px";
-        row.appendChild(postsCell);
+      const topCell = document.createElement("td");
+      topCell.textContent = index + 1;
+      topCell.style.padding = "6px";
+      row.appendChild(topCell);
 
-        tbody.appendChild(row);
-      });
+      const nameCell = document.createElement("td");
+      nameCell.textContent = user.name;
+      nameCell.style.padding = "6px";
+      row.appendChild(nameCell);
+
+      const postsCell = document.createElement("td");
+      postsCell.textContent = user.count;
+      postsCell.style.padding = "6px";
+      row.appendChild(postsCell);
+
+      tbody.appendChild(row);
     });
   }
 
-  // Actualizar cada vez que se abra
-  tablaBtn.addEventListener("click", loadTopUsers);
-
-  // Mostrar cuántos posts lleva el usuario actual
+  // Mostrar los posts del usuario actual
   auth.onAuthStateChanged(user => {
     if (user) {
       db.collection("posts").where("uid", "==", user.uid).get().then(snapshot => {
@@ -2203,6 +2221,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
-
+  
 </body>
 </html>
