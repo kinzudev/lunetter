@@ -2361,8 +2361,15 @@ document.addEventListener("DOMContentLoaded", function () {
   function addMessage(user) {
     const msgContainer = document.createElement("div");
     msgContainer.style.display = "flex";
-    msgContainer.style.alignItems = "center";
+    msgContainer.style.flexDirection = "column";
     msgContainer.style.marginBottom = "10px";
+    msgContainer.style.position = "relative";
+    msgContainer.style.padding = "5px 0";
+
+    // Cabecera: foto + nombre + verificado + botón eliminar
+    const header = document.createElement("div");
+    header.style.display = "flex";
+    header.style.alignItems = "center";
 
     // Foto de perfil
     const img = document.createElement("img");
@@ -2371,22 +2378,38 @@ document.addEventListener("DOMContentLoaded", function () {
     img.style.height = "40px";
     img.style.borderRadius = "50%";
     img.style.marginRight = "10px";
-    msgContainer.appendChild(img);
+    header.appendChild(img);
 
-    // Nombre + verificado
+    // Nombre
     const nameSpan = document.createElement("span");
     nameSpan.textContent = user.name;
     nameSpan.style.fontWeight = "bold";
-    msgContainer.appendChild(nameSpan);
+    header.appendChild(nameSpan);
 
+    // Verificado
     if (user.verified) {
       const verifiedImg = document.createElement("img");
       verifiedImg.src = "https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png";
       verifiedImg.style.width = "18px";
       verifiedImg.style.height = "18px";
       verifiedImg.style.marginLeft = "5px";
-      msgContainer.appendChild(verifiedImg);
+      header.appendChild(verifiedImg);
     }
+
+    // Botón eliminar
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "❌";
+    deleteBtn.style.marginLeft = "auto";
+    deleteBtn.style.background = "transparent";
+    deleteBtn.style.border = "none";
+    deleteBtn.style.cursor = "pointer";
+    deleteBtn.style.color = "red";
+    deleteBtn.addEventListener("click", function () {
+      msgContainer.remove();
+    });
+    header.appendChild(deleteBtn);
+
+    msgContainer.appendChild(header);
 
     // Mensaje
     const text = document.createElement("p");
@@ -2402,11 +2425,11 @@ document.addEventListener("DOMContentLoaded", function () {
   sendBtn.addEventListener("click", function () {
     if (chatInput.value.trim() === "") return;
 
-    // Simulación de usuario actual (esto deberías reemplazarlo con los datos reales del usuario logueado)
+    // Simulación de usuario actual (reemplazar con datos reales)
     const currentUser = {
-      name: "Usuario Demo",
-      photo: "https://via.placeholder.com/40",
-      verified: true, // aquí puedes poner true o false según corresponda
+      name: "Usuario Demo", // aquí debería ir el nombre real del usuario logueado
+      photo: "https://via.placeholder.com/40", // aquí la foto real del perfil
+      verified: true, // cambiar según el usuario
       message: chatInput.value
     };
 
