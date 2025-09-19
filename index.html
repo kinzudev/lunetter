@@ -2063,11 +2063,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
+  const ADMIN_EMAIL = "kinzudev@gmail.com";
+
   // Crear botón "Tabla"
   const tablaBtn = document.createElement("button");
   tablaBtn.textContent = "Tabla";
   tablaBtn.style.position = "fixed";
-  tablaBtn.style.top = "80px"; // Un poco más abajo
+  tablaBtn.style.top = "80px";
   tablaBtn.style.right = "20px";
   tablaBtn.style.background = "#2563eb";
   tablaBtn.style.color = "white";
@@ -2106,7 +2108,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const thead = document.createElement("thead");
   const headerRow = document.createElement("tr");
-  ["Top", "Usuario", "Posts"].forEach(txt => {
+  ["Top", "Usuario", "Posts", ""].forEach(txt => {
     const th = document.createElement("th");
     th.textContent = txt;
     th.style.borderBottom = "2px solid #374151";
@@ -2145,7 +2147,9 @@ document.addEventListener("DOMContentLoaded", () => {
     loadTopUsers();
   });
 
-  // Función para cargar top usuarios con nombre real, foto y verificado con imagen
+  let currentUser = null;
+
+  // Función para cargar top usuarios
   async function loadTopUsers() {
     const postsSnapshot = await db.collection("posts").get();
     const counts = {};
@@ -2159,31 +2163,33 @@ document.addEventListener("DOMContentLoaded", () => {
       counts[uid].count++;
     });
 
-    // Buscar los datos de los usuarios en Firestore
+    // Buscar usuarios
     const usersSnapshot = await db.collection("users").get();
     const usersMap = {};
     usersSnapshot.forEach(doc => {
       const u = doc.data();
+      // Excluir si tienen el campo excludedFromTop
+      if (u.excludedFromTop) return;
       usersMap[doc.id] = {
+        id: doc.id,
         displayName: u.displayName || "Usuario",
         photoURL: u.photoURL || "https://via.placeholder.com/40",
         verified: u.verified || false
       };
     });
 
-    // Ordenar por cantidad de posts
     const sorted = Object.entries(counts)
+      .filter(([uid]) => usersMap[uid]) // Solo usuarios válidos
       .map(([uid, data]) => ({
         uid,
         count: data.count,
-        name: usersMap[uid]?.displayName || "Usuario",
-        photoURL: usersMap[uid]?.photoURL,
-        verified: usersMap[uid]?.verified
+        name: usersMap[uid].displayName,
+        photoURL: usersMap[uid].photoURL,
+        verified: usersMap[uid].verified
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 50);
 
-    // Renderizar
     const tbody = document.getElementById("tabla-top-users");
     tbody.innerHTML = "";
 
@@ -2201,7 +2207,6 @@ document.addEventListener("DOMContentLoaded", () => {
       nameCell.style.alignItems = "center";
       nameCell.style.gap = "8px";
 
-      // Foto
       const img = document.createElement("img");
       img.src = user.photoURL;
       img.style.width = "32px";
@@ -2209,12 +2214,10 @@ document.addEventListener("DOMContentLoaded", () => {
       img.style.borderRadius = "50%";
       nameCell.appendChild(img);
 
-      // Nombre
       const nameSpan = document.createElement("span");
       nameSpan.textContent = user.name;
       nameCell.appendChild(nameSpan);
 
-      // Verificado con imagen
       if (user.verified) {
         const verifyImg = document.createElement("img");
         verifyImg.src = "https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png";
@@ -2231,12 +2234,37 @@ document.addEventListener("DOMContentLoaded", () => {
       postsCell.style.padding = "6px";
       row.appendChild(postsCell);
 
+      // Botón solo para admin
+      const actionCell = document.createElement("td");
+      if (currentUser && currentUser.email === ADMIN_EMAIL) {
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "Quitar del Top";
+        removeBtn.style.background = "#ef4444";
+        removeBtn.style.color = "white";
+        removeBtn.style.border = "none";
+        removeBtn.style.padding = "4px 8px";
+        removeBtn.style.borderRadius = "6px";
+        removeBtn.style.cursor = "pointer";
+
+        removeBtn.addEventListener("click", async () => {
+          await db.collection("users").doc(user.uid).update({
+            excludedFromTop: true
+          });
+          alert(`${user.name} fue quitado del top.`);
+          loadTopUsers();
+        });
+
+        actionCell.appendChild(removeBtn);
+      }
+      row.appendChild(actionCell);
+
       tbody.appendChild(row);
     });
   }
 
-  // Mostrar los posts del usuario actual
+  // Verificar usuario actual
   auth.onAuthStateChanged(user => {
+    currentUser = user;
     if (user) {
       db.collection("posts").where("uid", "==", user.uid).get().then(snapshot => {
         const myPosts = snapshot.size;
