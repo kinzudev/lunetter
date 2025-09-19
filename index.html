@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lunetter</title>
+  <title>Lunetter1</title>
   <!-- Tailwind CDN (for quick prototyping) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2054,6 +2054,104 @@ document.addEventListener("DOMContentLoaded", () => {
   // Botón cerrar advertencia
   warningPanel.querySelector("#close-warning").addEventListener("click", () => {
     warningPanel.style.display = "none";
+  });
+});
+</script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  auth.onAuthStateChanged(user => {
+    if (!user) return;
+
+    const userRef = db.collection("users").doc(user.uid);
+
+    // 📌 Agregar campo "Banner URL" en Editar Perfil
+    const editPanel = document.getElementById("edit-profile-panel"); 
+    if (editPanel && !document.getElementById("banner-input")) {
+      const label = document.createElement("label");
+      label.textContent = "Banner URL:";
+      label.style.display = "block";
+      label.style.marginTop = "10px";
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.id = "banner-input";
+      input.placeholder = "https://example.com/banner.jpg";
+      input.style.width = "100%";
+      input.style.marginTop = "5px";
+
+      editPanel.appendChild(label);
+      editPanel.appendChild(input);
+
+      // Guardar banner en Firestore
+      const saveBtn = document.getElementById("save-profile-btn");
+      if (saveBtn) {
+        saveBtn.addEventListener("click", () => {
+          const bannerUrl = input.value.trim();
+          if (bannerUrl) {
+            userRef.set({ banner: bannerUrl }, { merge: true })
+              .then(() => console.log("✅ Banner guardado"))
+              .catch(err => console.error("❌ Error guardando banner:", err));
+          }
+        });
+      }
+    }
+
+    // 📌 Mostrar banner en el perfil
+    function renderBanner(bannerUrl) {
+      let profileSection = document.getElementById("profile-section");
+      if (!profileSection) {
+        profileSection = document.createElement("div");
+        profileSection.id = "profile-section";
+        profileSection.style.position = "relative";
+        profileSection.style.width = "100%";
+        profileSection.style.height = "200px";
+        profileSection.style.overflow = "hidden";
+        document.body.prepend(profileSection);
+      }
+
+      // Banner
+      let bannerImg = document.getElementById("profile-banner");
+      if (!bannerImg) {
+        bannerImg = document.createElement("img");
+        bannerImg.id = "profile-banner";
+        bannerImg.style.width = "100%";
+        bannerImg.style.height = "200px";
+        bannerImg.style.objectFit = "cover";
+        bannerImg.style.position = "absolute";
+        bannerImg.style.top = "0";
+        bannerImg.style.left = "0";
+        profileSection.appendChild(bannerImg);
+      }
+      bannerImg.src = bannerUrl || "https://via.placeholder.com/800x200.png?text=Banner";
+
+      // Foto de perfil sobre el banner
+      let avatar = document.getElementById("profile-avatar");
+      if (!avatar) {
+        avatar = document.createElement("img");
+        avatar.id = "profile-avatar";
+        avatar.style.width = "100px";
+        avatar.style.height = "100px";
+        avatar.style.borderRadius = "50%";
+        avatar.style.border = "4px solid white";
+        avatar.style.position = "absolute";
+        avatar.style.bottom = "-50px";
+        avatar.style.left = "20px";
+        avatar.style.zIndex = "10";
+        profileSection.appendChild(avatar);
+      }
+    }
+
+    // Escuchar cambios en Firestore
+    userRef.onSnapshot(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        renderBanner(data.banner);
+      }
+    });
   });
 });
 </script>
