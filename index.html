@@ -1,0 +1,2635 @@
+<meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>lunetter</title>
+  <!-- Tailwind CDN (for quick prototyping) -->
+  <script src="https://web.archive.org/web/20250921005013js_/https://cdn.tailwindcss.com/"></script>
+  <link rel="preconnect" href="https://web.archive.org/web/20250921005013/https://fonts.googleapis.com/">
+  <link rel="preconnect" href="https://web.archive.org/web/20250921005013/https://fonts.gstatic.com/" crossorigin>
+  <link href="https://web.archive.org/web/20250921005013cs_/https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>body{font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,-apple-system,"Helvetica Neue",Arial}</style>
+  <!-- Favicon desde Discord CDN -->
+  <link rel="icon" type="image/png" href="https://web.archive.org/web/20250921005013im_/https://cdn.discordapp.com/attachments/1416930610928422954/1419076835165081772/image.png?ex=68d071ca&amp;is=68cf204a&amp;hm=222eb618af5d22706a9404b41c78e0ea874bba7489cb0b1ae07255f886426a89&amp;">
+</head>
+</head>
+<body class="bg-gray-50 min-h-screen"><!-- BEGIN WAYBACK TOOLBAR INSERT -->
+<script>__wm.rw(0);</script>
+<div id="wm-ipp-base" lang="en" style="display:none;direction:ltr;" toolbar-mode="auto">
+<div id="wm-ipp" style="position:fixed;left:0;top:0;right:0;">
+<div id="donato" style="position:relative;width:100%;height:0;">
+  <div id="donato-base">
+    <iframe id="donato-if" src="https://archive.org/includes/donate.php?as_page=1&amp;platform=wb&amp;referer=https%3A//web.archive.org/web/20250921005013/https%3A//kinzudev.github.io/lunetter/"
+	    scrolling="no" frameborder="0" style="width:100%; height:100%">
+    </iframe>
+  </div>
+</div><div id="wm-ipp-inside">
+  <div id="wm-toolbar" style="position:relative;display:flex;flex-flow:row nowrap;justify-content:space-between;">
+    <div id="wm-logo" style="/*width:110px;*/padding-top:12px;">
+      <a href="/web/" title="Wayback Machine home page"><img src="https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-200.png" srcset="https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-100.png, https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-150.png 1.5x, https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-200.png 2x" alt="Wayback Machine" style="width:100px" border="0" /></a>
+    </div>
+    <div class="c" style="display:flex;flex-flow:column nowrap;justify-content:space-between;flex:1;">
+      <form class="u" style="display:flex;flex-direction:row;flex-wrap:nowrap;" target="_top" method="get" action="/web/submit" name="wmtb" id="wmtb"><input type="text" name="url" id="wmtbURL" value="https://kinzudev.github.io/lunetter/" onfocus="this.focus();this.select();" style="flex:1;"/><input type="hidden" name="type" value="replay" /><input type="hidden" name="date" value="20250921005013" /><input type="submit" value="Go" />
+      </form>
+      <div style="display:flex;flex-flow:row nowrap;align-items:flex-end;">
+                <div class="s" id="wm-nav-captures" style="flex:1;">
+                    <a class="t" href="/web/20250921005013*/https://kinzudev.github.io/lunetter/" title="See a list of every capture for this URL">1 capture</a>
+          <div class="r" title="Timespan for captures of this URL">21 Sep 2025</div>
+          </div>
+        <div class="k">
+          <a href="" id="wm-graph-anchor">
+            <div id="wm-ipp-sparkline" title="Explore captures for this URL" style="position: relative">
+              <canvas id="wm-sparkline-canvas" width="750" height="27" border="0"></canvas>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="n">
+      <table>
+        <tbody>
+          <!-- NEXT/PREV MONTH NAV AND MONTH INDICATOR -->
+          <tr class="m">
+            <td class="b" nowrap="nowrap">Aug</td>
+            <td class="c" id="displayMonthEl" title="You are here: 00:50:13 Sep 21, 2025">SEP</td>
+            <td class="f" nowrap="nowrap">Oct</td>
+          </tr>
+          <!-- NEXT/PREV CAPTURE NAV AND DAY OF MONTH INDICATOR -->
+          <tr class="d">
+            <td class="b" nowrap="nowrap"><img src="https://web-static.archive.org/_static/images/toolbar/wm_tb_prv_off.png" alt="Previous capture" width="14" height="16" border="0" /></td>
+            <td class="c" id="displayDayEl" style="width:34px;font-size:22px;white-space:nowrap;" title="You are here: 00:50:13 Sep 21, 2025">21</td>
+            <td class="f" nowrap="nowrap"><img src="https://web-static.archive.org/_static/images/toolbar/wm_tb_nxt_off.png" alt="Next capture" width="14" height="16" border="0" /></td>
+          </tr>
+          <!-- NEXT/PREV YEAR NAV AND YEAR INDICATOR -->
+          <tr class="y">
+            <td class="b" nowrap="nowrap">2024</td>
+            <td class="c" id="displayYearEl" title="You are here: 00:50:13 Sep 21, 2025">2025</td>
+            <td class="f" nowrap="nowrap">2026</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="r" style="display:flex;flex-flow:column nowrap;align-items:flex-end;justify-content:space-between;">
+      <div id="wm-btns" style="text-align:right;height:23px;">
+                <span class="xxs">
+          <div id="wm-save-snapshot-success">success</div>
+          <div id="wm-save-snapshot-fail">fail</div>
+          <a id="wm-save-snapshot-open" href="#" title="Share via My Web Archive" >
+            <span class="iconochive-web"></span>
+          </a>
+          <a href="https://archive.org/account/login.php" title="Sign In" id="wm-sign-in">
+            <span class="iconochive-person"></span>
+          </a>
+          <span id="wm-save-snapshot-in-progress" class="iconochive-web"></span>
+        </span>
+                <a class="xxs" href="https://help.archive.org/help/category/the-wayback-machine/" title="Get some help using the Wayback Machine" style="top:-6px;"><span class="iconochive-question" style="color:rgb(87,186,244);font-size:160%;"></span></a>
+        <a id="wm-tb-close" href="#close" style="top:-2px;" title="Close the toolbar"><span class="iconochive-remove-circle" style="color:#888888;font-size:240%;"></span></a>
+      </div>
+      <div id="wm-share" class="xxs">
+        <a href="/web/20250921005013/http://web.archive.org/screenshot/https://kinzudev.github.io/lunetter/"
+           id="wm-screenshot"
+           title="screenshot">
+          <span class="wm-icon-screen-shot"></span>
+        </a>
+        <a href="#" id="wm-video" title="video">
+          <span class="iconochive-movies"></span>
+        </a>
+        <a id="wm-share-facebook" href="#" data-url="https://web.archive.org/web/20250921005013/https://kinzudev.github.io/lunetter/" title="Share on Facebook" style="margin-right:5px;" target="_blank"><span class="iconochive-facebook" style="color:#3b5998;font-size:160%;"></span></a>
+        <a id="wm-share-twitter" href="#" data-url="https://web.archive.org/web/20250921005013/https://kinzudev.github.io/lunetter/" title="Share on Twitter" style="margin-right:5px;" target="_blank"><span class="iconochive-twitter" style="color:#1dcaff;font-size:160%;"></span></a>
+      </div>
+      <div style="padding-right:2px;text-align:right;white-space:nowrap;">
+        <a id="wm-expand" class="wm-btn wm-closed" href="#expand"><span id="wm-expand-icon" class="iconochive-down-solid"></span> <span class="xxs" style="font-size:80%;">About this capture</span></a>
+      </div>
+    </div>
+  </div>
+    <div id="wm-capinfo" style="border-top:1px solid #777;display:none; overflow: hidden">
+        <div id="wm-capinfo-notice" source="api"></div>
+                <div id="wm-capinfo-collected-by">
+    <div style="background-color:#666;color:#fff;font-weight:bold;text-align:center;padding:2px 0;">COLLECTED BY</div>
+    <div style="padding:3px;position:relative" id="wm-collected-by-content">
+      <div style="display:inline-block;vertical-align:top;width:49%;">
+			<span class="c-logo" style="background-image:url(https://archive.org/services/img/save-page-now)"></span>
+		<div>Collection: <a style="color:#33f;" href="https://archive.org/details/save-page-now" target="_new"><span class="wm-title">Save Page Now</span></a></div>
+	      </div>
+    </div>
+    </div>
+    <div id="wm-capinfo-timestamps">
+    <div style="background-color:#666;color:#fff;font-weight:bold;text-align:center;padding:2px 0;" title="Timestamps for the elements of this page">TIMESTAMPS</div>
+    <div>
+      <div id="wm-capresources" style="margin:0 5px 5px 5px;max-height:250px;overflow-y:scroll !important"></div>
+      <div id="wm-capresources-loading" style="text-align:left;margin:0 20px 5px 5px;display:none"><img src="https://web-static.archive.org/_static/images/loading.gif" alt="loading" /></div>
+    </div>
+    </div>
+  </div></div></div></div><div id="wm-ipp-print">The Wayback Machine - https://web.archive.org/web/20250921005013/https://kinzudev.github.io/lunetter/</div>
+<script type="text/javascript">//<![CDATA[
+__wm.bt(750,27,25,2,"web","https://kinzudev.github.io/lunetter/","20250921005013",1996,"https://web-static.archive.org/_static/",["https://web-static.archive.org/_static/css/banner-styles.css?v=p7PEIJWi","https://web-static.archive.org/_static/css/iconochive.css?v=3PDvdIFv"], false);
+  __wm.rw(1);
+//]]></script>
+<!-- END WAYBACK TOOLBAR INSERT -->
+ 
+  <div class="max-w-4xl mx-auto p-4">
+    <header class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-extrabold">Lunetter™</h1>
+      <div id="auth-area" class="flex items-center gap-3">
+        <!-- Auth UI injected here -->
+      </div>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Left: Profile / Login -->
+      <section class="md:col-span-1 bg-white rounded-2xl p-4 shadow-sm">
+        <div id="profile-card" class="flex flex-col items-center gap-3">
+          <!-- profile content injected -->
+        </div>
+      </section>
+
+      <!-- Center: Post composer + feed -->
+      <section class="md:col-span-2">
+        <div id="composer" class="bg-white rounded-2xl p-4 mb-6 shadow-sm">
+          <!-- composer UI injected -->
+        </div>
+
+        <div id="feed" class="space-y-4">
+          <!-- posts injected here -->
+        </div>
+      </section>
+    </main>
+
+    <footer class="mt-8 text-center text-sm text-gray-500">Bienvenidos a lunetter :D <code>Echo por @KinzuDev Y </code>@Zunex</footer>
+  </div>
+
+  <!-- Firebase v9 compat CDN -->
+  <script src="https://web.archive.org/web/20250921005013js_/https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://web.archive.org/web/20250921005013js_/https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://web.archive.org/web/20250921005013js_/https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://web.archive.org/web/20250921005013js_/https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+
+  <script>
+  // ---------- CONFIG ----------
+  const firebaseConfig = {
+    apiKey: "AIzaSyBwj_as6pb5Bg81F9Cl9VWTKkekMM9Exfk",
+    authDomain: "pekora-forum.firebaseapp.com",
+    projectId: "pekora-forum",
+    storageBucket: "pekora-forum.firebasestorage.app",
+    messagingSenderId: "161910967859",
+    appId: "1:161910967859:web:6a28cecaae74b9b7e9dd46",
+    measurementId: "G-BPBTW5KBRK"
+  };
+  // ----------------------------
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // Helpers
+  const $ = (sel) => document.querySelector(sel);
+  const createEl = (tag, attrs = {}, text = '') => {
+    const el = document.createElement(tag);
+    Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+    if (text) el.textContent = text;
+    return el;
+  };
+
+  // ---------- UI ----------
+  function renderAuthArea(user){
+    const container = $('#auth-area');
+    container.innerHTML = '';
+    if(user){
+      const avatar = createEl('img', {src: user.photoURL||'https://web.archive.org/web/20250921005013/https://ui-avatars.com/api/?name='+encodeURIComponent(user.displayName||user.email), class:'w-10 h-10 rounded-full object-cover'});
+      const btnLogout = createEl('button', {class:'ml-2 px-3 py-1 bg-red-500 text-white rounded'}, 'Salir');
+      btnLogout.onclick = ()=> auth.signOut();
+      container.appendChild(avatar);
+      container.appendChild(btnLogout);
+    } else {
+      const btnLogin = createEl('button', {class:'px-3 py-1 bg-blue-600 text-white rounded'}, 'Ingresar / Registrarse');
+      btnLogin.onclick = ()=> openAuthModal();
+      container.appendChild(btnLogin);
+    }
+  }
+
+  function openAuthModal(){
+    const mode = prompt('Escribe "r" para registrarte o "l" para iniciar sesión (r/l)');
+    if(!mode) return;
+    if(mode.toLowerCase() === 'r'){
+      const email = prompt('Email');
+      const password = prompt('Contraseña (mín 6 caracteres)');
+      const displayName = prompt('Nombre público (visible)');
+      if(!email||!password) return alert('Email y password requeridos');
+      auth.createUserWithEmailAndPassword(email, password)
+      .then(({user})=> user.updateProfile({displayName: displayName || null}))
+      .then(()=> alert('Registrado correctamente'))
+      .catch(err=> alert('Error: '+err.message));
+    } else {
+      const email = prompt('Email');
+      const password = prompt('Contraseña');
+      if(!email||!password) return alert('Email y password requeridos');
+      auth.signInWithEmailAndPassword(email, password).catch(err=> alert('Error: '+err.message));
+    }
+  }
+
+  function renderProfileCard(userData){
+    const c = $('#profile-card');
+    c.innerHTML = '';
+    if(!userData){
+      c.innerHTML = `<div class="text-center">No hay usuario autenticado.<div class="mt-3"><button id=btn-open-auth class="px-3 py-1 bg-blue-600 text-white rounded">Iniciar / Registrar</button></div></div>`;
+      $('#btn-open-auth').onclick = openAuthModal;
+      return;
+    }
+
+    const img = createEl('img', {src: userData.photoURL||'https://web.archive.org/web/20250921005013/https://ui-avatars.com/api/?name='+encodeURIComponent(userData.displayName||userData.email), class:'w-24 h-24 rounded-full object-cover'});
+    const name = createEl('h3', {class:'text-lg font-semibold'}, userData.displayName || userData.email);
+    const email = createEl('p', {class:'text-sm text-gray-500'}, userData.email);
+    const editBtn = createEl('button', {class:'mt-3 px-3 py-1 bg-indigo-600 text-white rounded'}, 'Editar perfil');
+    editBtn.onclick = ()=> openEditProfile(userData);
+
+    c.appendChild(img);
+    c.appendChild(name);
+    c.appendChild(email);
+    c.appendChild(editBtn);
+  }
+
+  function openEditProfile(userData){
+    const name = prompt('Nombre público', userData.displayName||'');
+    const photo = prompt('URL de foto de perfil (dejar vacío para mantener)');
+    if(name !== null){
+      auth.currentUser.updateProfile({displayName: name, photoURL: photo || userData.photoURL || null}).then(()=>{
+        const u = auth.currentUser;
+        db.collection('users').doc(u.uid).set({displayName: u.displayName, photoURL: u.photoURL, updatedAt: firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+        alert('Perfil actualizado');
+      }).catch(e=> alert('Error: '+e.message));
+    }
+  }
+
+  function renderComposer(userData){
+    const c = $('#composer');
+    c.innerHTML = '';
+    if(!userData){
+      c.innerHTML = '<div class="text-center py-6 text-gray-500">Inicia sesión para publicar.</div>';
+      return;
+    }
+
+    const form = document.createElement('form');
+    form.className = 'space-y-3';
+
+    const textarea = createEl('textarea', {placeholder:'¿Qué está pasando? (max 280 caracteres)', maxlength:280, class:'w-full border rounded p-3 min-h-[80px] resize-none'});
+
+    // Nuevo input de URL en lugar de archivo
+    const urlInput = createEl('input', {type:'text', id:'imageUrlInput', placeholder:'Pega aquí la URL de una imagen (opcional)', class:'w-full border rounded p-2'});
+
+    const submit = createEl('button', {class:'px-4 py-2 bg-green-600 text-white rounded'}, 'Publicar');
+
+    form.appendChild(textarea);
+    form.appendChild(urlInput);
+    form.appendChild(submit);
+
+    form.onsubmit = async (e)=>{
+      e.preventDefault();
+      submit.disabled = true;
+      const text = textarea.value.trim();
+      const imageUrl = urlInput.value.trim() || null;
+      try{
+        const post = {
+          uid: auth.currentUser.uid,
+          text: text || null,
+          imageUrl: imageUrl,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          likes: 0
+        };
+        await db.collection('posts').add(post);
+        textarea.value = '';
+        urlInput.value = '';
+      }catch(err){
+        alert('Error publicando: '+err.message);
+      }finally{ submit.disabled = false; }
+    };
+
+    c.appendChild(form);
+  }
+
+  function renderPost(doc, userId){
+    const data = doc.data();
+    const container = createEl('article', {class:'bg-white p-4 rounded-2xl shadow-sm'});
+    const header = createEl('div', {class:'flex items-center gap-3 mb-3'});
+    const avatar = createEl('img', {src:'https://web.archive.org/web/20250921005013/https://ui-avatars.com/api/?name=...', class:'w-12 h-12 rounded-full object-cover'});
+    const meta = createEl('div');
+    const authorName = createEl('div', {class:'font-semibold'}, 'Cargando...');
+    const time = createEl('div', {class:'text-xs text-gray-400'}, '');
+    meta.appendChild(authorName); meta.appendChild(time);
+    header.appendChild(avatar); header.appendChild(meta);
+
+    const body = createEl('div', {class:'mt-2'});
+    if(data.text) body.appendChild(createEl('p', {class:'whitespace-pre-wrap'}, data.text));
+    if(data.imageUrl) body.appendChild(createEl('img', {src:data.imageUrl, class:'mt-3 max-h-96 w-full object-cover rounded'}));
+
+    const actions = createEl('div', {class:'mt-3 flex items-center gap-3 text-sm text-gray-600'});
+    const likeBtn = createEl('button', {class:'flex items-center gap-2 px-2 py-1 rounded'}, `❤ ${data.likes||0}`);
+    likeBtn.onclick = async ()=>{
+      const postRef = db.collection('posts').doc(doc.id);
+      await postRef.update({likes: firebase.firestore.FieldValue.increment(1)});
+    };
+    actions.appendChild(likeBtn);
+
+    if(userId === data.uid){
+      const del = createEl('button', {class:'px-2 py-1 bg-red-100 rounded text-red-600'}, 'Eliminar');
+      del.onclick = async ()=>{
+        if(!confirm('Borrar publicación?')) return;
+        try{
+          await db.collection('posts').doc(doc.id).delete();
+        }catch(e){ alert('Error: '+e.message); }
+      };
+      actions.appendChild(del);
+    }
+
+    container.appendChild(header);
+    container.appendChild(body);
+    container.appendChild(actions);
+
+    db.collection('users').doc(data.uid).get().then(snap=>{
+      const u = snap.exists ? snap.data() : null;
+      if(u){
+        avatar.src = u.photoURL || ('https://web.archive.org/web/20250921005013/https://ui-avatars.com/api/?name='+encodeURIComponent(u.displayName||'User'));
+        authorName.textContent = u.displayName || 'Usuario';
+      } else {
+        authorName.textContent = 'Usuario';
+      }
+    }).catch(()=>{});
+
+    if(data.createdAt && data.createdAt.toDate){
+      time.textContent = timeAgo(data.createdAt.toDate());
+    }
+
+    return container;
+  }
+
+  function timeAgo(date){
+    const s = Math.floor((Date.now() - date.getTime())/1000);
+    if(s < 60) return s + 's';
+    const m = Math.floor(s/60); if(m < 60) return m + 'm';
+    const h = Math.floor(m/60); if(h < 24) return h + 'h';
+    const d = Math.floor(h/24); return d + 'd';
+  }
+
+  let unsubscribeFeed = null;
+  function subscribeFeed(){
+    if(unsubscribeFeed) unsubscribeFeed();
+    unsubscribeFeed = db.collection('posts').orderBy('createdAt', 'desc').limit(50).onSnapshot(snapshot=>{
+      const feed = $('#feed');
+      feed.innerHTML = '';
+      snapshot.forEach(doc=>{
+        feed.appendChild(renderPost(doc, auth.currentUser ? auth.currentUser.uid : null));
+      });
+    }, err=> console.error('feed err', err));
+  }
+
+  auth.onAuthStateChanged(async user=>{
+    renderAuthArea(user);
+    if(user){
+      const uRef = db.collection('users').doc(user.uid);
+      await uRef.set({displayName: user.displayName || null, email: user.email || null, photoURL: user.photoURL || null, lastSeen: firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+      const snap = await uRef.get();
+      renderProfileCard({...user, ...(snap.exists ? snap.data() : {})});
+      renderComposer(user);
+    } else {
+      renderProfileCard(null);
+      renderComposer(null);
+    }
+    subscribeFeed();
+  });
+
+  subscribeFeed();
+  </script>
+  
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ADMIN_EMAIL = "kinzudev@gmail.com";
+  const VERIFIED_ICON = "https://web.archive.org/web/20250921005013/https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png";
+
+  // Crear panel admin oculto
+  const panel = document.createElement("div");
+  panel.id = "admin-panel";
+  panel.style.display = "none";
+  panel.className = "fixed top-10 right-10 bg-white shadow-lg p-4 rounded-xl z-50 w-80";
+  panel.innerHTML = `
+    <h2 class="text-lg font-bold mb-3">Panel Admin</h2>
+    <input type="text" id="verify-email" placeholder="Email del usuario" class="w-full border p-2 rounded mb-3"/>
+    <button id="btn-verify" class="px-3 py-2 bg-blue-600 text-white rounded">Añadir verificado</button>
+  `;
+  document.body.appendChild(panel);
+
+  // Toggle panel con tecla Insert
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Insert" && auth.currentUser && auth.currentUser.email === ADMIN_EMAIL) {
+      panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+  });
+
+  // Guardar estado verificado en Firestore
+  document.getElementById("btn-verify").onclick = async () => {
+    const email = document.getElementById("verify-email").value.trim();
+    if (!email) return alert("Ingresa un email");
+
+    try {
+      const q = await db.collection("users").where("email", "==", email).get();
+      if (q.empty) return alert("Usuario no encontrado");
+
+      q.forEach(async (docSnap) => {
+        await db.collection("users").doc(docSnap.id).set({ verified: true }, { merge: true });
+      });
+
+      alert("Usuario verificado con éxito ✅");
+      document.getElementById("verify-email").value = "";
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  // Modificar renderizado para mostrar el icono de verificado
+  const originalRenderPost = renderPost;
+  renderPost = function (doc, userId) {
+    const el = originalRenderPost(doc, userId);
+    const data = doc.data();
+
+    db.collection("users").doc(data.uid).get().then((snap) => {
+      if (snap.exists && snap.data().verified) {
+        const nameEl = el.querySelector(".font-semibold");
+        if (nameEl && !nameEl.querySelector("img")) {
+          const icon = document.createElement("img");
+          icon.src = VERIFIED_ICON;
+          icon.className = "inline-block w-4 h-4 ml-1";
+          nameEl.appendChild(icon);
+        }
+      }
+    });
+
+    return el;
+  };
+
+  // También actualizar en el perfil
+  const originalRenderProfileCard = renderProfileCard;
+  renderProfileCard = function (userData) {
+    originalRenderProfileCard(userData);
+    if (userData && userData.verified) {
+      const nameEl = document.querySelector("#profile-card h3");
+      if (nameEl && !nameEl.querySelector("img")) {
+        const icon = document.createElement("img");
+        icon.src = VERIFIED_ICON;
+        icon.className = "inline-block w-5 h-5 ml-1";
+        nameEl.appendChild(icon);
+      }
+    } else if (userData) {
+      db.collection("users").doc(userData.uid).get().then((snap) => {
+        if (snap.exists && snap.data().verified) {
+          const nameEl = document.querySelector("#profile-card h3");
+          if (nameEl && !nameEl.querySelector("img")) {
+            const icon = document.createElement("img");
+            icon.src = VERIFIED_ICON;
+            icon.className = "inline-block w-5 h-5 ml-1";
+            nameEl.appendChild(icon);
+          }
+        }
+      });
+    }
+  };
+});
+</script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ADMIN_EMAIL = "kinzudev@gmail.com";
+  const BAN_IMAGE = "https://web.archive.org/web/20250921005013/https://cdn.discordapp.com/attachments/1417337874101309450/1417568031961255996/image.png?ex=68caf49b&is=68c9a31b&hm=ba80717b504ae1b1f9b05a747db1e7deac74c59ab9f663b24403e5f04bb99532&"; // imagen de baneo (puedes cambiarla)
+  const BAN_MESSAGE = `
+    <div class="fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center text-white z-50 text-center p-6">
+      <img src="${BAN_IMAGE}" class="w-40 h-40 mb-4" />
+      <h2 class="text-2xl font-bold mb-2">Has sido baneado</h2>
+      <p class="mb-4">Si quieres recuperar tu cuenta envía un mensaje en Discord a los dueños:<br>
+      <b>@enjecteds</b> y <b>@zunex78</b></p>
+    </div>
+  `;
+
+  // Crear panel Ban
+  const panel = document.createElement("div");
+  panel.id = "ban-panel";
+  panel.style.display = "none";
+  panel.className = "fixed top-20 right-10 bg-white shadow-lg p-4 rounded-xl z-50 w-96";
+  panel.innerHTML = `
+    <h2 class="text-lg font-bold mb-3">Panel Ban</h2>
+    <input type="text" id="ban-email" placeholder="Email a banear" class="w-full border p-2 rounded mb-3"/>
+    <button id="btn-ban" class="px-3 py-2 bg-red-600 text-white rounded w-full mb-3">Banear</button>
+    <input type="text" id="unban-email" placeholder="Email a desbanear" class="w-full border p-2 rounded mb-3"/>
+    <button id="btn-unban" class="px-3 py-2 bg-green-600 text-white rounded w-full">Desbanear</button>
+  `;
+  document.body.appendChild(panel);
+
+  // Toggle con Tab
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Tab" && auth.currentUser && auth.currentUser.email === ADMIN_EMAIL) {
+      e.preventDefault();
+      panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+  });
+
+  // Banear
+  document.getElementById("btn-ban").onclick = async () => {
+    const email = document.getElementById("ban-email").value.trim();
+    if (!email) return alert("Ingresa un email");
+
+    try {
+      const q = await db.collection("users").where("email", "==", email).get();
+      if (q.empty) return alert("Usuario no encontrado");
+
+      q.forEach(async (docSnap) => {
+        await db.collection("users").doc(docSnap.id).set({ banned: true }, { merge: true });
+      });
+
+      alert("Usuario baneado ❌");
+      document.getElementById("ban-email").value = "";
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  // Desbanear
+  document.getElementById("btn-unban").onclick = async () => {
+    const email = document.getElementById("unban-email").value.trim();
+    if (!email) return alert("Ingresa un email");
+
+    try {
+      const q = await db.collection("users").where("email", "==", email).get();
+      if (q.empty) return alert("Usuario no encontrado");
+
+      q.forEach(async (docSnap) => {
+        await db.collection("users").doc(docSnap.id).set({ banned: false }, { merge: true });
+      });
+
+      alert("Usuario desbaneado ✅");
+      document.getElementById("unban-email").value = "";
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  // Bloqueo para usuarios baneados
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      try {
+        const snap = await db.collection("users").doc(user.uid).get();
+        if (snap.exists && snap.data().banned) {
+          // Mostrar pantalla baneado
+          document.body.innerHTML = BAN_MESSAGE;
+
+          // Evitar likes y publicaciones
+          document.addEventListener("click", (e) => e.stopImmediatePropagation(), true);
+          document.addEventListener("keydown", (e) => e.stopImmediatePropagation(), true);
+        }
+      } catch (err) {
+        console.error("Error al verificar baneo:", err);
+      }
+    }
+  });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Añadimos render de followers en el perfil
+  async function renderProfileFollowers(userData) {
+    if (!userData) return;
+    const userRef = db.collection("users").doc(auth.currentUser.uid);
+    const snap = await userRef.get();
+    const data = snap.exists ? snap.data() : {};
+
+    let followersCount = data.followers ? data.followers.length : 0;
+    let followingCount = data.following ? data.following.length : 0;
+
+    const c = document.getElementById("profile-card");
+    let stats = document.createElement("div");
+    stats.className = "mt-4 flex justify-around text-sm text-gray-600";
+    stats.innerHTML = `
+      <div><b>${followersCount}</b><br>Seguidores</div>
+      <div><b>${followingCount}</b><br>Siguiendo</div>
+    `;
+    c.appendChild(stats);
+  }
+
+  // Guardamos la función original de renderizar posts
+  const oldRenderPost = renderPost;
+
+  // Nueva versión extendida
+  renderPost = function(doc, userId) {
+    const container = oldRenderPost(doc, userId);
+    const data = doc.data();
+
+    // Seleccionamos el nombre del autor en el post
+    const authorNameEl = container.querySelector("div.font-semibold");
+
+    // Mostrar número de seguidores al lado del nombre
+    db.collection("users").doc(data.uid).get().then(snap => {
+      if (snap.exists) {
+        const userData = snap.data();
+        const followersCount = userData.followers ? userData.followers.length : 0;
+
+        // Añadimos el contador de seguidores al lado del nombre
+        if (authorNameEl && !authorNameEl.querySelector(".followers-count")) {
+          const span = document.createElement("span");
+          span.className = "followers-count text-xs text-gray-500 ml-2";
+          span.textContent = `(${followersCount} seguidores)`;
+          authorNameEl.appendChild(span);
+        }
+      }
+    });
+
+    // Botón seguir / dejar de seguir
+    if (auth.currentUser && data.uid !== auth.currentUser.uid) {
+      const followBtn = document.createElement("button");
+      followBtn.className = "px-3 py-1 rounded bg-blue-500 text-white text-sm ml-2";
+
+      const userRef = db.collection("users").doc(auth.currentUser.uid);
+
+      userRef.get().then(snap => {
+        if (snap.exists) {
+          let following = snap.data().following || [];
+          followBtn.textContent = following.includes(data.uid) ? "Dejar de seguir" : "Seguir";
+        }
+      });
+
+      followBtn.onclick = async () => {
+        const currentUserRef = db.collection("users").doc(auth.currentUser.uid);
+        const targetUserRef = db.collection("users").doc(data.uid);
+
+        await db.runTransaction(async (transaction) => {
+          const currentSnap = await transaction.get(currentUserRef);
+          const targetSnap = await transaction.get(targetUserRef);
+
+          let currentData = currentSnap.data() || {};
+          let targetData = targetSnap.data() || {};
+
+          let following = currentData.following || [];
+          let followers = targetData.followers || [];
+
+          if (following.includes(data.uid)) {
+            // Dejar de seguir
+            following = following.filter(uid => uid !== data.uid);
+            followers = followers.filter(uid => uid !== auth.currentUser.uid);
+            followBtn.textContent = "Seguir";
+          } else {
+            // Seguir
+            following.push(data.uid);
+            followers.push(auth.currentUser.uid);
+            followBtn.textContent = "Dejar de seguir";
+          }
+
+          transaction.update(currentUserRef, { following });
+          transaction.update(targetUserRef, { followers });
+        });
+      };
+
+      container.querySelector("div.mt-3")?.appendChild(followBtn);
+    }
+
+    return container;
+  };
+
+  // Re-render profile con followers
+  const oldRenderProfile = renderProfileCard;
+  renderProfileCard = function(userData) {
+    oldRenderProfile(userData);
+    renderProfileFollowers(userData);
+  };
+});
+</script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ADMIN_EMAIL = "kinzudev@gmail.com";
+
+  // --- Agregamos nueva opción al panel de Admin ---
+  const adminTagPanel = `
+    <h2 class="text-lg font-bold mt-6 mb-3">Asignar Tag Admin</h2>
+    <input type="text" id="admin-tag-email" placeholder="Email del usuario" class="w-full border p-2 rounded mb-3"/>
+    <button id="btn-add-admin-tag" class="px-3 py-2 bg-indigo-600 text-white rounded w-full">Dar Tag Admin</button>
+    <button id="btn-remove-admin-tag" class="mt-2 px-3 py-2 bg-gray-600 text-white rounded w-full">Quitar Tag Admin</button>
+  `;
+
+  // Esperamos a que ya exista el panel
+  const observer = new MutationObserver(() => {
+    const panel = document.getElementById("ban-panel");
+    if (panel && !document.getElementById("admin-tag-email")) {
+      panel.insertAdjacentHTML("beforeend", adminTagPanel);
+
+      document.getElementById("btn-add-admin-tag").onclick = async () => {
+        const email = document.getElementById("admin-tag-email").value.trim();
+        if (!email) return alert("Ingresa un email");
+
+        const snap = await db.collection("users").where("email", "==", email).get();
+        if (snap.empty) return alert("Usuario no encontrado");
+
+        snap.forEach(doc => {
+          db.collection("users").doc(doc.id).set({ isAdmin: true }, { merge: true });
+        });
+
+        alert("✅ Tag Admin asignado");
+      };
+
+      document.getElementById("btn-remove-admin-tag").onclick = async () => {
+        const email = document.getElementById("admin-tag-email").value.trim();
+        if (!email) return alert("Ingresa un email");
+
+        const snap = await db.collection("users").where("email", "==", email).get();
+        if (snap.empty) return alert("Usuario no encontrado");
+
+        snap.forEach(doc => {
+          db.collection("users").doc(doc.id).set({ isAdmin: false }, { merge: true });
+        });
+
+        alert("❌ Tag Admin quitado");
+      };
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // --- Editamos renderPost para mostrar el tag Admin ---
+  const oldRenderPost = renderPost;
+  renderPost = function (doc, userId) {
+    const container = oldRenderPost(doc, userId);
+    const data = doc.data();
+
+    const authorNameEl = container.querySelector("div.font-semibold");
+
+    db.collection("users").doc(data.uid).get().then(snap => {
+      if (snap.exists && snap.data().isAdmin) {
+        if (authorNameEl && !authorNameEl.querySelector(".admin-tag")) {
+          const span = document.createElement("span");
+          span.className = "admin-tag ml-2 px-2 py-0.5 text-xs bg-red-600 text-white rounded";
+          span.textContent = "Admin";
+          authorNameEl.appendChild(span);
+        }
+      }
+    });
+
+    return container;
+  };
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Helper: obtiene el botón de like dentro del post retornado por renderPost
+  function findLikeButtonInPostElement(postEl) {
+    if (!postEl) return null;
+    const buttons = postEl.querySelectorAll('button');
+    for (const b of buttons) {
+      const txt = (b.textContent||'').trim();
+      if (txt.includes('❤')) return b;
+    }
+    return null;
+  }
+
+  // Función segura de like (registra un like único por usuario)
+  async function safeLike(postId, btn) {
+    if (!auth.currentUser) return alert('Debes iniciar sesión para dar like.');
+    const uid = auth.currentUser.uid;
+    const postRef = db.collection('posts').doc(postId);
+    const likeRef = postRef.collection('likes').doc(uid);
+
+    // prevenir doble-click rápido
+    if (btn._liking) return;
+    btn._liking = true;
+    btn.disabled = true;
+
+    try {
+      await db.runTransaction(async (t) => {
+        const likeSnap = await t.get(likeRef);
+        if (likeSnap.exists) {
+          // ya dio like
+          throw new Error('ALREADY_LIKED');
+        }
+        // registrar like
+        t.set(likeRef, { uid, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        // incrementar contador en post (campo 'likes' que usa tu app)
+        t.update(postRef, { likes: firebase.firestore.FieldValue.increment(1) });
+      });
+
+      // Si llegamos aquí la transacción fue ok -> actualizar UI
+      // Obtener nuevo valor de likes para mantener exactitud visual
+      const postSnap = await postRef.get();
+      const newCount = (postSnap.exists && postSnap.data().likes) ? postSnap.data().likes : null;
+      if (newCount !== null) {
+        btn.textContent = `❤ ${newCount}`;
+      } else {
+        // fallback: incrementar visualmente
+        const cur = parseInt((btn.textContent.replace(/[^0-9]/g,''))||0,10) + 1;
+        btn.textContent = `❤ ${cur}`;
+      }
+      // marcar que ya dio like (evita siguientes intentos)
+      btn.dataset.liked = "1";
+      btn.style.opacity = "0.6";
+    } catch (err) {
+      if (err.message === 'ALREADY_LIKED') {
+        alert('Ya diste like a este post.');
+        btn.dataset.liked = "1";
+        btn.style.opacity = "0.6";
+      } else {
+        console.error('Error en safeLike:', err);
+        alert('Hubo un error al dar like. Reintenta.');
+      }
+    } finally {
+      btn._liking = false;
+      btn.disabled = true; // dejamos deshabilitado para que no se vuelva a intentar
+    }
+  }
+
+  // Wrap / monkey-patch renderPost para reemplazar el handler del like button
+  if (typeof renderPost === 'function') {
+    const originalRenderPost = renderPost;
+    renderPost = function(doc, userId) {
+      const el = originalRenderPost(doc, userId);
+
+      try {
+        // buscar botón de like que creó tu función original
+        const likeBtn = findLikeButtonInPostElement(el);
+        if (likeBtn) {
+          // si ya hemos instalado handler, saltar
+          if (!likeBtn.dataset.safeLikeInstalled) {
+            // intentar extraer postId del doc (doc.id viene del snapshot)
+            const postId = doc && doc.id ? doc.id : null;
+
+            // quitar onClick anterior si existe (para evitar doble acciones)
+            likeBtn.onclick = null;
+            likeBtn.removeEventListener('click', likeBtn._oldClickHandler);
+
+            // marcar instalado y añadir listener
+            likeBtn.dataset.safeLikeInstalled = "1";
+            likeBtn.addEventListener('click', (e) => {
+              // si ya marcado localmente como liked, bloquear
+              if (likeBtn.dataset.liked === "1") {
+                alert('Ya diste like a este post.');
+                return;
+              }
+              if (!postId) {
+                console.warn('postId no disponible para safeLike');
+                return;
+              }
+              safeLike(postId, likeBtn);
+            });
+
+            // estado inicial: si ya dio like, deshabilitar botón
+            if (auth.currentUser && postId) {
+              const uid = auth.currentUser.uid;
+              db.collection('posts').doc(postId).collection('likes').doc(uid).get().then(snap => {
+                if (snap.exists) {
+                  likeBtn.dataset.liked = "1";
+                  likeBtn.disabled = true;
+                  likeBtn.style.opacity = "0.6";
+                }
+              }).catch(()=>{});
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error parcheando like button:', err);
+      }
+
+      return el;
+    };
+  } else {
+    console.warn('renderPost no existe cuando se cargó este script — asegúrate de pegarlo al final del HTML, después de definir renderPost.');
+  }
+
+  // Adicional: si el usuario cambia (login/logout), refrescar feed para recalcar botones
+  if (typeof auth !== 'undefined') {
+    auth.onAuthStateChanged(() => {
+      // fuerza re-suscripción si tienes subscribeFeed
+      if (typeof subscribeFeed === 'function') subscribeFeed();
+    });
+  }
+});
+</script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // --- Crear botón Reglas ---
+  const rulesBtn = document.createElement("button");
+  rulesBtn.textContent = "Reglas";
+  rulesBtn.className = "fixed top-5 left-5 px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md z-50";
+  document.body.appendChild(rulesBtn);
+
+  // --- Crear panel de Reglas ---
+  const rulesPanel = document.createElement("div");
+  rulesPanel.className = "hidden fixed top-20 left-1/2 -translate-x-1/2 w-96 bg-white border rounded-2xl shadow-lg z-50";
+  rulesPanel.innerHTML = `
+    <div class="bg-indigo-600 text-white p-3 rounded-t-2xl font-bold flex justify-between items-center">
+      <span>Reglas</span>
+      <button id="close-rules" class="text-white font-bold">X</button>
+    </div>
+    <div id="rules-content" class="p-4 space-y-2 text-sm text-gray-700">
+      <p>Cargando reglas...</p>
+    </div>
+    <div id="edit-rules-area" class="p-3 hidden border-t text-right">
+      <button id="edit-rules-btn" class="px-3 py-1 bg-blue-600 text-white rounded">Editar reglas</button>
+    </div>
+  `;
+  document.body.appendChild(rulesPanel);
+
+  // --- Mostrar/Ocultar panel ---
+  rulesBtn.addEventListener("click", () => {
+    rulesPanel.classList.toggle("hidden");
+  });
+  rulesPanel.querySelector("#close-rules").addEventListener("click", () => {
+    rulesPanel.classList.add("hidden");
+  });
+
+  const rulesContent = rulesPanel.querySelector("#rules-content");
+  const editArea = rulesPanel.querySelector("#edit-rules-area");
+  const editBtn = rulesPanel.querySelector("#edit-rules-btn");
+
+  // --- Cargar reglas desde Firestore ---
+  function loadRules() {
+    db.collection("settings").doc("reglas").onSnapshot((doc) => {
+      if (doc.exists) {
+        const data = doc.data();
+        rulesContent.innerHTML = "";
+        (data.text || "Sin reglas definidas").split("\n").forEach(line => {
+          const p = document.createElement("p");
+          p.textContent = "• " + line;
+          rulesContent.appendChild(p);
+        });
+      } else {
+        rulesContent.innerHTML = "<p>No hay reglas todavía.</p>";
+      }
+    });
+  }
+  loadRules();
+
+  // --- Editar reglas solo si es kinzudev@gmail.com ---
+  auth.onAuthStateChanged(user => {
+    if (user && user.email === "kinzudev@gmail.com") {
+      editArea.classList.remove("hidden");
+    } else {
+      editArea.classList.add("hidden");
+    }
+  });
+
+  editBtn.addEventListener("click", async () => {
+    const newRules = prompt("Escribe las nuevas reglas (separadas por saltos de línea):");
+    if (!newRules) return;
+    try {
+      await db.collection("settings").doc("reglas").set({
+        text: newRules,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert("Reglas actualizadas.");
+    } catch (err) {
+      alert("Error al actualizar: " + err.message);
+    }
+  });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // Crea/asegura la sección "Sobre mí" dentro de #profile-card
+  function ensureAboutSectionInProfile() {
+    const profileCard = document.getElementById('profile-card');
+    if (!profileCard) return null;
+
+    let about = profileCard.querySelector('#about-section');
+    if (about) return about;
+
+    about = document.createElement('div');
+    about.id = 'about-section';
+    about.className = 'w-full mt-4 text-sm text-gray-700';
+
+    about.innerHTML = `
+      <h4 class="font-semibold mb-1">Sobre mí</h4>
+      <p id="about-text" class="text-gray-600">Cargando...</p>
+
+      <div id="about-editor" style="display:none; margin-top:8px;">
+        <textarea id="about-textarea" rows="4" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;"></textarea>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+          <button id="about-save" style="padding:6px 10px;background:#10b981;color:white;border-radius:6px;border:none;cursor:pointer;">Guardar</button>
+          <button id="about-cancel" style="padding:6px 10px;background:#e5e7eb;color:#111;border-radius:6px;border:none;cursor:pointer;">Cancelar</button>
+        </div>
+      </div>
+
+      <div id="about-edit-btn-wrap" style="margin-top:8px;text-align:right;"></div>
+    `;
+
+    profileCard.appendChild(about);
+    return about;
+  }
+
+  // Instala manejadores de edición (solo para el dueño del perfil)
+  function installEditHandlersFor(uid) {
+    const editWrap = document.getElementById('about-edit-btn-wrap');
+    if (!editWrap) return;
+
+    // Evitar duplicados
+    if (editWrap.querySelector('#about-edit-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'about-edit-btn';
+    btn.textContent = 'Editar "Sobre mí"';
+    btn.style = 'padding:6px 10px;background:#4f46e5;color:white;border-radius:6px;border:none;cursor:pointer;';
+    editWrap.appendChild(btn);
+
+    btn.addEventListener('click', () => {
+      const editor = document.getElementById('about-editor');
+      const aboutText = document.getElementById('about-text');
+      const textarea = document.getElementById('about-textarea');
+
+      textarea.value = (aboutText && aboutText.textContent && aboutText.textContent !== 'Este usuario aún no escribió nada sobre sí mismo.') ? aboutText.textContent : '';
+      aboutText.style.display = 'none';
+      editor.style.display = 'block';
+    });
+
+    document.getElementById('about-cancel').addEventListener('click', () => {
+      document.getElementById('about-editor').style.display = 'none';
+      document.getElementById('about-text').style.display = 'block';
+    });
+
+    document.getElementById('about-save').addEventListener('click', async () => {
+      const newText = document.getElementById('about-textarea').value;
+      try {
+        await db.collection('users').doc(uid).set({ aboutMe: newText }, { merge: true });
+        document.getElementById('about-editor').style.display = 'none';
+      } catch (err) {
+        alert('Error al guardar: ' + err.message);
+      }
+    });
+  }
+
+  // Escucha y muestra el campo aboutMe de un uid
+  function listenAndRenderAbout(uid) {
+    const aboutTextEl = document.querySelector('#about-text');
+    if (!aboutTextEl) return;
+
+    // detach previous snapshot? simple approach: keep listener per uid
+    db.collection('users').doc(uid).onSnapshot(doc => {
+      if (!doc.exists) {
+        aboutTextEl.textContent = 'Este usuario aún no escribió nada sobre sí mismo.';
+        const editor = document.getElementById('about-editor'); if (editor) editor.style.display = 'none';
+        const wrap = document.getElementById('about-edit-btn-wrap'); if (wrap) wrap.innerHTML = '';
+        return;
+      }
+      const d = doc.data();
+      aboutTextEl.textContent = d.aboutMe || 'Este usuario aún no escribió nada sobre sí mismo.';
+      // mostrar botón editar solo si el usuario actual es el dueño del perfil
+      if (auth.currentUser && auth.currentUser.uid === uid) {
+        installEditHandlersFor(uid);
+      } else {
+        const wrap = document.getElementById('about-edit-btn-wrap'); if (wrap) wrap.innerHTML = '';
+      }
+    }, err => {
+      console.error('Error escuchando aboutMe:', err);
+    });
+  }
+
+  // Parcheamos renderProfileCard para añadir la sección y sus listeners
+  if (typeof renderProfileCard === 'function') {
+    const originalRenderProfileCard = renderProfileCard;
+    renderProfileCard = function(userData) {
+      originalRenderProfileCard(userData);
+
+      // Asegurar sección
+      const about = ensureAboutSectionInProfile();
+      if (!about) return;
+
+      // Determinar uid del perfil que se está mostrando
+      let uid = null;
+      if (userData && userData.uid) uid = userData.uid;
+      // si no hay uid pero hay email tratamos de buscar el doc (esto cubre casos)
+      if (!uid && userData && userData.email) {
+        db.collection('users').where('email', '==', userData.email).limit(1).get()
+          .then(q => {
+            if (!q.empty) {
+              const uidFound = q.docs[0].id;
+              listenAndRenderAbout(uidFound);
+            } else {
+              // sin doc de usuario
+              const aboutTextEl = document.getElementById('about-text');
+              if (aboutTextEl) aboutTextEl.textContent = 'Este usuario aún no escribió nada sobre sí mismo.';
+            }
+          }).catch(err => {
+            console.error('Error buscando usuario por email:', err);
+          });
+        return;
+      }
+
+      if (uid) {
+        listenAndRenderAbout(uid);
+      }
+    };
+  } else {
+    // Si renderProfileCard no existe todavía, intentamos añadir la sección cuando aparezca el perfil en DOM
+    // (fallback): detectamos cambios en #profile-card
+    const mo = new MutationObserver((mutations) => {
+      const pc = document.getElementById('profile-card');
+      if (pc && pc.children.length > 0) {
+        // instalar sección si falta
+        const about = ensureAboutSectionInProfile();
+        // intentar inferir uid desde un data-attr en el contenedor (si lo tienes)
+        // si no, no podemos activar listeners automáticos en este fallback.
+        mo.disconnect();
+      }
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+  }
+
+});
+</script>
+  
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // --- Crear modal para ver perfiles ---
+  const modal = document.createElement('div');
+  modal.id = 'profile-modal';
+  modal.style = `
+    display:none;
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.6);
+    z-index:1000;
+    justify-content:center;align-items:center;
+  `;
+  modal.innerHTML = `
+    <div style="background:white;max-width:500px;width:90%;padding:20px;border-radius:12px;overflow-y:auto;max-height:90%;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2 style="font-size:20px;font-weight:bold;">Perfil de usuario</h2>
+        <button id="close-profile-modal" style="font-size:18px;font-weight:bold;">✕</button>
+      </div>
+      <div id="profile-modal-content" style="margin-top:15px;">
+        Cargando...
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById('close-profile-modal').addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  // --- Función para abrir perfil ---
+  async function openUserProfile(uid) {
+    try {
+      const snap = await db.collection('users').doc(uid).get();
+      if (!snap.exists) {
+        document.getElementById('profile-modal-content').innerHTML = '<p>No se encontró este usuario.</p>';
+      } else {
+        const data = snap.data();
+        const displayName = data.displayName || 'Usuario';
+        const email = data.email || 'Email no disponible';
+        const aboutMe = data.aboutMe || 'Este usuario aún no escribió nada sobre sí mismo.';
+        const photo = data.photoURL || 'https://web.archive.org/web/20250921005013/https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName);
+        const verified = data.verified === true;
+
+        document.getElementById('profile-modal-content').innerHTML = `
+          <div style="text-align:center;">
+            <img src="${photo}" alt="avatar" style="width:100px;height:100px;object-fit:cover;border-radius:50%;margin:auto;">
+            <h3 style="font-size:18px;font-weight:600;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px;">
+              ${displayName}
+              ${verified ? `<img src="https://web.archive.org/web/20250921005013/https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png" alt="verificado" style="width:18px;height:18px;">` : ''}
+            </h3>
+            <p style="font-size:14px;color:#555;">${email}</p>
+          </div>
+          <div style="margin-top:15px;text-align:left;">
+            <h4 style="font-weight:bold;margin-bottom:5px;">Sobre mí</h4>
+            <p style="font-size:14px;color:#333;white-space:pre-wrap;">${aboutMe}</p>
+          </div>
+        `;
+      }
+      modal.style.display = 'flex';
+    } catch (err) {
+      document.getElementById('profile-modal-content').innerHTML = '<p>Error cargando perfil.</p>';
+    }
+  }
+
+  // --- Parchear renderPost para añadir el botón ---
+  if (typeof renderPost === 'function') {
+    const originalRenderPost = renderPost;
+    renderPost = function(doc, userId) {
+      const postEl = originalRenderPost(doc, userId);
+
+      // Botón Ver Perfil
+      const btn = document.createElement('button');
+      btn.textContent = 'Ver Perfil';
+      btn.style = 'margin-top:10px;padding:6px 12px;background:#4f46e5;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;';
+      btn.addEventListener('click', () => openUserProfile(doc.data().uid));
+
+      postEl.appendChild(btn);
+      return postEl;
+    };
+  }
+
+});
+</script>
+  
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  /******************************************************************
+   * Admin UI: agregar / quitar logo (sección dentro de #admin-panel)
+   ******************************************************************/
+  function ensureAdminLogoSection() {
+    const adminPanel = document.getElementById('admin-panel');
+    if (!adminPanel) return;
+    if (document.getElementById('admin-logo-section')) return;
+
+    const section = document.createElement('div');
+    section.id = 'admin-logo-section';
+    section.style = "margin-top:18px;padding:10px;border-top:1px solid #e5e7eb;";
+    section.innerHTML = `
+      <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">Agregar / Quitar Logo personalizado</h3>
+      <input type="email" id="logo-user-email" placeholder="Gmail del usuario" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:6px;">
+      <input type="url" id="logo-url" placeholder="URL de la imagen" style="width:100%;padding:8px;margin-bottom:8px;border:1px solid #ddd;border-radius:6px;">
+      <div style="display:flex;gap:8px;">
+        <button id="add-logo-btn" style="flex:1;padding:8px;background:#059669;color:white;border:none;border-radius:6px;cursor:pointer;">Guardar Logo</button>
+        <button id="remove-logo-btn" style="flex:1;padding:8px;background:#dc2626;color:white;border:none;border-radius:6px;cursor:pointer;">Quitar Logo</button>
+      </div>
+      <p id="logo-status" style="margin-top:8px;font-size:13px;color:#374151;"></p>
+    `;
+    adminPanel.appendChild(section);
+
+    const status = document.getElementById('logo-status');
+
+    // Guardar logo
+    document.getElementById('add-logo-btn').addEventListener('click', async () => {
+      const email = document.getElementById('logo-user-email').value.trim();
+      const url = document.getElementById('logo-url').value.trim();
+      if (!email || !url) {
+        status.textContent = "Debes completar Gmail y URL.";
+        status.style.color = "crimson";
+        return;
+      }
+      try {
+        const snap = await db.collection('users').where('email', '==', email).limit(1).get();
+        if (snap.empty) {
+          status.textContent = "Usuario no encontrado.";
+          status.style.color = "crimson";
+          return;
+        }
+        const doc = snap.docs[0];
+        await db.collection('users').doc(doc.id).update({ customLogo: url });
+        status.textContent = "Logo guardado ✅";
+        status.style.color = "green";
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Error al guardar logo.";
+        status.style.color = "crimson";
+      }
+    });
+
+    // Quitar logo
+    document.getElementById('remove-logo-btn').addEventListener('click', async () => {
+      const email = document.getElementById('logo-user-email').value.trim();
+      if (!email) {
+        status.textContent = "Ingresa el Gmail del usuario para quitar logo.";
+        status.style.color = "crimson";
+        return;
+      }
+      try {
+        const snap = await db.collection('users').where('email', '==', email).limit(1).get();
+        if (snap.empty) {
+          status.textContent = "Usuario no encontrado.";
+          status.style.color = "crimson";
+          return;
+        }
+        const doc = snap.docs[0];
+        await db.collection('users').doc(doc.id).update({ customLogo: firebase.firestore.FieldValue.delete() });
+        status.textContent = "Logo eliminado ✅";
+        status.style.color = "green";
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Error al eliminar logo.";
+        status.style.color = "crimson";
+      }
+    });
+  }
+
+  // esperar a que exista el panel
+  const adminInterval = setInterval(() => {
+    if (document.getElementById('admin-panel')) {
+      clearInterval(adminInterval);
+      ensureAdminLogoSection();
+    }
+  }, 800);
+
+  /******************************************************************
+   * Mostrar logo al lado del nombre en posts
+   ******************************************************************/
+  function upsertCustomLogoInNameEl(nameEl, logoUrl) {
+    if (!nameEl) return;
+    nameEl.style.display = "inline-flex";
+    nameEl.style.alignItems = "center";
+    nameEl.style.gap = "4px";
+
+    let img = nameEl.querySelector('img.custom-logo');
+    if (logoUrl) {
+      if (img) {
+        if (img.src !== logoUrl) img.src = logoUrl;
+      } else {
+        img = document.createElement('img');
+        img.className = 'custom-logo';
+        img.src = logoUrl;
+        img.style.width = '16px';
+        img.style.height = '16px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '3px';
+        nameEl.appendChild(img);
+      }
+    } else {
+      if (img) img.remove();
+    }
+  }
+
+  if (typeof renderPost === 'function') {
+    const originalRenderPost = renderPost;
+    renderPost = function(doc, userId) {
+      const postEl = originalRenderPost(doc, userId);
+      try {
+        const uid = doc?.data()?.uid;
+        if (postEl && uid) postEl.dataset.uid = uid;
+
+        const nameEl = postEl.querySelector('.font-semibold');
+        if (nameEl && uid) {
+          db.collection('users').doc(uid).get().then(snap => {
+            if (snap.exists) {
+              upsertCustomLogoInNameEl(nameEl, snap.data().customLogo || null);
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Patch renderPost error:', err);
+      }
+      return postEl;
+    };
+  }
+
+  /******************************************************************
+   * Actualizar logos en tiempo real
+   ******************************************************************/
+  try {
+    db.collection('users').onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        const uid = change.doc.id;
+        const data = change.doc.data();
+        const posts = document.querySelectorAll(`[data-uid="${uid}"]`);
+        posts.forEach(postEl => {
+          const nameEl = postEl.querySelector('.font-semibold');
+          if (nameEl) upsertCustomLogoInNameEl(nameEl, data.customLogo || null);
+        });
+      });
+    });
+  } catch (err) {
+    console.warn('No se pudo instalar listener de users:', err);
+  }
+});
+</script>
+
+<script>
+  // Crear botón de tienda
+  const tiendaBtn = document.createElement("button");
+  tiendaBtn.textContent = "TIENDA";
+  tiendaBtn.className = "fixed top-16 left-4 px-4 py-2 bg-purple-600 text-white rounded shadow";
+  document.body.appendChild(tiendaBtn);
+
+  // Panel de tienda
+  const tiendaPanel = document.createElement("div");
+  tiendaPanel.className = "hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+  tiendaPanel.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-lg w-3/4 max-h-[80vh] overflow-y-auto p-6 relative">
+      <h2 class="text-xl font-bold mb-4">Tienda</h2>
+      <div id="tienda-productos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="tienda-admin" class="mt-4"></div>
+      <button id="cerrar-tienda" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">✖</button>
+    </div>
+  `;
+  document.body.appendChild(tiendaPanel);
+
+  // Mostrar / ocultar panel
+  tiendaBtn.onclick = () => tiendaPanel.classList.remove("hidden");
+  tiendaPanel.querySelector("#cerrar-tienda").onclick = () => tiendaPanel.classList.add("hidden");
+
+  // Renderizar productos
+  async function renderTienda(user, snapshot) {
+    const cont = document.getElementById("tienda-productos");
+    cont.innerHTML = ""; // limpiar antes de renderizar
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      const div = document.createElement("div");
+      div.className = "border rounded p-3 bg-gray-50 shadow-sm";
+      div.innerHTML = `
+        <img src="${p.imagen}" alt="producto" class="w-full h-40 object-cover rounded mb-2">
+        <h3 class="font-semibold">${p.nombre}</h3>
+        <p class="text-sm text-gray-600">${p.descripcion}</p>
+      `;
+
+      // Botón eliminar si es admin
+      if (user && user.email === "kinzudev@gmail.com") {
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "❌ Eliminar";
+        delBtn.className = "mt-2 px-3 py-1 bg-red-500 text-white rounded";
+        delBtn.onclick = async () => {
+          if (confirm("¿Seguro que quieres eliminar este producto?")) {
+            await db.collection("tienda").doc(doc.id).delete();
+          }
+        };
+        div.appendChild(delBtn);
+      }
+
+      cont.appendChild(div);
+    });
+
+    // Botón de añadir productos solo para admin
+    const adminDiv = document.getElementById("tienda-admin");
+    adminDiv.innerHTML = "";
+    if (user && user.email === "kinzudev@gmail.com") {
+      const addBtn = document.createElement("button");
+      addBtn.textContent = "➕ Editar tienda";
+      addBtn.className = "px-4 py-2 bg-green-600 text-white rounded shadow";
+      addBtn.onclick = async () => {
+        const nombre = prompt("Nombre del producto:");
+        const imagen = prompt("URL de la imagen:");
+        const descripcion = prompt("Descripción del producto:");
+        if (nombre && imagen) {
+          await db.collection("tienda").add({ nombre, imagen, descripcion });
+        }
+      };
+      adminDiv.appendChild(addBtn);
+    }
+  }
+
+  // Escuchar cambios de auth y tienda en conjunto
+  let currentUser = null;
+  auth.onAuthStateChanged(user => {
+    currentUser = user;
+    // Suscribir tienda en tiempo real (una sola vez)
+    db.collection("tienda").onSnapshot(snapshot => {
+      renderTienda(currentUser, snapshot);
+    });
+  });
+</script>
+
+  <script>
+  // Escucha cuando se rendericen los posts para añadir botón de responder
+  function attachReplyButtons() {
+    document.querySelectorAll(".btn-reply").forEach(btn => {
+      btn.onclick = () => {
+        const postId = btn.dataset.id;
+        const replyBox = document.getElementById(`reply-box-${postId}`);
+        if (replyBox) {
+          replyBox.classList.toggle("hidden");
+        }
+      };
+    });
+  }
+
+  // Renderizar respuestas de un post
+  async function renderReplies(postId, container) {
+    const snapshot = await db.collection("posts").doc(postId).collection("replies").orderBy("createdAt", "asc").get();
+    container.innerHTML = "";
+    snapshot.forEach(doc => {
+      const r = doc.data();
+      const div = document.createElement("div");
+      div.className = "mt-2 p-2 border rounded bg-gray-50";
+      div.innerHTML = `
+        <div class="flex items-center gap-2">
+          <img src="${r.photoURL || "https://web.archive.org/web/20250921005013/https://ui-avatars.com/api/?name="+encodeURIComponent(r.author)}" class="w-6 h-6 rounded-full">
+          <span class="font-semibold">${r.author} ${r.verified ? '<img src="https://web.archive.org/web/20250921005013/https://img.icons8.com/?size=16&id=2sZ0sdlG9kWP&format=png" class="inline w-4 h-4">' : ""}</span>
+        </div>
+        <p class="ml-8 text-sm">${r.text}</p>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  // Modificar renderPost para añadir botón de responder y mostrar replies
+  const originalRenderPost = renderPost;
+  renderPost = function(doc, userId) {
+    const postEl = originalRenderPost(doc, userId);
+
+    const repliesContainer = document.createElement("div");
+    repliesContainer.className = "mt-3 space-y-2";
+    repliesContainer.id = `replies-${doc.id}`;
+    postEl.appendChild(repliesContainer);
+
+    const replyBox = document.createElement("div");
+    replyBox.className = "hidden mt-2";
+    replyBox.id = `reply-box-${doc.id}`;
+    replyBox.innerHTML = `
+      <textarea placeholder="Escribe una respuesta..." class="w-full border rounded p-2 text-sm mb-2"></textarea>
+      <button class="px-3 py-1 bg-blue-500 text-white rounded">Responder</button>
+    `;
+    const replyBtn = replyBox.querySelector("button");
+    replyBtn.onclick = async () => {
+      const text = replyBox.querySelector("textarea").value.trim();
+      if (!text) return;
+      const user = auth.currentUser;
+      if (!user) return alert("Debes iniciar sesión para responder.");
+      await db.collection("posts").doc(doc.id).collection("replies").add({
+        text,
+        author: user.displayName || user.email,
+        photoURL: user.photoURL || null,
+        verified: user.verified || false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      replyBox.querySelector("textarea").value = "";
+      renderReplies(doc.id, repliesContainer);
+    };
+    postEl.appendChild(replyBox);
+
+    const replyToggleBtn = document.createElement("button");
+    replyToggleBtn.textContent = "Responder";
+    replyToggleBtn.className = "btn-reply text-blue-600 text-sm mt-2";
+    replyToggleBtn.dataset.id = doc.id;
+    postEl.appendChild(replyToggleBtn);
+
+    // Cargar replies
+    renderReplies(doc.id, repliesContainer);
+
+    return postEl;
+  };
+
+  // Reatachar botones al recargar feed
+  const originalSubscribeFeed = subscribeFeed;
+  subscribeFeed = function() {
+    if (unsubscribeFeed) unsubscribeFeed();
+    unsubscribeFeed = db.collection("posts").orderBy("createdAt", "desc").limit(50).onSnapshot(snapshot => {
+      const feed = document.getElementById("feed");
+      feed.innerHTML = "";
+      snapshot.forEach(doc => {
+        feed.appendChild(renderPost(doc, auth.currentUser ? auth.currentUser.uid : null));
+      });
+      attachReplyButtons();
+    });
+  };
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // detecta botones cuyo texto sea "Ver Perfil" (case-insensitive)
+  function isVerPerfilBtn(el) {
+    if (!el || el.nodeType !== 1) return false;
+    const tag = el.tagName.toLowerCase();
+    if (tag !== 'button' && tag !== 'a' && tag !== 'div' && tag !== 'span') return false;
+    const txt = (el.textContent || el.innerText || '').trim().toLowerCase();
+    return txt === 'ver perfil';
+  }
+
+  // heurística para elegir el contenedor del post donde posicionar el botón
+  function findPostContainer(startEl) {
+    let el = startEl.parentElement;
+    const nameSelectors = ['.font-semibold','h3','h4','.username','.author-name','.post-header','.post-title','img'];
+    while (el && el !== document.body) {
+      // si contiene nombres / avatar, lo consideramos el header/post container
+      for (const sel of nameSelectors) {
+        if (el.querySelector(sel)) return el;
+      }
+      // si tiene clases típicas de post o es article -> usarlo
+      if (el.classList && (el.classList.contains('post') || el.classList.contains('card') || el.tagName.toLowerCase() === 'article')) return el;
+      // si tiene data-uid (nosotros lo pusimos antes), también es buen candidato
+      if (el.hasAttribute && el.hasAttribute('data-uid')) return el;
+      el = el.parentElement;
+    }
+    // fallback: nearest article or the original parent
+    return startEl.closest('article') || startEl.closest('.post') || startEl.parentElement;
+  }
+
+  // mueve todos los botones "Ver Perfil" no movidos aún
+  function moveAllVerPerfilButtons() {
+    document.querySelectorAll('button, a, span, div').forEach(el => {
+      if (!isVerPerfilBtn(el)) return;
+      if (el.dataset.verperfilMoved === "1") return; // ya movido
+
+      const container = findPostContainer(el);
+      if (!container) return;
+
+      // asegurar posicionamiento relativo del contenedor
+      const currentPos = window.getComputedStyle(container).position;
+      if (currentPos === 'static') container.style.position = 'relative';
+
+      // mover dentro del contenedor si no está dentro
+      if (el.parentElement !== container) container.appendChild(el);
+
+      // aplicar estilos para ubicar arriba derecha
+      el.style.position = 'absolute';
+      el.style.top = '8px';
+      el.style.right = '8px';
+      el.style.margin = '0';
+      el.style.zIndex = '30';
+      // reducir tamaño para que no rompa el layout
+      el.style.fontSize = '12px';
+      el.style.padding = el.style.padding || '6px 8px';
+      el.style.borderRadius = '6px';
+
+      // marcar como movido para no duplicar
+      el.dataset.verperfilMoved = "1";
+      el.classList.add('moved-ver-perfil');
+    });
+  }
+
+  // ejecutar una vez al cargar
+  moveAllVerPerfilButtons();
+
+  // observar cambios (posts nuevos, re-render, etc.) y volver a mover
+  const mo = new MutationObserver((mutations) => {
+    // ligera debounce para evitar exceso de trabajo
+    if (window._moveVerPerfilTimeout) clearTimeout(window._moveVerPerfilTimeout);
+    window._moveVerPerfilTimeout = setTimeout(() => {
+      moveAllVerPerfilButtons();
+    }, 80);
+  });
+  mo.observe(document.body, { childList: true, subtree: true });
+
+  // también reintentar al hacer login/logout (por si cambia la UI)
+  if (typeof auth !== 'undefined' && auth.onAuthStateChanged) {
+    auth.onAuthStateChanged(() => setTimeout(moveAllVerPerfilButtons, 150));
+  }
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const authUser = firebase.auth().currentUser;
+
+  // Botón Juegos
+  const juegosBtn = document.createElement("button");
+  juegosBtn.textContent = "Juegos";
+  juegosBtn.className = "fixed top-28 left-4 bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700";
+  document.body.appendChild(juegosBtn);
+
+  // Panel de Juegos
+  const juegosPanel = document.createElement("div");
+  juegosPanel.className = "fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50";
+  juegosPanel.innerHTML = `
+    <div class="bg-white w-3/4 h-3/4 rounded-2xl shadow-lg overflow-y-auto p-6 relative">
+      <h2 class="text-2xl font-bold mb-4">🎮 Juegos</h2>
+      <button id="closeJuegos" class="absolute top-3 right-3 text-red-500 font-bold">X</button>
+      
+      <div class="space-y-6">
+        <!-- Tres en Raya Multijugador -->
+        <div class="p-4 border rounded-lg">
+          <h3 class="text-xl font-semibold mb-2">⭕❌ Tres en Raya (Online)</h3>
+          <button id="createGame" class="bg-green-600 text-white px-3 py-1 rounded">Crear partida</button>
+          <input type="text" id="gameIdInput" placeholder="ID de partida" class="border p-1 rounded ml-2">
+          <button id="joinGame" class="bg-blue-600 text-white px-3 py-1 rounded">Unirse</button>
+          <p id="gameInfo" class="mt-2 text-sm text-gray-600"></p>
+          <div id="ticTacToeOnline" class="grid grid-cols-3 gap-1 w-40 mt-3"></div>
+          <p id="ticTacToeStatus" class="mt-2 text-sm"></p>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(juegosPanel);
+
+  // Mostrar/Ocultar
+  juegosBtn.onclick = () => juegosPanel.classList.remove("hidden");
+  juegosPanel.querySelector("#closeJuegos").onclick = () => juegosPanel.classList.add("hidden");
+
+  // =====================
+  // TRES EN RAYA ONLINE
+  // =====================
+  const boardDiv = juegosPanel.querySelector("#ticTacToeOnline");
+  const statusDiv = juegosPanel.querySelector("#ticTacToeStatus");
+  const gameInfo = juegosPanel.querySelector("#gameInfo");
+
+  let currentGameId = null;
+  let unsubscribeGame = null;
+  let playerSymbol = null;
+
+  function renderBoard(board) {
+    boardDiv.innerHTML = "";
+    board.forEach((cell, i) => {
+      const btn = document.createElement("button");
+      btn.className = "w-12 h-12 border flex items-center justify-center text-lg font-bold";
+      btn.textContent = cell || "";
+      btn.onclick = () => makeMove(i);
+      boardDiv.appendChild(btn);
+    });
+  }
+
+  async function makeMove(i) {
+    if (!currentGameId || !playerSymbol) return;
+    const gameRef = firebase.firestore().collection("games").doc(currentGameId);
+    const snap = await gameRef.get();
+    if (!snap.exists) return;
+
+    const game = snap.data();
+    if (game.winner) return;
+    if (game.board[i]) return;
+    if (game.turn !== playerSymbol) return; // no es tu turno
+
+    const newBoard = [...game.board];
+    newBoard[i] = playerSymbol;
+
+    let winner = null;
+    const wins = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    for (let [a,b,c] of wins) {
+      if (newBoard[a] && newBoard[a] === newBoard[b] && newBoard[a] === newBoard[c]) {
+        winner = newBoard[a];
+      }
+    }
+
+    await gameRef.update({
+      board: newBoard,
+      turn: playerSymbol === "X" ? "O" : "X",
+      winner: winner || null
+    });
+  }
+
+  // Crear partida
+  juegosPanel.querySelector("#createGame").onclick = async () => {
+    const uid = firebase.auth().currentUser?.uid;
+    if (!uid) return alert("Debes iniciar sesión");
+
+    const gameRef = await firebase.firestore().collection("games").add({
+      board: Array(9).fill(null),
+      turn: "X",
+      players: { X: uid, O: null },
+      winner: null,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    currentGameId = gameRef.id;
+    playerSymbol = "X";
+    gameInfo.textContent = "ID de partida: " + currentGameId;
+    subscribeGame();
+  };
+
+  // Unirse a partida
+  juegosPanel.querySelector("#joinGame").onclick = async () => {
+    const uid = firebase.auth().currentUser?.uid;
+    if (!uid) return alert("Debes iniciar sesión");
+
+    const gameId = juegosPanel.querySelector("#gameIdInput").value.trim();
+    if (!gameId) return alert("Ingresa el ID de la partida");
+
+    const gameRef = firebase.firestore().collection("games").doc(gameId);
+    const snap = await gameRef.get();
+    if (!snap.exists) return alert("Partida no encontrada");
+
+    const game = snap.data();
+    if (game.players.O && game.players.X && game.players.O !== uid && game.players.X !== uid) {
+      return alert("La partida ya está completa");
+    }
+
+    if (!game.players.O && game.players.X !== uid) {
+      await gameRef.update({ "players.O": uid });
+      playerSymbol = "O";
+    } else if (game.players.X === uid) {
+      playerSymbol = "X";
+    } else if (game.players.O === uid) {
+      playerSymbol = "O";
+    }
+
+    currentGameId = gameId;
+    gameInfo.textContent = "Unido a partida: " + currentGameId;
+    subscribeGame();
+  };
+
+  function subscribeGame() {
+    if (unsubscribeGame) unsubscribeGame();
+    unsubscribeGame = firebase.firestore().collection("games").doc(currentGameId)
+      .onSnapshot((snap) => {
+        if (!snap.exists) return;
+        const game = snap.data();
+        renderBoard(game.board);
+        if (game.winner) {
+          statusDiv.textContent = "🎉 Ganó " + game.winner;
+        } else {
+          statusDiv.textContent = "Turno de: " + game.turn;
+        }
+      });
+  }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ADMIN_EMAIL = "lunetter@gmail.com";
+
+  // ---------- Crear panel admin (oculto) ----------
+  const adminPanel = document.createElement('div');
+  adminPanel.id = 'ban-admin-panel';
+  adminPanel.style.display = 'none';
+  adminPanel.style.position = 'fixed';
+  adminPanel.style.top = '80px';
+  adminPanel.style.right = '20px';
+  adminPanel.style.zIndex = 99999;
+  adminPanel.style.width = '360px';
+  adminPanel.style.background = '#fff';
+  adminPanel.style.borderRadius = '12px';
+  adminPanel.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
+  adminPanel.style.padding = '14px';
+  adminPanel.innerHTML = `
+    <h3 style="margin:0 0 8px 0;">Panel Admin - Baneos</h3>
+    <label style="font-size:13px">Email del usuario</label>
+    <input id="ban-email" type="email" placeholder="usuario@gmail.com" style="width:100%;padding:8px;margin:6px 0;border:1px solid #ddd;border-radius:6px;" />
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <button id="ban-perm" style="flex:1;padding:8px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;">Banear Permanente</button>
+      <button id="unban-btn" style="flex:1;padding:8px;background:#10b981;color:#fff;border:none;border-radius:6px;cursor:pointer;">Desbanear</button>
+    </div>
+    <div style="font-size:13px;margin-bottom:6px;">Ban temporal (opcional):</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <input id="ban-days" type="number" min="0" placeholder="días" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:6px;" />
+      <input id="ban-hours" type="number" min="0" placeholder="horas" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:6px;" />
+      <input id="ban-secs" type="number" min="0" placeholder="seg" style="flex:1;padding:6px;border:1px solid #ddd;border-radius:6px;" />
+    </div>
+    <button id="ban-temp" style="width:100%;padding:8px;background:#f59e0b;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-bottom:8px;">Banear Temporal</button>
+    <div id="admin-msg" style="font-size:13px;color:#374151;min-height:18px;"></div>
+  `;
+  document.body.appendChild(adminPanel);
+
+  // ---------- Overlay de baneo para mostrar a usuarios baneados ----------
+  const banOverlay = document.createElement('div');
+  banOverlay.id = 'ban-overlay';
+  banOverlay.style.display = 'none';
+  banOverlay.style.position = 'fixed';
+  banOverlay.style.inset = '0';
+  banOverlay.style.background = 'rgba(0,0,0,0.95)';
+  banOverlay.style.color = 'white';
+  banOverlay.style.zIndex = 100000;
+  banOverlay.style.justifyContent = 'center';
+  banOverlay.style.alignItems = 'center';
+  banOverlay.style.textAlign = 'center';
+  banOverlay.style.padding = '20px';
+  banOverlay.innerHTML = `
+    <div style="max-width:820px;padding:20px;">
+      <!-- Imagen personalizada encima del texto (añadida por petición) -->
+      <img src="https://web.archive.org/web/20250921005013/https://images.squarespace-cdn.com/content/64affeccb8061b07b302a082/1695378472779-JVAFCRPLZTWQXOMHIAUA/Sticker-1.png?content-type=image%2Fpng" alt="baneado" style="max-width:220px;height:auto;display:block;margin:0 auto 18px;" />
+      <h1 style="font-size:28px;margin:0 0 8px 0;">Has sido baneado</h1>
+      <p style="margin:0 0 10px 0;">porfavor contacta a <strong>@enjecteds</strong> y <strong>@zunex78</strong></p>
+      <p id="ban-countdown" style="font-family:monospace;font-size:18px;margin-top:8px;"></p>
+    </div>
+  `;
+  document.body.appendChild(banOverlay);
+
+  // Helpers DOM
+  const msgEl = adminPanel.querySelector('#admin-msg');
+  const emailInput = adminPanel.querySelector('#ban-email');
+  const btnBanPerm = adminPanel.querySelector('#ban-perm');
+  const btnBanTemp = adminPanel.querySelector('#ban-temp');
+  const btnUnban = adminPanel.querySelector('#unban-btn');
+  const daysInput = adminPanel.querySelector('#ban-days');
+  const hoursInput = adminPanel.querySelector('#ban-hours');
+  const secsInput = adminPanel.querySelector('#ban-secs');
+  const countdownEl = banOverlay.querySelector('#ban-countdown');
+
+  // Firestore refs
+  const db = firebase.firestore();
+  const authObj = firebase.auth();
+
+  // Mostrar/ocultar admin panel con tecla Insert solo si eres admin
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Insert' && authObj.currentUser && authObj.currentUser.email === ADMIN_EMAIL) {
+      adminPanel.style.display = adminPanel.style.display === 'none' ? 'block' : 'none';
+    }
+  });
+
+  // Banear permanente: banned:true, banExpires: null
+  btnBanPerm.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!email) return (msgEl.textContent = 'Ingresa un email.');
+    msgEl.textContent = 'Buscando usuario...';
+    try {
+      const q = await db.collection('users').where('email', '==', email).limit(1).get();
+      if (q.empty) {
+        const newRef = db.collection('users').doc();
+        await newRef.set({ email, banned: true, banExpires: null, bannedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      } else {
+        const id = q.docs[0].id;
+        await db.collection('users').doc(id).set({ banned: true, banExpires: null, bannedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      }
+      msgEl.textContent = 'Usuario baneado permanentemente.';
+    } catch (err) {
+      console.error(err);
+      msgEl.textContent = 'Error: ' + err.message;
+    }
+  });
+
+  // Banear temporal: calcular fecha de expiración
+  btnBanTemp.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!email) return (msgEl.textContent = 'Ingresa un email.');
+    const days = parseInt(daysInput.value) || 0;
+    const hours = parseInt(hoursInput.value) || 0;
+    const secs = parseInt(secsInput.value) || 0;
+    const totalMilliseconds = (days * 24 * 3600 + hours * 3600 + secs) * 1000;
+    if (totalMilliseconds <= 0) return (msgEl.textContent = 'Ingresa una duración válida.');
+    msgEl.textContent = 'Buscando usuario...';
+    try {
+      const expiresDate = new Date(Date.now() + totalMilliseconds);
+      const q = await db.collection('users').where('email', '==', email).limit(1).get();
+      if (q.empty) {
+        const newRef = db.collection('users').doc();
+        await newRef.set({ email, banned: true, banExpires: firebase.firestore.Timestamp.fromDate(expiresDate), bannedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      } else {
+        const id = q.docs[0].id;
+        await db.collection('users').doc(id).set({ banned: true, banExpires: firebase.firestore.Timestamp.fromDate(expiresDate), bannedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      }
+      msgEl.textContent = `Usuario baneado hasta ${expiresDate.toLocaleString()}.`;
+    } catch (err) {
+      console.error(err);
+      msgEl.textContent = 'Error: ' + err.message;
+    }
+  });
+
+  // Desbanear
+  btnUnban.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!email) return (msgEl.textContent = 'Ingresa un email.');
+    msgEl.textContent = 'Buscando usuario...';
+    try {
+      const q = await db.collection('users').where('email', '==', email).limit(1).get();
+      if (q.empty) return (msgEl.textContent = 'Usuario no encontrado.');
+      const id = q.docs[0].id;
+      await db.collection('users').doc(id).set({ banned: false, banExpires: null, unbannedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      msgEl.textContent = 'Usuario desbaneado.';
+    } catch (err) {
+      console.error(err);
+      msgEl.textContent = 'Error: ' + err.message;
+    }
+  });
+
+  // ---------- Mostrar overlay localmente si el usuario actual está baneado ----------
+  let banListenerUnsub = null;
+  function attachBanListenerForCurrentUser(uid) {
+    if (banListenerUnsub) banListenerUnsub();
+    banListenerUnsub = db.collection('users').doc(uid).onSnapshot(doc => {
+      if (!doc.exists) return hideBanOverlay();
+      const data = doc.data();
+      if (data && data.banned) {
+        const expires = data.banExpires && data.banExpires.toDate ? data.banExpires.toDate() : (data.banExpires ? new Date(data.banExpires) : null);
+        showBanOverlay(expires);
+      } else {
+        hideBanOverlay();
+      }
+    }, err => {
+      console.error('Error listening user ban:', err);
+    });
+  }
+
+  // Overlay control
+  let overlayInterval = null;
+  function showBanOverlay(expiresAt) {
+    banOverlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    document.querySelectorAll('.like-btn, button.like, .btn-like').forEach(b => b.disabled = true);
+    const composer = document.getElementById('composer');
+    if (composer) {
+      composer.querySelectorAll('button, input, textarea').forEach(i => i.disabled = true);
+    }
+
+    function update() {
+      if (!expiresAt) {
+        countdownEl.textContent = 'Baneo permanente';
+        return;
+      }
+      const diff = expiresAt.getTime() - Date.now();
+      if (diff <= 0) {
+        countdownEl.textContent = 'Expirado — esperando actualización...';
+        clearInterval(overlayInterval);
+        return;
+      }
+      const s = Math.floor(diff / 1000) % 60;
+      const m = Math.floor(diff / (1000*60)) % 60;
+      const h = Math.floor(diff / (1000*60*60)) % 24;
+      const d = Math.floor(diff / (1000*60*60*24));
+      const parts = [];
+      if (d) parts.push(d + 'd');
+      if (h) parts.push(h + 'h');
+      parts.push(String(m).padStart(2,'0') + 'm');
+      parts.push(String(s).padStart(2,'0') + 's');
+      countdownEl.textContent = 'Tiempo restante: ' + parts.join(' ');
+    }
+
+    update();
+    if (overlayInterval) clearInterval(overlayInterval);
+    overlayInterval = setInterval(update, 1000);
+
+    function stopEv(e) { e.stopImmediatePropagation(); }
+    document.addEventListener('click', stopEv, true);
+    document.addEventListener('keydown', stopEv, true);
+    banOverlay._stopHandlers = stopEv;
+  }
+
+  function hideBanOverlay() {
+    banOverlay.style.display = 'none';
+    document.body.style.overflow = '';
+    document.querySelectorAll('.like-btn, button.like, .btn-like').forEach(b => { b.disabled = false; });
+    const composer = document.getElementById('composer');
+    if (composer) {
+      composer.querySelectorAll('button, input, textarea').forEach(i => i.disabled = false);
+    }
+    if (overlayInterval) { clearInterval(overlayInterval); overlayInterval = null; }
+    if (banOverlay._stopHandlers) {
+      document.removeEventListener('click', banOverlay._stopHandlers, true);
+      document.removeEventListener('keydown', banOverlay._stopHandlers, true);
+      banOverlay._stopHandlers = null;
+    }
+  }
+
+  // ---------- Realtime: si otro admin banea a alguien y es el usuario actual, mostrar overlay ----------
+  authObj.onAuthStateChanged(async (user) => {
+    if (user) {
+      const uRef = db.collection('users').doc(user.uid);
+      const snap = await uRef.get();
+      if (!snap.exists) {
+        await uRef.set({ email: user.email || null, displayName: user.displayName || null }, { merge: true });
+      }
+      attachBanListenerForCurrentUser(user.uid);
+    } else {
+      if (banListenerUnsub) { banListenerUnsub(); banListenerUnsub = null; }
+      hideBanOverlay();
+    }
+  });
+
+  // También comprobar por email en caso de docs creados por email
+  let usersSnapshotUnsub = null;
+  authObj.onAuthStateChanged(user => {
+    if (usersSnapshotUnsub) { usersSnapshotUnsub(); usersSnapshotUnsub = null; }
+    if (!user) return;
+    usersSnapshotUnsub = db.collection('users').where('email','==', user.email).onSnapshot(snap => {
+      if (snap.empty) return;
+      const doc = snap.docs[0];
+      const data = doc.data();
+      if (data && data.banned) {
+        const expires = data.banExpires && data.banExpires.toDate ? data.banExpires.toDate() : (data.banExpires ? new Date(data.banExpires) : null);
+        showBanOverlay(expires);
+      } else {
+        hideBanOverlay();
+      }
+    });
+  });
+
+  // Cleanup on unload
+  window.addEventListener('beforeunload', () => {
+    if (banListenerUnsub) banListenerUnsub();
+    if (usersSnapshotUnsub) usersSnapshotUnsub();
+  });
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Crear el botón fijo arriba a la derecha
+  const mobileBtn = document.createElement("button");
+  mobileBtn.textContent = "Mobil Versión";
+  mobileBtn.style.position = "fixed";
+  mobileBtn.style.top = "10px";
+  mobileBtn.style.right = "10px";
+  mobileBtn.style.zIndex = "1000";
+  mobileBtn.style.padding = "8px 14px";
+  mobileBtn.style.border = "none";
+  mobileBtn.style.borderRadius = "6px";
+  mobileBtn.style.background = "#2563eb";
+  mobileBtn.style.color = "white";
+  mobileBtn.style.cursor = "pointer";
+  mobileBtn.style.fontWeight = "bold";
+  document.body.appendChild(mobileBtn);
+
+  // Crear estilos para modo móvil
+  const mobileStyle = document.createElement("style");
+  mobileStyle.id = "mobile-style";
+  mobileStyle.textContent = `
+    body.mobile-version {
+      font-size: 14px !important;
+      max-width: 480px;
+      margin: auto;
+      background: #f9fafb;
+    }
+    body.mobile-version .post, 
+    body.mobile-version .card,
+    body.mobile-version .panel {
+      width: 100% !important;
+      margin: 8px 0 !important;
+      border-radius: 10px !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    body.mobile-version header,
+    body.mobile-version nav {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  `;
+  document.head.appendChild(mobileStyle);
+  mobileStyle.disabled = true;
+
+  // Crear advertencia
+  const warningPanel = document.createElement("div");
+  warningPanel.style.position = "fixed";
+  warningPanel.style.top = "0";
+  warningPanel.style.left = "0";
+  warningPanel.style.width = "100%";
+  warningPanel.style.height = "100%";
+  warningPanel.style.background = "rgba(0,0,0,0.7)";
+  warningPanel.style.display = "none";
+  warningPanel.style.justifyContent = "center";
+  warningPanel.style.alignItems = "center";
+  warningPanel.style.zIndex = "10000";
+  warningPanel.innerHTML = `
+    <div style="background:white;padding:20px;border-radius:12px;text-align:center;max-width:320px;">
+      <h2 style="margin-bottom:12px;">⚠️ Advertencia</h2>
+      <p style="margin-bottom:16px;">Esto es solo para teléfonos!</p>
+      <button id="close-warning" style="padding:8px 16px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;">Entendido</button>
+    </div>
+  `;
+  document.body.appendChild(warningPanel);
+
+  let mobileEnabled = false;
+  let warningShown = false;
+
+  mobileBtn.addEventListener("click", () => {
+    if (!mobileEnabled) {
+      if (!warningShown) {
+        warningPanel.style.display = "flex";
+        warningShown = true;
+      }
+      document.body.classList.add("mobile-version");
+      mobileStyle.disabled = false;
+      mobileEnabled = true;
+      mobileBtn.textContent = "Versión Normal";
+    } else {
+      document.body.classList.remove("mobile-version");
+      mobileStyle.disabled = true;
+      mobileEnabled = false;
+      mobileBtn.textContent = "Mobil Versión";
+    }
+  });
+
+  // Botón cerrar advertencia
+  warningPanel.querySelector("#close-warning").addEventListener("click", () => {
+    warningPanel.style.display = "none";
+  });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const ADMIN_EMAIL = "kinzudev@gmail.com";
+
+  // Crear botón "Tabla"
+  const tablaBtn = document.createElement("button");
+  tablaBtn.textContent = "Tabla";
+  tablaBtn.style.position = "fixed";
+  tablaBtn.style.top = "80px";
+  tablaBtn.style.right = "20px";
+  tablaBtn.style.background = "#2563eb";
+  tablaBtn.style.color = "white";
+  tablaBtn.style.padding = "10px 16px";
+  tablaBtn.style.border = "none";
+  tablaBtn.style.borderRadius = "8px";
+  tablaBtn.style.cursor = "pointer";
+  tablaBtn.style.zIndex = "1000";
+  document.body.appendChild(tablaBtn);
+
+  // Crear panel oculto
+  const panel = document.createElement("div");
+  panel.style.position = "fixed";
+  panel.style.top = "50%";
+  panel.style.left = "50%";
+  panel.style.transform = "translate(-50%, -50%)";
+  panel.style.width = "650px";
+  panel.style.height = "500px";
+  panel.style.background = "#1f2937";
+  panel.style.color = "white";
+  panel.style.padding = "20px";
+  panel.style.borderRadius = "12px";
+  panel.style.boxShadow = "0 8px 24px rgba(0,0,0,0.3)";
+  panel.style.display = "none";
+  panel.style.overflowY = "auto";
+  panel.style.zIndex = "1100";
+
+  const title = document.createElement("h2");
+  title.textContent = "Tabla global de top personas con más posts";
+  title.style.marginBottom = "20px";
+  panel.appendChild(title);
+
+  const table = document.createElement("table");
+  table.style.width = "100%";
+  table.style.borderCollapse = "collapse";
+
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  ["Top", "Usuario", "Posts", ""].forEach(txt => {
+    const th = document.createElement("th");
+    th.textContent = txt;
+    th.style.borderBottom = "2px solid #374151";
+    th.style.padding = "8px";
+    th.style.textAlign = "left";
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  tbody.id = "tabla-top-users";
+  table.appendChild(tbody);
+
+  panel.appendChild(table);
+
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "Cerrar";
+  closeBtn.style.marginTop = "20px";
+  closeBtn.style.padding = "8px 12px";
+  closeBtn.style.background = "#dc2626";
+  closeBtn.style.color = "white";
+  closeBtn.style.border = "none";
+  closeBtn.style.borderRadius = "8px";
+  closeBtn.style.cursor = "pointer";
+  closeBtn.addEventListener("click", () => {
+    panel.style.display = "none";
+  });
+  panel.appendChild(closeBtn);
+
+  document.body.appendChild(panel);
+
+  // Abrir panel
+  tablaBtn.addEventListener("click", () => {
+    panel.style.display = "block";
+    loadTopUsers();
+  });
+
+  let currentUser = null;
+
+  // Función para cargar top usuarios
+  async function loadTopUsers() {
+    const postsSnapshot = await db.collection("posts").get();
+    const counts = {};
+
+    postsSnapshot.forEach(doc => {
+      const data = doc.data();
+      const uid = data.uid;
+      if (!counts[uid]) {
+        counts[uid] = { count: 0 };
+      }
+      counts[uid].count++;
+    });
+
+    // Buscar usuarios
+    const usersSnapshot = await db.collection("users").get();
+    const usersMap = {};
+    usersSnapshot.forEach(doc => {
+      const u = doc.data();
+      // Excluir si tienen el campo excludedFromTop
+      if (u.excludedFromTop) return;
+      usersMap[doc.id] = {
+        id: doc.id,
+        displayName: u.displayName || "Usuario",
+        photoURL: u.photoURL || "https://web.archive.org/web/20250921005013/https://via.placeholder.com/40",
+        verified: u.verified || false
+      };
+    });
+
+    const sorted = Object.entries(counts)
+      .filter(([uid]) => usersMap[uid]) // Solo usuarios válidos
+      .map(([uid, data]) => ({
+        uid,
+        count: data.count,
+        name: usersMap[uid].displayName,
+        photoURL: usersMap[uid].photoURL,
+        verified: usersMap[uid].verified
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 50);
+
+    const tbody = document.getElementById("tabla-top-users");
+    tbody.innerHTML = "";
+
+    sorted.forEach((user, index) => {
+      const row = document.createElement("tr");
+
+      const topCell = document.createElement("td");
+      topCell.textContent = index + 1;
+      topCell.style.padding = "6px";
+      row.appendChild(topCell);
+
+      const nameCell = document.createElement("td");
+      nameCell.style.padding = "6px";
+      nameCell.style.display = "flex";
+      nameCell.style.alignItems = "center";
+      nameCell.style.gap = "8px";
+
+      const img = document.createElement("img");
+      img.src = user.photoURL;
+      img.style.width = "32px";
+      img.style.height = "32px";
+      img.style.borderRadius = "50%";
+      nameCell.appendChild(img);
+
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = user.name;
+      nameCell.appendChild(nameSpan);
+
+      if (user.verified) {
+        const verifyImg = document.createElement("img");
+        verifyImg.src = "https://web.archive.org/web/20250921005013/https://img.icons8.com/?size=512&id=2sZ0sdlG9kWP&format=png";
+        verifyImg.style.width = "18px";
+        verifyImg.style.height = "18px";
+        verifyImg.style.marginLeft = "4px";
+        nameCell.appendChild(verifyImg);
+      }
+
+      row.appendChild(nameCell);
+
+      const postsCell = document.createElement("td");
+      postsCell.textContent = user.count;
+      postsCell.style.padding = "6px";
+      row.appendChild(postsCell);
+
+      // Botón solo para admin
+      const actionCell = document.createElement("td");
+      if (currentUser && currentUser.email === ADMIN_EMAIL) {
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "Quitar del Top";
+        removeBtn.style.background = "#ef4444";
+        removeBtn.style.color = "white";
+        removeBtn.style.border = "none";
+        removeBtn.style.padding = "4px 8px";
+        removeBtn.style.borderRadius = "6px";
+        removeBtn.style.cursor = "pointer";
+
+        removeBtn.addEventListener("click", async () => {
+          await db.collection("users").doc(user.uid).update({
+            excludedFromTop: true
+          });
+          alert(`${user.name} fue quitado del top.`);
+          loadTopUsers();
+        });
+
+        actionCell.appendChild(removeBtn);
+      }
+      row.appendChild(actionCell);
+
+      tbody.appendChild(row);
+    });
+  }
+
+  // Verificar usuario actual
+  auth.onAuthStateChanged(user => {
+    currentUser = user;
+    if (user) {
+      db.collection("posts").where("uid", "==", user.uid).get().then(snapshot => {
+        const myPosts = snapshot.size;
+        const info = document.createElement("p");
+        info.textContent = `Has publicado ${myPosts} posts.`;
+        info.style.marginTop = "15px";
+        info.style.fontWeight = "bold";
+        panel.appendChild(info);
+      });
+    }
+  });
+});
+</script>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const BUTTON_SELECTORS = ['.follow-btn', '.btn-follow', '[data-follow-target]']; // detectores comunes
+
+  // --- Helpers ---
+  function setBtnState(btn, following) {
+    btn.disabled = false;
+    btn.dataset.following = following ? '1' : '0';
+    btn.textContent = following ? 'Dejar de seguir' : 'Seguir';
+    btn.setAttribute('aria-pressed', following ? 'true' : 'false');
+    if (following) btn.classList.add('is-following'); else btn.classList.remove('is-following');
+  }
+
+  function setBtnBusy(btn, busy = true) {
+    btn.disabled = busy;
+    if (busy) {
+      btn.dataset._prevText = btn.textContent;
+      btn.textContent = '...';
+    } else {
+      if (btn.dataset._prevText) { btn.textContent = btn.dataset._prevText; delete btn.dataset._prevText; }
+    }
+  }
+
+  // intenta resolver el UID objetivo desde atributos (uid, email, data-target, data-follow-target) o desde el DOM
+  async function resolveTargetUid(btn) {
+    const ds = btn.dataset;
+    if (ds.uid) return ds.uid;
+    if (ds.targetUid) return ds.targetUid;
+    if (ds.followTarget) return ds.followTarget;
+    if (ds.followTargetUid) return ds.followTargetUid;
+    if (ds.email) {
+      // buscar user por email
+      const q = await db.collection('users').where('email','==', ds.email).limit(1).get();
+      if (!q.empty) return q.docs[0].id;
+      return null;
+    }
+    // fallback: buscar un ancestor con data-uid
+    const anc = btn.closest('[data-uid]');
+    if (anc && anc.dataset.uid) return anc.dataset.uid;
+    // no encontrado
+    return null;
+  }
+
+  // comprobar si currentUser ya sigue targetUid
+  async function checkFollowingState(currentUid, targetUid) {
+    if (!currentUid || !targetUid) return false;
+    try {
+      // 1) primer intento: campo array en users/{uid}.following
+      const uDoc = await db.collection('users').doc(currentUid).get();
+      if (uDoc.exists) {
+        const data = uDoc.data();
+        if (Array.isArray(data.following) && data.following.includes(targetUid)) return true;
+      }
+      // 2) segunda opción: estructura followers/{currentUid}/following/{targetUid}
+      const doc = await db.collection('followers').doc(currentUid).collection('following').doc(targetUid).get();
+      if (doc.exists) return true;
+    } catch (e) {
+      console.warn('checkFollowingState err', e);
+    }
+    return false;
+  }
+
+  // Acción de seguir / dejar de seguir
+  async function toggleFollowAction(btn) {
+    setBtnBusy(btn, true);
+    try {
+      const user = auth.currentUser;
+      if (!user) { alert('Debes iniciar sesión para seguir usuarios.'); setBtnBusy(btn, false); return; }
+
+      const currentUid = user.uid;
+      const targetUid = await resolveTargetUid(btn);
+      if (!targetUid) { alert('No se pudo determinar el usuario a seguir.'); setBtnBusy(btn, false); return; }
+      if (targetUid === currentUid) { alert('No puedes seguir tu propia cuenta.'); setBtnBusy(btn, false); return; }
+
+      const isFollowing = btn.dataset.following === '1';
+
+      // Prepare refs
+      const meRef = db.collection('users').doc(currentUid);
+      const targetRef = db.collection('users').doc(targetUid);
+      const myFollowingCol = db.collection('followers').doc(currentUid).collection('following');
+      const targetFollowersCol = db.collection('followers').doc(targetUid).collection('followers'); // legacy maybe
+
+      if (isFollowing) {
+        // unfollow: intentar ambos esquemas (arrays y subcolecciones)
+        try {
+          await Promise.all([
+            meRef.update({ following: firebase.firestore.FieldValue.arrayRemove(targetUid) }).catch(()=>{}),
+            targetRef.update({ followers: firebase.firestore.FieldValue.arrayRemove(currentUid) }).catch(()=>{}),
+            myFollowingCol.doc(targetUid).delete().catch(()=>{}),
+            // intentar también borrar targetFollowersCol doc si existe
+            targetFollowersCol.doc(currentUid).delete().catch(()=>{})
+          ]);
+        } catch (e) {
+          console.warn('unfollow error', e);
+        }
+        setBtnState(btn, false);
+      } else {
+        // follow: write both locations — use set with merge for safety if docs don't exist
+        try {
+          await Promise.all([
+            meRef.set({ following: firebase.firestore.FieldValue.arrayUnion(targetUid) }, { merge: true }).catch(()=>{}),
+            targetRef.set({ followers: firebase.firestore.FieldValue.arrayUnion(currentUid) }, { merge: true }).catch(()=>{}),
+            myFollowingCol.doc(targetUid).set({ followedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{}),
+            // optionally add reciprocal doc for target's followers collection for legacy compatibility
+            db.collection('followers').doc(targetUid).collection('followers').doc(currentUid).set({ followedAt: firebase.firestore.FieldValue.serverTimestamp() }).catch(()=>{})
+          ]);
+        } catch (e) {
+          console.warn('follow error', e);
+        }
+        setBtnState(btn, true);
+      }
+    } catch (err) {
+      console.error('toggleFollowAction err', err);
+      alert('Error al realizar la acción: ' + (err.message || err));
+    } finally {
+      setBtnBusy(btn, false);
+    }
+  }
+
+  // Attach behaviour to a single button (idempotente)
+  function attachToButton(btn) {
+    if (!btn || btn.dataset.followAttached === '1') return;
+    btn.dataset.followAttached = '1';
+    btn.style.cursor = 'pointer';
+
+    // initial state: if auth available, resolve; otherwise default "Seguir"
+    async function setInitial() {
+      btn.disabled = true;
+      const user = auth.currentUser;
+      const targetUid = await resolveTargetUid(btn);
+      if (user && targetUid) {
+        const isFollowing = await checkFollowingState(user.uid, targetUid);
+        setBtnState(btn, !!isFollowing);
+      } else {
+        setBtnState(btn, false); // default
+      }
+    }
+    setInitial();
+
+    // click handler
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      // prevent double clicks while busy
+      if (btn.disabled) return;
+      await toggleFollowAction(btn);
+    });
+  }
+
+  // scan DOM for candidate buttons
+  function scanAndAttach() {
+    // Gather candidates by selectors or by button text "Seguir"
+    const candidates = new Set();
+    BUTTON_SELECTORS.forEach(sel => {
+      document.querySelectorAll(sel).forEach(b => candidates.add(b));
+    });
+    // also detect any button whose text equals "Seguir" (exact) or has data-follow-target attr
+    document.querySelectorAll('button').forEach(b => {
+      const txt = (b.textContent || '').trim().toLowerCase();
+      if (txt === 'seguir' || txt === 'dejar de seguir' || b.hasAttribute('data-follow-target') || b.hasAttribute('data-email')) {
+        candidates.add(b);
+      }
+    });
+
+    candidates.forEach(btn => attachToButton(btn));
+  }
+
+  // observe DOM for dynamic buttons
+  const mo = new MutationObserver((mutations) => {
+    // small debounce
+    if (window._followAttachTimeout) clearTimeout(window._followAttachTimeout);
+    window._followAttachTimeout = setTimeout(scanAndAttach, 80);
+  });
+  mo.observe(document.body, { childList: true, subtree: true });
+
+  // run initial attach
+  scanAndAttach();
+
+  // re-scan on auth change to update state (and enable input)
+  auth.onAuthStateChanged(user => {
+    // update all buttons states
+    document.querySelectorAll('[data-follow-attached]').forEach(el => {
+      // noop (kept for compatibility)
+    });
+    // do a fresh scan to update labels based on new auth
+    scanAndAttach();
+  });
+
+  // convenience: expose a manual initializer
+  window.__initFollowButtons = scanAndAttach;
+
+  console.log('Follow-fix script loaded: listening for follow buttons.');
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Crear botón flotante
+  const themeBtn = document.createElement("button");
+  themeBtn.textContent = "Tema";
+  themeBtn.className = "fixed bottom-4 right-4 px-4 py-2 bg-gray-800 text-white rounded-full shadow-lg z-50";
+  document.body.appendChild(themeBtn);
+
+  // Revisar si ya hay tema guardado
+  if(localStorage.getItem("theme") === "dark"){
+    document.documentElement.classList.add("dark-mode");
+  }
+
+  // Toggle al presionar el botón
+  themeBtn.addEventListener("click", () => {
+    document.documentElement.classList.toggle("dark-mode");
+
+    if(document.documentElement.classList.contains("dark-mode")){
+      localStorage.setItem("theme", "dark");
+    } else {
+      localStorage.setItem("theme", "light");
+    }
+  });
+
+  // Estilos de modo oscuro
+  const style = document.createElement("style");
+  style.textContent = `
+    .dark-mode {
+      background-color: #111 !important;
+      color: #f1f1f1 !important;
+    }
+    .dark-mode .bg-white { background-color: #1a1a1a !important; }
+    .dark-mode .text-black { color: #f1f1f1 !important; }
+    .dark-mode .text-gray-500 { color: #bbb !important; }
+    .dark-mode .bg-gray-50 { background-color: #000 !important; }
+    .dark-mode input, 
+    .dark-mode textarea {
+      background-color: #222 !important;
+      color: #fff !important;
+      border-color: #444 !important;
+    }
+  `;
+  document.head.appendChild(style);
+});
+</script>
+
+</body>
+</html>
